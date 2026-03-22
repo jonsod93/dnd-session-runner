@@ -55,6 +55,9 @@ function PropLine({ label, value, colorDamageTypes }) {
   )
 }
 
+// ── Damage type detection from action text ────────────────────────────────────
+const DAMAGE_TYPES = ['fire', 'cold', 'lightning', 'thunder', 'acid', 'poison', 'necrotic', 'radiant', 'force', 'psychic', 'bludgeoning', 'piercing', 'slashing']
+
 // Colorizes damage type names anywhere in text (e.g. "one of the following: acid, cold, fire, lightning or poison")
 const DAMAGE_TYPE_RE = new RegExp(
   '\\b(' + DAMAGE_TYPES.join('|') + ')\\b',
@@ -76,9 +79,6 @@ function ColoredDamageText({ text }) {
   if (lastIdx < text.length) parts.push(<span key={lastIdx}>{text.slice(lastIdx)}</span>)
   return <span className="text-[#787774]">{parts.length > 0 ? parts : text}</span>
 }
-
-// ── Damage type detection from action text ────────────────────────────────────
-const DAMAGE_TYPES = ['fire', 'cold', 'lightning', 'thunder', 'acid', 'poison', 'necrotic', 'radiant', 'force', 'psychic', 'bludgeoning', 'piercing', 'slashing']
 
 // Detect the damage type that follows a dice expression in the text
 function detectDamageContext(fullText, segmentIndex, segments) {
