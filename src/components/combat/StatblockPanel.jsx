@@ -264,7 +264,7 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
   return (
     <div className="mb-3.5">
       <div className="flex items-start flex-wrap gap-x-1.5 gap-y-0.5">
-        <span className="text-xs font-semibold text-[#e6e6e6] leading-relaxed">
+        <span className="text-sm font-semibold text-[#e6e6e6] leading-relaxed">
           {item.Name}
         </span>
         {item.Usage && (
