@@ -55,22 +55,26 @@ function PropLine({ label, value, colorDamageTypes }) {
   )
 }
 
-// Colorizes damage type names in comma-separated text (e.g. "Fire, Cold, Bludgeoning")
+// Colorizes damage type names anywhere in text (e.g. "one of the following: acid, cold, fire, lightning or poison")
+const DAMAGE_TYPE_RE = new RegExp(
+  '\\b(' + DAMAGE_TYPES.join('|') + ')\\b',
+  'gi'
+)
+
 function ColoredDamageText({ text }) {
   if (!text) return null
-  // Split by commas but preserve them, then colorize each part
-  const parts = text.split(/(,\s*)/)
-  return (
-    <span className="text-[#787774]">
-      {parts.map((part, i) => {
-        const color = getDamageTypeColor(part.replace(/,\s*$/, '').trim())
-        if (color) {
-          return <span key={i} style={{ color }} className="font-medium">{part}</span>
-        }
-        return <span key={i}>{part}</span>
-      })}
-    </span>
-  )
+  const parts = []
+  let lastIdx = 0
+  const re = new RegExp(DAMAGE_TYPE_RE.source, 'gi')
+  let m
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > lastIdx) parts.push(<span key={lastIdx}>{text.slice(lastIdx, m.index)}</span>)
+    const color = getDamageTypeColor(m[1])
+    parts.push(<span key={m.index} style={{ color }} className="font-medium">{m[0]}</span>)
+    lastIdx = re.lastIndex
+  }
+  if (lastIdx < text.length) parts.push(<span key={lastIdx}>{text.slice(lastIdx)}</span>)
+  return <span className="text-[#787774]">{parts.length > 0 ? parts : text}</span>
 }
 
 // ── Damage type detection from action text ────────────────────────────────────
@@ -111,8 +115,28 @@ function detectHitDamageType(fullText) {
   return null
 }
 
-// ── Highlight key terms (DCs, ranges) in plain text ──────────────────────────
-const KEY_TERM_RE = /\b(DC\s+\d+)|((?:\d+[\s-](?:foot|feet|ft\.?|mile|miles))\b(?:\s+(?:cone|sphere|cube|line|radius|emanation))?)/gi
+// ── Highlight key terms in plain text ────────────────────────────────────────
+// Matches: DC X [Ability] saving throw, AC X, ability score names,
+// slash ranges like 30/120, and distance measurements
+const KEY_TERM_RE = new RegExp(
+  '(' +
+    // DC X [Ability] saving throw (full phrase)
+    'DC\\s+\\d+(?:\\s+(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma))?(?:\\s+saving\\s+throw)?' +
+    '|' +
+    // AC followed by a number
+    '\\bAC\\s+\\d+' +
+    '|' +
+    // Standalone ability score names (full words only)
+    '\\b(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\\b' +
+    '|' +
+    // Slash ranges like 30/120 ft, 80/320 ft.
+    '\\b\\d+\\/\\d+(?:\\s*(?:ft\\.?|feet|foot|miles?))?' +
+    '|' +
+    // Distance measurements with area shapes
+    '(?:\\d+[\\s-](?:foot|feet|ft\\.?|mile|miles))\\b(?:\\s+(?:cone|sphere|cube|line|radius|emanation))?' +
+  ')',
+  'gi'
+)
 
 function HighlightedText({ text }) {
   const parts = []
@@ -122,13 +146,16 @@ function HighlightedText({ text }) {
   while ((m = re.exec(text)) !== null) {
     if (m.index > lastIdx) parts.push(<span key={lastIdx}>{text.slice(lastIdx, m.index)}</span>)
     parts.push(
-      <span key={m.index} className="text-[#e6e6e6] font-medium">{m[0]}</span>
+      <span key={m.index} className="text-[#c8c8c8] font-semibold">{m[0]}</span>
     )
     lastIdx = re.lastIndex
   }
   if (lastIdx < text.length) parts.push(<span key={lastIdx}>{text.slice(lastIdx)}</span>)
   return parts.length > 1 ? <>{parts}</> : <span>{text}</span>
 }
+
+// Export for reuse in SpellDrawer
+export { HighlightedText, RichContent, DAMAGE_TYPES }
 
 // ── Rich text renderer: dice rolls + spell names ──────────────────────────────
 function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
@@ -158,7 +185,7 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
               key={i}
               className={color
                 ? "font-mono underline decoration-dotted underline-offset-2 cursor-pointer transition-opacity hover:opacity-80"
-                : "font-mono text-amber-300/80 hover:text-amber-300 underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
+                : "font-mono text-[#e6e6e6] hover:text-white underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
               }
               style={color ? { color } : undefined}
               onClick={(e) => {
@@ -206,6 +233,21 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
                 <HighlightedText text={m[1]} />
                 <span style={{ color: nextColor }} className="font-medium">{m[2]}</span>
                 {m[3]}
+              </span>
+            )
+          }
+        }
+        // Color "X damage" text that follows a colored damage roll
+        // e.g., ") cold damage" after "(16d8)" should be colored
+        if (seg.type === 'text' && i > 0 && rollColors[i - 1]?.color) {
+          const prevColor = rollColors[i - 1].color
+          const dmgMatch = seg.text.match(/^(\s*\)?\s*)(\w+\s+damage)\b(.*)$/i)
+          if (dmgMatch) {
+            return (
+              <span key={i}>
+                {dmgMatch[1]}
+                <span style={{ color: prevColor }} className="font-medium">{dmgMatch[2]}</span>
+                <HighlightedText text={dmgMatch[3]} />
               </span>
             )
           }
@@ -509,7 +551,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
                 <span key={s.Name}>
                   {i > 0 && ', '}
                   <button
-                    className="text-amber-300/80 hover:text-amber-300 underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
+                    className="text-[#e6e6e6] hover:text-white underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
                     onClick={() => handleAbilityRoll(`${s.Name} Saving Throw`, s.Modifier)}
                     title={`Roll ${s.Name} Save ${formatMod(s.Modifier)}`}
                   >
@@ -529,7 +571,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
                 <span key={s.Name}>
                   {i > 0 && ', '}
                   <button
-                    className="text-amber-300/80 hover:text-amber-300 underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
+                    className="text-[#e6e6e6] hover:text-white underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
                     onClick={() => handleAbilityRoll(`${s.Name}`, s.Modifier)}
                     title={`Roll ${s.Name} ${formatMod(s.Modifier)}`}
                   >

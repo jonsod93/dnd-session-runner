@@ -4,12 +4,13 @@ import { StatblockBody } from './StatblockPanel'
 
 const GRACE_MS = 350
 
-export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, monsters, pcs }) {
+export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, monsters, pcs }) {
   const [tab,   setTab]   = useState('npc')
   const [query, setQuery] = useState('')
   const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
+  const [deleteConfirm, setDeleteConfirm] = useState(null) // { name, type: 'npc'|'pc' }
 
   // ── Hover preview state ───────────────────────────────────────────────────
   const [preview,       setPreview]       = useState(null) // { entry, anchor }
@@ -175,6 +176,15 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   {entry.ChallengeRating && (
                     <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
                   )}
+                  {entry._custom && (
+                    <button
+                      className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-red-400 text-[10px] transition-all"
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc' }) }}
+                      title="Delete statblock"
+                    >
+                      ✕
+                    </button>
+                  )}
                   <button
                     className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-gold-400 text-[10px] transition-all"
                     onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
@@ -275,6 +285,44 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             Quick add creates a combatant with no statblock — useful for improvised NPCs and summoned creatures.
           </p>
         </div>
+      )}
+
+      {/* ── Delete confirmation modal ───────────────────────────────────── */}
+      {deleteConfirm && createPortal(
+        <div
+          className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setDeleteConfirm(null)}
+        >
+          <div
+            className="bg-[#252525] border border-white/[0.1] rounded-lg w-full max-w-sm p-5"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete Statblock</h3>
+            <p className="text-xs text-[#787774] mb-4">
+              Are you sure you want to delete <span className="text-[#e6e6e6] font-medium">{deleteConfirm.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="text-xs text-[#787774] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-3 py-1.5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type)
+                  setDeleteConfirm(null)
+                }}
+                className="text-xs bg-red-500/80 hover:bg-red-500 text-white font-medium rounded px-3 py-1.5 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Hover preview portal ─────────────────────────────────────────── */}

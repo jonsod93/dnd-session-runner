@@ -32,7 +32,12 @@ export function useLibrary() {
     // Monsters: all top-level keys starting with "Creatures."
     const monsters = Object.entries(rawData)
       .filter(([k]) => k.startsWith('Creatures.'))
-      .map(([, v]) => ({ ...v, _libType: 'monster' }))
+      .map(([, v]) => ({
+        ...v,
+        _libType: 'monster',
+        // Normalize CR: prefer ChallengeRating, fall back to Challenge field
+        ChallengeRating: v.ChallengeRating ?? v.Challenge ?? null,
+      }))
       .sort((a, b) => a.Name.localeCompare(b.Name))
 
     // PCs: top-level "PersistentCharacters.<hash>" keys + legacy array formats

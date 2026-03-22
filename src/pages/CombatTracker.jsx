@@ -72,10 +72,15 @@ export default function CombatTracker() {
         const active = combat.combatants.find((c) => c.id === combat.activeTurnId)
         if (active?.hp) setDamageTargetId(active.id)
       }
+      if (e.key === 'Delete' && selectedId) {
+        e.preventDefault()
+        combat.remove(selectedId)
+        setSelectedId(null)
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [combat])
+  }, [combat, selectedId])
 
   // ── Drag & drop ──────────────────────────────────────────────────────────
   const sensors = useSensors(
@@ -128,6 +133,10 @@ export default function CombatTracker() {
           setEditor({ mode: 'edit', entry, customIndex: idx >= 0 ? idx : -1 })
         }}
         onNewStatblock={() => setEditor({ mode: 'new' })}
+        onDeleteStatblock={(name) => {
+          const idx = library.getCustomIndex(name)
+          if (idx >= 0) library.removeCustomStatblock(idx)
+        }}
       />
 
       {/* ── Centre: editor OR tracker ────────────────────────────────────── */}
@@ -136,8 +145,15 @@ export default function CombatTracker() {
           initial={editor.mode === 'edit' ? editor.entry : undefined}
           title={editor.mode === 'new' ? 'New Statblock' : `Edit: ${editor.entry?.Name}`}
           onSave={(statblock) => {
-            if (editor.mode === 'edit' && editor.customIndex >= 0) {
-              library.updateCustomStatblock(editor.customIndex, statblock)
+            if (editor.mode === 'edit') {
+              // Check for existing custom entry by original name or new name
+              const origIdx = editor.customIndex >= 0 ? editor.customIndex : library.getCustomIndex(editor.entry?.Name)
+              const nameIdx = origIdx < 0 ? library.getCustomIndex(statblock.Name) : origIdx
+              if (nameIdx >= 0) {
+                library.updateCustomStatblock(nameIdx, statblock)
+              } else {
+                library.addCustomStatblock(statblock)
+              }
             } else {
               library.addCustomStatblock(statblock)
             }
