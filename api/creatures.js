@@ -13,7 +13,7 @@ module.exports = (req, res) => {
   }
 
   try {
-    const filePath = path.join(process.cwd(), 'improved-initiative.json')
+    const filePath = path.join(process.cwd(), 'src', 'data', 'improved-initiative.json')
     const raw = fs.readFileSync(filePath, 'utf-8')
     const data = JSON.parse(raw)
 
