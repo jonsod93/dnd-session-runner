@@ -30,4 +30,25 @@
   .label-section {
     @apply text-[10px] font-medium uppercase tracking-[0.12em] text-[#787774];
   }
+
+  /* Override Leaflet tooltip for dark POI popups */
+  .poi-tooltip-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .poi-tooltip-wrapper::before {
+    display: none !important;
+  }
+
+  /* Leaflet zoom controls dark theme */
+  .leaflet-control-zoom a {
+    background-color: #252525 !important;
+    color: #e6e6e6 !important;
+    border-color: rgba(255,255,255,0.1) !important;
+  }
+  .leaflet-control-zoom a:hover {
+    background-color: #333 !important;
+  }
 }
