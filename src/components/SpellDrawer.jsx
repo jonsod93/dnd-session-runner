@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { spellNameToSlug } from '../data/srdSpellNames'
 
-const CACHE_PREFIX = 'mythranos-spell-v1-'
+const CACHE_PREFIX = 'mythranos-spell-v2-'
 
 export function SpellDrawer({ spellName, onClose }) {
   const [spell,   setSpell]   = useState(null)
@@ -10,13 +10,14 @@ export function SpellDrawer({ spellName, onClose }) {
 
   useEffect(() => {
     if (!spellName) return
+    let cancelled = false
     setLoading(true)
     setError(null)
     setSpell(null)
 
-    const slug      = spellNameToSlug(spellName)
-    const cacheKey  = CACHE_PREFIX + slug
-    const cached    = localStorage.getItem(cacheKey)
+    const slug     = spellNameToSlug(spellName)
+    const cacheKey = CACHE_PREFIX + slug
+    const cached   = localStorage.getItem(cacheKey)
 
     if (cached) {
       setSpell(JSON.parse(cached))
@@ -24,32 +25,41 @@ export function SpellDrawer({ spellName, onClose }) {
       return
     }
 
-    fetch(`https://api.open5e.com/v2/spells/${slug}/`)
+    // Try SRD slug directly first, then fall back to name filter
+    const srdSlug = `srd_${slug}`
+    fetch(`https://api.open5e.com/v2/spells/${srdSlug}/`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status)
         return r.json()
       })
+      .catch(() =>
+        // Fallback: exact name lookup, prefer SRD sources
+        fetch(`https://api.open5e.com/v2/spells/?name=${encodeURIComponent(spellName)}&limit=10`)
+          .then((r) => r.ok ? r.json() : Promise.reject())
+          .then((data) => {
+            const results = data.results ?? []
+            // Prefer srd source, then srd-2024, then any
+            const pick = results.find((r) => r.document?.key === 'srd-2014')
+                      ?? results.find((r) => r.document?.key === 'srd-2024')
+                      ?? results.find((r) => r.document?.key?.startsWith('srd'))
+                      ?? results[0]
+            if (!pick) throw new Error('not found')
+            return pick
+          })
+      )
       .then((data) => {
+        if (cancelled) return
         localStorage.setItem(cacheKey, JSON.stringify(data))
         setSpell(data)
         setLoading(false)
       })
       .catch(() => {
-        // Fallback: try search endpoint
-        fetch(`https://api.open5e.com/v2/spells/?search=${encodeURIComponent(spellName)}&limit=1`)
-          .then((r) => r.ok ? r.json() : Promise.reject())
-          .then((data) => {
-            const result = data.results?.[0]
-            if (!result) throw new Error('not found')
-            localStorage.setItem(cacheKey, JSON.stringify(result))
-            setSpell(result)
-            setLoading(false)
-          })
-          .catch(() => {
-            setError('Spell data not available.')
-            setLoading(false)
-          })
+        if (cancelled) return
+        setError('Spell data not available.')
+        setLoading(false)
       })
+
+    return () => { cancelled = true }
   }, [spellName])
 
   // Escape to close
