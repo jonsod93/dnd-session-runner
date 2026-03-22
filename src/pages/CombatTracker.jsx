@@ -95,10 +95,11 @@ export default function CombatTracker() {
 
   const hasLair = combat.combatants.some((c) => c.type === 'lair')
 
-  // Quick-add combatants shown first in initiative modal
+  // Initiative modal ordering: PCs → quick-add → monsters
   const initiativeCombatants = [
+    ...combat.combatants.filter((c) => c.type === 'pc'),
     ...combat.combatants.filter((c) => c.type === 'quick'),
-    ...combat.combatants.filter((c) => c.type !== 'lair' && c.type !== 'quick'),
+    ...combat.combatants.filter((c) => c.type !== 'lair' && c.type !== 'pc' && c.type !== 'quick'),
   ]
 
   return (

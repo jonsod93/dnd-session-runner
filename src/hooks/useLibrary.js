@@ -19,13 +19,16 @@ export function useLibrary() {
       .map(([, v]) => ({ ...v, _libType: 'monster' }))
       .sort((a, b) => a.Name.localeCompare(b.Name))
 
-    // PCs: PersistentCharacters is the library of saved PCs in Improved Initiative
-    const pcArrays = [
+    // PCs: top-level "PersistentCharacters.<hash>" keys + legacy array formats
+    const topLevelPCs = Object.entries(rawData)
+      .filter(([k]) => k.startsWith('PersistentCharacters.'))
+      .map(([, v]) => v)
+    const legacyPCs = [
       ...safeParse(rawData['ImprovedInitiative.PersistentCharacters']),
       ...safeParse(rawData['ImprovedInitiative.PlayerCharacters']),
     ]
     const seen = new Set()
-    const pcs = pcArrays
+    const pcs = [...topLevelPCs, ...legacyPCs]
       .filter((pc) => {
         if (!pc.Name || seen.has(pc.Name)) return false
         seen.add(pc.Name)
