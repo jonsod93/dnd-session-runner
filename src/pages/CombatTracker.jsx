@@ -15,36 +15,36 @@ import {
 } from '@dnd-kit/sortable'
 
 import { useCombatState } from '../hooks/useCombatState'
-import { LeftPanel } from '../components/combat/LeftPanel'
-import { CombatantRow } from '../components/combat/CombatantRow'
-import { StatblockPanel } from '../components/combat/StatblockPanel'
+import { LeftPanel }       from '../components/combat/LeftPanel'
+import { CombatantRow }    from '../components/combat/CombatantRow'
+import { StatblockPanel }  from '../components/combat/StatblockPanel'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
-import { DamageModal } from '../components/combat/DamageModal'
-import { AbilityModal } from '../components/combat/AbilityModal'
+import { DamageModal }     from '../components/combat/DamageModal'
 
 export default function CombatTracker() {
   const combat = useCombatState()
 
-  // UI state (not persisted)
-  const [selectedId, setSelectedId]           = useState(null)
-  const [showInitModal, setShowInitModal]     = useState(false)
-  const [damageTargetId, setDamageTargetId]   = useState(null)
-  const [abilityModal, setAbilityModal]       = useState(null) // {title, content}
-  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [selectedId,        setSelectedId]        = useState(null)
+  const [showInitModal,     setShowInitModal]      = useState(false)
+  const [damageTargetId,    setDamageTargetId]     = useState(null)
+  const [showClearConfirm,  setShowClearConfirm]   = useState(false)
 
   const selectedCombatant = combat.combatants.find((c) => c.id === selectedId) ?? null
   const damageTarget      = combat.combatants.find((c) => c.id === damageTargetId) ?? null
+
+  // Keep selectedId in sync — if selected combatant is removed, clear it
+  useEffect(() => {
+    if (selectedId && !combat.combatants.find((c) => c.id === selectedId)) {
+      setSelectedId(null)
+    }
+  }, [combat.combatants, selectedId])
 
   // ── Keyboard shortcuts ──────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
       const tag = document.activeElement?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-
-      if (e.key === 'n' || e.key === 'N') {
-        e.preventDefault()
-        combat.nextTurn()
-      }
+      if (e.key === 'n' || e.key === 'N') { e.preventDefault(); combat.nextTurn() }
       if (e.key === 't' || e.key === 'T') {
         e.preventDefault()
         const active = combat.combatants.find((c) => c.id === combat.activeTurnId)
@@ -68,8 +68,6 @@ export default function CombatTracker() {
     combat.reorder(arrayMove(combat.combatants, oldIdx, newIdx))
   }
 
-  // ── Counts ───────────────────────────────────────────────────────────────
-  const round   = null  // future feature
   const hasLair = combat.combatants.some((c) => c.type === 'lair')
 
   return (
@@ -78,7 +76,6 @@ export default function CombatTracker() {
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <LeftPanel
         onAdd={(entry) => {
-          // Prevent duplicate lair action
           if (entry.type === 'lair' && hasLair) return
           combat.add(entry)
         }}
@@ -88,7 +85,7 @@ export default function CombatTracker() {
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Toolbar */}
-        <div className="shrink-0 px-4 py-2 border-b border-slate-800 bg-slate-950 flex items-center gap-2 flex-wrap">
+        <div className="shrink-0 px-4 py-2 border-b border-slate-800 bg-slate-950 flex items-center gap-2 flex-wrap min-h-[52px]">
           <button
             onClick={() => setShowInitModal(true)}
             className="bg-gold-500 hover:bg-gold-400 text-slate-950 font-semibold font-display text-xs uppercase tracking-widest px-4 py-2 rounded transition-colors"
@@ -98,10 +95,10 @@ export default function CombatTracker() {
 
           <button
             onClick={combat.nextTurn}
-            className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-mono px-4 py-2 rounded transition-colors"
+            className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded transition-colors"
             title="Next turn (N)"
           >
-            Next Turn <kbd className="opacity-50 ml-1">[N]</kbd>
+            Next Turn <span className="text-slate-500 font-mono text-xs ml-1">[N]</span>
           </button>
 
           <div className="flex-1" />
@@ -114,7 +111,11 @@ export default function CombatTracker() {
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-400">Clear all?</span>
               <button
-                onClick={() => { combat.clear(); setShowClearConfirm(false); setSelectedId(null) }}
+                onClick={() => {
+                  combat.clear()
+                  setShowClearConfirm(false)
+                  setSelectedId(null)
+                }}
                 className="text-xs text-red-400 hover:text-red-300 border border-red-800 hover:border-red-600 rounded px-2 py-1 transition-colors"
               >
                 Yes, clear
@@ -142,7 +143,7 @@ export default function CombatTracker() {
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-slate-600 text-sm mb-1">No combatants yet</p>
               <p className="text-slate-700 text-xs">
-                Add PCs and monsters from the library, or use Quick Add.
+                Add from the library or use Quick Add on the left.
               </p>
             </div>
           )}
@@ -180,14 +181,14 @@ export default function CombatTracker() {
         </div>
       </div>
 
-      {/* ── Right: statblock panel ───────────────────────────────────────── */}
-      {selectedCombatant && (
-        <StatblockPanel
-          combatant={selectedCombatant}
-          onClose={() => setSelectedId(null)}
-          onAbilityClick={(title, content) => setAbilityModal({ title, content })}
-        />
-      )}
+      {/* ── Right: statblock panel (always rendered) ─────────────────────── */}
+      <StatblockPanel
+        combatant={selectedCombatant}
+        onClear={() => setSelectedId(null)}
+        onUsageChange={(key, value) => {
+          if (selectedId) combat.updateUsage(selectedId, key, value)
+        }}
+      />
 
       {/* ── Modals ───────────────────────────────────────────────────────── */}
       {showInitModal && (
@@ -203,14 +204,6 @@ export default function CombatTracker() {
           combatant={damageTarget}
           onConfirm={(amount) => { combat.applyDamage(damageTargetId, amount); setDamageTargetId(null) }}
           onClose={() => setDamageTargetId(null)}
-        />
-      )}
-
-      {abilityModal && (
-        <AbilityModal
-          title={abilityModal.title}
-          content={abilityModal.content}
-          onClose={() => setAbilityModal(null)}
         />
       )}
     </div>
