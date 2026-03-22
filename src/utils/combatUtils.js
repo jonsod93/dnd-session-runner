@@ -48,13 +48,13 @@ export const DAMAGE_TYPE_COLORS = {
   thunder:     '#a78bfa', // violet-400
   acid:        '#4ade80', // green-400
   poison:      '#86efac', // green-300
-  necrotic:    '#a8a29e', // stone-400
+  necrotic:    '#b5cc8e', // sickly pale green
   radiant:     '#fde68a', // amber-200
   force:       '#c084fc', // purple-400
   psychic:     '#f0abfc', // fuchsia-300
-  bludgeoning: '#d6d3d1', // stone-300
-  piercing:    '#d6d3d1',
-  slashing:    '#d6d3d1',
+  bludgeoning: '#a8a29e', // stone-400 (gray)
+  piercing:    '#a8a29e',
+  slashing:    '#a8a29e',
 }
 
 export function getDamageTypeColor(type) {
