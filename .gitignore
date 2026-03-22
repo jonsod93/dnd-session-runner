@@ -10,3 +10,5 @@ Thumbs.db
 .claude/
 
 # Map images tracked via Git LFS (.gitattributes)
+
+.vercel
