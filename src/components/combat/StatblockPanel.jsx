@@ -2,11 +2,11 @@ import { abilityMod, formatMod } from '../../utils/combatUtils'
 
 const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
 
-// ── Usage parsing ─────────────────────────────────────────────────────────────
-function parseUsage(usageStr) {
-  if (!usageStr) return null
-  if (/recharge\s*\d/i.test(usageStr)) return { type: 'recharge', count: 1 }
-  const m = usageStr.match(/(\d+)\s*\/\s*(day|short|long|rest)/i)
+// ── Usage parsing — checks both Usage field and item Name ─────────────────────
+function parseUsage(item) {
+  const text = [item.Usage ?? '', item.Name ?? ''].join(' ')
+  if (/recharge\s*\d/i.test(text)) return { type: 'recharge', count: 1 }
+  const m = text.match(/(\d+)\s*\/\s*(day|short|long|rest)/i)
   if (m) return { type: 'uses', count: parseInt(m[1]) }
   return null
 }
@@ -16,21 +16,20 @@ function UsageBoxes({ trackKey, count, usage, onUsageChange }) {
   if (!onUsageChange) return null
   const used = usage?.[trackKey] ?? 0
   return (
-    <div className="inline-flex items-center gap-1 ml-2">
+    <div className="inline-flex items-center gap-1 ml-1.5">
       {Array.from({ length: count }, (_, i) => (
         <button
           key={i}
           title={i < used ? 'Click to unmark' : 'Mark as used'}
           onClick={(e) => {
             e.stopPropagation()
-            // Click on a checked box → uncheck it and all after; click unchecked → check up to it
             onUsageChange(trackKey, i < used ? i : i + 1)
           }}
           className={[
-            'w-3.5 h-3.5 rounded-sm border transition-colors',
+            'w-3 h-3 rounded-sm border transition-colors',
             i < used
-              ? 'bg-gold-500 border-gold-400'
-              : 'border-slate-500 hover:border-gold-500 bg-transparent',
+              ? 'bg-gold-400 border-gold-400'
+              : 'border-white/20 hover:border-gold-400/60 bg-transparent',
           ].join(' ')}
         />
       ))}
@@ -38,33 +37,30 @@ function UsageBoxes({ trackKey, count, usage, onUsageChange }) {
   )
 }
 
-// ── Divider ───────────────────────────────────────────────────────────────────
 function Rule() {
-  return <hr className="border-gold-600/30 my-2.5" />
+  return <hr className="border-white/[0.06] my-3" />
 }
 
-// ── Property line ─────────────────────────────────────────────────────────────
 function PropLine({ label, value }) {
   if (!value) return null
   return (
-    <p className="text-xs text-slate-300 leading-relaxed">
-      <span className="font-semibold text-slate-200">{label} </span>
-      {value}
+    <p className="text-[11px] text-[#e6e6e6] leading-relaxed">
+      <span className="font-medium text-[#e6e6e6]">{label} </span>
+      <span className="text-[#787774]">{value}</span>
     </p>
   )
 }
 
-// ── Single ability/action entry (always expanded) ─────────────────────────────
 function AbilityEntry({ item, usage, onUsageChange }) {
-  const usageInfo = parseUsage(item.Usage)
+  const usageInfo = parseUsage(item)
   return (
     <div className="mb-3">
-      <div className="flex items-start gap-1 flex-wrap">
-        <span className="text-xs font-bold text-slate-200 leading-relaxed">
+      <div className="flex items-start flex-wrap gap-x-1.5 gap-y-0.5">
+        <span className="text-[11px] font-semibold text-[#e6e6e6] leading-relaxed">
           {item.Name}
         </span>
         {item.Usage && (
-          <span className="text-xs text-slate-500 italic">({item.Usage})</span>
+          <span className="text-[11px] text-[#787774] italic">({item.Usage})</span>
         )}
         {usageInfo && (
           <UsageBoxes
@@ -76,7 +72,7 @@ function AbilityEntry({ item, usage, onUsageChange }) {
         )}
       </div>
       {(item.Content || item.Description) && (
-        <p className="text-xs text-slate-400 leading-relaxed mt-0.5 whitespace-pre-wrap">
+        <p className="text-[11px] text-[#787774] leading-relaxed mt-0.5 whitespace-pre-wrap">
           {item.Content ?? item.Description}
         </p>
       )}
@@ -84,7 +80,6 @@ function AbilityEntry({ item, usage, onUsageChange }) {
   )
 }
 
-// ── Section ───────────────────────────────────────────────────────────────────
 function Section({ title, items, usage, onUsageChange, legendaryPerRound }) {
   if (!items?.length) return null
   return (
@@ -115,39 +110,37 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound }) {
 // ── Main panel ────────────────────────────────────────────────────────────────
 export function StatblockPanel({ combatant, onClear, onUsageChange }) {
   return (
-    <div className="w-80 shrink-0 bg-slate-900 border-l border-slate-700 flex flex-col">
+    <div className="w-80 shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0 min-h-[52px]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0 min-h-[48px]">
         {combatant ? (
           <>
-            <h3 className="font-display text-sm font-semibold text-slate-100 truncate pr-2">
+            <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
               {combatant.name}
             </h3>
             <button
               onClick={onClear}
-              className="text-slate-500 hover:text-slate-300 shrink-0 text-sm leading-none"
-              title="Clear statblock view"
+              className="text-[#787774] hover:text-[#e6e6e6] shrink-0 text-sm leading-none transition-colors"
+              title="Clear view"
             >
               ✕
             </button>
           </>
         ) : (
-          <h3 className="font-display text-xs uppercase tracking-widest text-slate-600">
-            Statblock
-          </h3>
+          <h3 className="label-section">Statblock</h3>
         )}
       </div>
 
       {/* Body */}
       {!combatant ? (
         <div className="flex-1 flex items-center justify-center px-6 text-center">
-          <p className="text-slate-600 text-sm leading-relaxed">
+          <p className="text-[#787774] text-sm leading-relaxed">
             Click on a combatant row to view statblock details.
           </p>
         </div>
       ) : !combatant.statblock ? (
         <div className="flex-1 flex items-center justify-center px-6 text-center">
-          <p className="text-slate-600 text-sm">No statblock available.</p>
+          <p className="text-[#787774] text-sm">No statblock available.</p>
         </div>
       ) : (
         <StatblockBody
@@ -163,45 +156,42 @@ export function StatblockPanel({ combatant, onClear, onUsageChange }) {
 function StatblockBody({ sb, usage, onUsageChange }) {
   const saves  = sb.Saves?.map((s) => `${s.Name} ${formatMod(s.Modifier)}`).join(', ')
   const skills = sb.Skills?.map((s) => `${s.Name} ${formatMod(s.Modifier)}`).join(', ')
-
-  // Legendary actions per round: explicit field or default 3
-  const legendaryPerRound =
-    sb.LegendaryActions?.length
-      ? (sb.LegendaryActionsCount ?? 3)
-      : null
+  const legendaryPerRound = sb.LegendaryActions?.length ? (sb.LegendaryActionsCount ?? 3) : null
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-3 text-xs space-y-0">
+    <div className="flex-1 overflow-y-auto px-4 py-3">
       {/* Type & source */}
-      <p className="text-slate-400 italic mb-0.5">{sb.Type}</p>
-      {sb.Source && <p className="text-slate-600 text-[10px] mb-2">Source: {sb.Source}</p>}
+      <p className="text-[11px] text-[#787774] italic mb-0.5">{sb.Type}</p>
+      {sb.Source && (
+        <p className="text-[10px] text-[#787774]/60 mb-3">Source: {sb.Source}</p>
+      )}
 
-      {/* Core stats row */}
-      <div className="flex flex-wrap gap-x-4 gap-y-0.5 mb-1.5">
+      {/* Core stats */}
+      <div className="flex flex-wrap gap-x-4 gap-y-0.5 mb-2">
         {sb.AC?.Value != null && (
-          <span>
-            <span className="text-slate-500">AC </span>
-            <span className="font-semibold text-slate-200">{sb.AC.Value}</span>
-            {sb.AC.Notes ? <span className="text-slate-500"> ({sb.AC.Notes})</span> : null}
+          <span className="text-[11px]">
+            <span className="text-[#787774]">AC </span>
+            <span className="font-medium text-[#e6e6e6]">{sb.AC.Value}</span>
+            {sb.AC.Notes ? <span className="text-[#787774]"> ({sb.AC.Notes})</span> : null}
           </span>
         )}
         {sb.HP?.Value != null && (
-          <span>
-            <span className="text-slate-500">HP </span>
-            <span className="font-semibold text-slate-200">{sb.HP.Value}</span>
-            {sb.HP.Notes ? <span className="text-slate-500"> ({sb.HP.Notes})</span> : null}
+          <span className="text-[11px]">
+            <span className="text-[#787774]">HP </span>
+            <span className="font-medium text-[#e6e6e6]">{sb.HP.Value}</span>
+            {sb.HP.Notes ? <span className="text-[#787774]"> ({sb.HP.Notes})</span> : null}
           </span>
         )}
         {sb.ChallengeRating && (
-          <span>
-            <span className="text-slate-500">CR </span>
-            <span className="font-semibold text-slate-200">{sb.ChallengeRating}</span>
+          <span className="text-[11px]">
+            <span className="text-[#787774]">CR </span>
+            <span className="font-medium text-[#e6e6e6]">{sb.ChallengeRating}</span>
           </span>
         )}
         {sb.Speed && (
-          <span>
-            <span className="text-slate-500">Speed </span>
-            <span className="text-slate-300">{sb.Speed}</span>
+          <span className="text-[11px]">
+            <span className="text-[#787774]">Speed </span>
+            <span className="text-[#e6e6e6]">{sb.Speed}</span>
           </span>
         )}
       </div>
@@ -214,11 +204,11 @@ function StatblockBody({ sb, usage, onUsageChange }) {
           <div className="grid grid-cols-6 gap-1 text-center mb-1">
             {ABILITIES.map((a) => (
               <div key={a}>
-                <div className="text-[10px] text-slate-500 uppercase tracking-wide">{a}</div>
-                <div className="text-slate-200 font-semibold font-mono text-xs mt-0.5">
+                <div className="label-section mb-0.5">{a}</div>
+                <div className="text-[#e6e6e6] font-medium font-mono text-[11px]">
                   {sb.Abilities[a]}
                 </div>
-                <div className="text-slate-500 text-[10px]">
+                <div className="text-[#787774] text-[10px]">
                   ({formatMod(abilityMod(sb.Abilities[a]))})
                 </div>
               </div>
@@ -230,22 +220,19 @@ function StatblockBody({ sb, usage, onUsageChange }) {
 
       {/* Properties */}
       <div className="space-y-1 mb-2">
-        <PropLine label="Saving Throws"       value={saves} />
-        <PropLine label="Skills"              value={skills} />
+        <PropLine label="Saving Throws"          value={saves} />
+        <PropLine label="Skills"                 value={skills} />
         <PropLine label="Damage Vulnerabilities" value={sb.DamageVulnerabilities} />
-        <PropLine label="Damage Resistances"  value={sb.DamageResistances} />
-        <PropLine label="Damage Immunities"   value={sb.DamageImmunities} />
-        <PropLine label="Condition Immunities" value={sb.ConditionImmunities} />
-        <PropLine label="Senses"              value={sb.Senses} />
-        <PropLine label="Languages"           value={sb.Languages} />
+        <PropLine label="Damage Resistances"     value={sb.DamageResistances} />
+        <PropLine label="Damage Immunities"      value={sb.DamageImmunities} />
+        <PropLine label="Condition Immunities"   value={sb.ConditionImmunities} />
+        <PropLine label="Senses"                 value={sb.Senses} />
+        <PropLine label="Languages"              value={sb.Languages} />
       </div>
 
       {(saves || skills || sb.DamageVulnerabilities || sb.DamageResistances ||
-        sb.DamageImmunities || sb.ConditionImmunities || sb.Senses || sb.Languages) && (
-        <Rule />
-      )}
+        sb.DamageImmunities || sb.ConditionImmunities || sb.Senses || sb.Languages) && <Rule />}
 
-      {/* Traits & actions */}
       <Section title="Traits"            items={sb.Traits}           usage={usage} onUsageChange={onUsageChange} />
       <Section title="Actions"           items={sb.Actions}          usage={usage} onUsageChange={onUsageChange} />
       <Section title="Bonus Actions"     items={sb.BonusActions}     usage={usage} onUsageChange={onUsageChange} />
@@ -263,11 +250,10 @@ function StatblockBody({ sb, usage, onUsageChange }) {
       {sb.Description && (
         <>
           <Rule />
-          <p className="text-slate-400 italic leading-relaxed">{sb.Description}</p>
+          <p className="text-[11px] text-[#787774] italic leading-relaxed">{sb.Description}</p>
         </>
       )}
-
-      <div className="h-4" /> {/* bottom breathing room */}
+      <div className="h-4" />
     </div>
   )
 }

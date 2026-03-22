@@ -24,15 +24,15 @@ import { DamageModal }     from '../components/combat/DamageModal'
 export default function CombatTracker() {
   const combat = useCombatState()
 
-  const [selectedId,        setSelectedId]        = useState(null)
-  const [showInitModal,     setShowInitModal]      = useState(false)
-  const [damageTargetId,    setDamageTargetId]     = useState(null)
-  const [showClearConfirm,  setShowClearConfirm]   = useState(false)
+  const [selectedId,       setSelectedId]       = useState(null)
+  const [showInitModal,    setShowInitModal]     = useState(false)
+  const [damageTargetId,   setDamageTargetId]    = useState(null)
+  const [showClearConfirm, setShowClearConfirm]  = useState(false)
 
   const selectedCombatant = combat.combatants.find((c) => c.id === selectedId) ?? null
   const damageTarget      = combat.combatants.find((c) => c.id === damageTargetId) ?? null
 
-  // Keep selectedId in sync — if selected combatant is removed, clear it
+  // Deselect if selected combatant is removed
   useEffect(() => {
     if (selectedId && !combat.combatants.find((c) => c.id === selectedId)) {
       setSelectedId(null)
@@ -63,15 +63,32 @@ export default function CombatTracker() {
 
   const handleDragEnd = ({ active, over }) => {
     if (!over || active.id === over.id) return
-    const oldIdx = combat.combatants.findIndex((c) => c.id === active.id)
-    const newIdx = combat.combatants.findIndex((c) => c.id === over.id)
-    combat.reorder(arrayMove(combat.combatants, oldIdx, newIdx))
+
+    const oldIdx  = combat.combatants.findIndex((c) => c.id === active.id)
+    const newIdx  = combat.combatants.findIndex((c) => c.id === over.id)
+    const newList = arrayMove(combat.combatants, oldIdx, newIdx)
+
+    // Adopt the initiative of the combatant now above (fallback to below)
+    const above = newIdx > 0 ? newList[newIdx - 1] : null
+    const below = newList[newIdx + 1] ?? null
+    const ref   = above ?? below
+
+    combat.reorder(newList)
+    if (ref?.initiative != null) {
+      combat.setInitiatives({ [active.id]: ref.initiative })
+    }
   }
 
   const hasLair = combat.combatants.some((c) => c.type === 'lair')
 
+  // Quick-add combatants shown first in initiative modal
+  const initiativeCombatants = [
+    ...combat.combatants.filter((c) => c.type === 'quick'),
+    ...combat.combatants.filter((c) => c.type !== 'lair' && c.type !== 'quick'),
+  ]
+
   return (
-    <div className="flex" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex bg-[#1a1a1a]" style={{ height: 'calc(100vh - 48px)' }}>
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <LeftPanel
@@ -82,47 +99,44 @@ export default function CombatTracker() {
       />
 
       {/* ── Centre: tracker ─────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#1a1a1a]">
 
         {/* Toolbar */}
-        <div className="shrink-0 px-4 py-2 border-b border-slate-800 bg-slate-950 flex items-center gap-2 flex-wrap min-h-[52px]">
+        <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.06] flex items-center gap-3 min-h-[48px]">
           <button
             onClick={() => setShowInitModal(true)}
-            className="bg-gold-500 hover:bg-gold-400 text-slate-950 font-semibold font-display text-xs uppercase tracking-widest px-4 py-2 rounded transition-colors"
+            className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-xs px-3 py-1.5 rounded transition-colors"
           >
             Roll Initiative
           </button>
 
           <button
             onClick={combat.nextTurn}
-            className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded transition-colors"
+            className="text-sm text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
             title="Next turn (N)"
           >
-            Next Turn <span className="text-slate-500 font-mono text-xs ml-1">[N]</span>
+            Next Turn
+            <span className="font-mono text-[10px] ml-1.5 text-[#787774]/60">[N]</span>
           </button>
 
           <div className="flex-1" />
 
-          <span className="text-slate-600 text-xs font-mono">
+          <span className="text-[11px] text-[#787774] font-mono">
             {combat.combatants.filter((c) => c.type !== 'lair').length} combatants
           </span>
 
           {showClearConfirm ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Clear all?</span>
+              <span className="text-xs text-[#787774]">Clear all?</span>
               <button
-                onClick={() => {
-                  combat.clear()
-                  setShowClearConfirm(false)
-                  setSelectedId(null)
-                }}
-                className="text-xs text-red-400 hover:text-red-300 border border-red-800 hover:border-red-600 rounded px-2 py-1 transition-colors"
+                onClick={() => { combat.clear(); setShowClearConfirm(false); setSelectedId(null) }}
+                className="text-xs text-red-400/80 hover:text-red-400 transition-colors"
               >
-                Yes, clear
+                Confirm
               </button>
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className="text-xs text-slate-500 hover:text-slate-300"
+                className="text-xs text-[#787774] hover:text-[#e6e6e6] transition-colors"
               >
                 Cancel
               </button>
@@ -130,7 +144,7 @@ export default function CombatTracker() {
           ) : (
             <button
               onClick={() => setShowClearConfirm(true)}
-              className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
+              className="text-xs text-[#787774]/50 hover:text-[#787774] transition-colors"
             >
               Clear all
             </button>
@@ -141,8 +155,8 @@ export default function CombatTracker() {
         <div className="flex-1 overflow-y-auto">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
-              <p className="text-slate-600 text-sm mb-1">No combatants yet</p>
-              <p className="text-slate-700 text-xs">
+              <p className="text-[#787774] text-sm mb-1">No combatants</p>
+              <p className="text-[#787774]/50 text-xs">
                 Add from the library or use Quick Add on the left.
               </p>
             </div>
@@ -181,7 +195,7 @@ export default function CombatTracker() {
         </div>
       </div>
 
-      {/* ── Right: statblock panel (always rendered) ─────────────────────── */}
+      {/* ── Right: statblock panel ───────────────────────────────────────── */}
       <StatblockPanel
         combatant={selectedCombatant}
         onClear={() => setSelectedId(null)}
@@ -193,7 +207,7 @@ export default function CombatTracker() {
       {/* ── Modals ───────────────────────────────────────────────────────── */}
       {showInitModal && (
         <InitiativeModal
-          combatants={combat.combatants.filter((c) => c.type !== 'lair')}
+          combatants={initiativeCombatants}
           onConfirm={(map) => { combat.setInitiatives(map); setShowInitModal(false) }}
           onClose={() => setShowInitModal(false)}
         />

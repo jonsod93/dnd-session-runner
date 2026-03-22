@@ -17,58 +17,53 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
     if (!isNaN(amount)) onConfirm(amount)
   }
 
-  const isDmg = parseInt(value, 10) > 0
-  const isHeal = parseInt(value, 10) < 0
+  const parsed  = parseInt(value, 10)
+  const isDmg   = parsed > 0
+  const isHeal  = parsed < 0
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.5)' }}
       onClick={onClose}
     >
       <div
-        className="bg-slate-900 border border-slate-600 rounded-lg shadow-2xl w-80 p-5"
+        className="bg-[#252525] border border-white/[0.1] rounded-lg w-80 p-5"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="font-display text-xs uppercase tracking-widest text-gold-400 mb-1">
-          Apply Damage / Healing
-        </h3>
-        <p className="text-slate-400 text-sm mb-4">
+        <h3 className="text-sm font-medium text-[#e6e6e6] mb-0.5">Apply Damage / Healing</h3>
+        <p className="text-[11px] text-[#787774] mb-4">
           {combatant.name} —{' '}
-          <span className="font-mono text-slate-300">
+          <span className="font-mono text-[#e6e6e6]">
             {combatant.hp?.current}/{combatant.hp?.max} HP
           </span>
         </p>
         <form onSubmit={handleSubmit}>
-          <div className="relative">
-            <input
-              ref={inputRef}
-              type="number"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="e.g. 8 (damage) or -5 (healing)"
-              className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-slate-100 font-mono text-sm focus:outline-none focus:border-gold-500 placeholder:text-slate-600"
-            />
-          </div>
-          {value !== '' && !isNaN(parseInt(value)) && (
-            <p className={`text-xs mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-slate-400'}`}>
-              {isDmg
-                ? `−${parseInt(value)} HP (damage)`
-                : isHeal
-                ? `+${-parseInt(value)} HP (healing)`
-                : 'no change'}
+          <input
+            ref={inputRef}
+            type="number"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="e.g. 8 damage, −5 healing"
+            className="w-full bg-transparent border-b border-white/[0.12] py-2 text-sm font-mono text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+          />
+          {value !== '' && !isNaN(parsed) && (
+            <p className={`text-[11px] mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#787774]'}`}>
+              {isDmg ? `−${parsed} HP (damage)` : isHeal ? `+${-parsed} HP (healing)` : 'no change'}
             </p>
           )}
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-5">
             <button
               type="submit"
-              className="flex-1 bg-gold-500 hover:bg-gold-400 text-slate-950 font-semibold text-sm rounded px-4 py-2 transition-colors"
+              className="flex-1 bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2 transition-colors"
             >
               Apply
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm rounded px-4 py-2 transition-colors"
+              className="flex-1 text-sm text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.06] rounded px-4 py-2 transition-colors border border-white/[0.1]"
             >
               Cancel
             </button>

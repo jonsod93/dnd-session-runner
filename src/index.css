@@ -7,40 +7,27 @@
     height: 100%;
     margin: 0;
     padding: 0;
+    background-color: #1a1a1a;
+    color: #e6e6e6;
   }
 
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0f172a;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
-  }
+  /* Near-invisible scrollbar — Notion style */
+  ::-webkit-scrollbar       { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 }
 
 @layer components {
-  /* Leaflet map container — must fill its parent */
+  /* Leaflet map background */
   .leaflet-container {
-    background-color: #0f172a !important;
+    background-color: #1a1a1a !important;
     width: 100%;
     height: 100%;
   }
 
-  /* Amber gold decorative rule */
-  .rule-gold {
-    @apply border-t border-gold-500/40;
-  }
-
-  /* Section label used throughout */
+  /* Shared section label — used throughout */
   .label-section {
-    @apply font-display text-xs tracking-[0.2em] uppercase text-gold-500;
+    @apply text-[10px] font-medium uppercase tracking-[0.12em] text-[#787774];
   }
 }

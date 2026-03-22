@@ -5,8 +5,6 @@ export function LeftPanel({ onAdd }) {
   const [tab, setTab] = useState('library')
   const { all } = useLibrary()
   const [query, setQuery] = useState('')
-
-  // Quick Add form state
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
 
@@ -18,13 +16,7 @@ export function LeftPanel({ onAdd }) {
 
   const handleLibraryAdd = (entry) => {
     if (entry._libType === 'pc') {
-      onAdd({
-        type: 'pc',
-        name: entry.Name,
-        ac: null,
-        hp: null,
-        statblock: entry,
-      })
+      onAdd({ type: 'pc', name: entry.Name, ac: null, hp: null, statblock: entry })
     } else {
       onAdd({
         type: 'monster',
@@ -39,7 +31,7 @@ export function LeftPanel({ onAdd }) {
   const handleQuickAdd = (e) => {
     e.preventDefault()
     const name = qaName.trim()
-    if (!name) return
+    if (!name && qaType !== 'lair') return
     if (qaType === 'lair') {
       onAdd({ type: 'lair', name: 'Lair Action', ac: null, hp: null, statblock: null })
     } else {
@@ -49,20 +41,20 @@ export function LeftPanel({ onAdd }) {
   }
 
   return (
-    <div className="w-64 shrink-0 bg-slate-900 border-r border-slate-700 flex flex-col">
+    <div className="w-64 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col">
       {/* Tabs */}
-      <div className="flex border-b border-slate-700 shrink-0">
+      <div className="flex border-b border-white/[0.06] shrink-0">
         {[
-          { key: 'library', label: 'Library' },
-          { key: 'quickadd', label: 'Quick Add' },
+          { key: 'library',  label: 'Library'    },
+          { key: 'quickadd', label: 'Quick Add'  },
         ].map(({ key, label }) => (
           <button
             key={key}
             className={[
-              'flex-1 py-2.5 text-xs font-display uppercase tracking-widest border-b-2 transition-colors',
+              'flex-1 py-3 text-xs border-b-2 transition-colors',
               tab === key
-                ? 'border-gold-400 text-gold-400'
-                : 'border-transparent text-slate-500 hover:text-slate-300',
+                ? 'border-gold-400 text-[#e6e6e6]'
+                : 'border-transparent text-[#787774] hover:text-[#e6e6e6]',
             ].join(' ')}
             onClick={() => setTab(key)}
           >
@@ -71,47 +63,45 @@ export function LeftPanel({ onAdd }) {
         ))}
       </div>
 
-      {/* Library tab */}
+      {/* ── Library ─────────────────────────────────────────────────────── */}
       {tab === 'library' && (
         <>
-          <div className="px-3 py-2 border-b border-slate-800 shrink-0">
+          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search…"
-              className="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-gold-500 placeholder:text-slate-600"
+              className="w-full bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
             />
           </div>
           <div className="flex-1 overflow-y-auto">
             {filtered.length === 0 && (
-              <p className="text-slate-600 text-xs text-center py-6">No results</p>
+              <p className="text-[#787774] text-sm text-center py-6">No results</p>
             )}
             {filtered.map((entry) => (
               <button
                 key={entry.Id ?? entry.Name}
-                className="w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-slate-800/60 transition-colors border-b border-slate-800/50 group"
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
                 onClick={() => handleLibraryAdd(entry)}
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs text-slate-200 group-hover:text-slate-100 truncate">
-                    {entry.Name}
-                  </div>
+                  <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                   {entry._libType === 'monster' && entry.Type && (
-                    <div className="text-[10px] text-slate-600 truncate">{entry.Type}</div>
+                    <div className="text-[11px] text-[#787774] truncate mt-0.5">{entry.Type}</div>
                   )}
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {entry._libType === 'pc' ? (
-                    <span className="text-[10px] bg-blue-900/60 text-blue-300 px-1.5 py-0.5 rounded uppercase">
+                    <span className="text-[10px] text-blue-400/80 border border-blue-400/30 px-1.5 py-0.5 rounded">
                       PC
                     </span>
                   ) : (
                     entry.ChallengeRating && (
-                      <span className="text-[10px] text-slate-500">CR {entry.ChallengeRating}</span>
+                      <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
                     )
                   )}
-                  <span className="text-slate-600 group-hover:text-slate-400 text-xs">+</span>
+                  <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </button>
             ))}
@@ -119,26 +109,26 @@ export function LeftPanel({ onAdd }) {
         </>
       )}
 
-      {/* Quick Add tab */}
+      {/* ── Quick Add ───────────────────────────────────────────────────── */}
       {tab === 'quickadd' && (
         <div className="flex-1 p-4">
-          <form onSubmit={handleQuickAdd} className="space-y-3">
+          <form onSubmit={handleQuickAdd} className="space-y-4">
             <div>
-              <label className="label-section mb-1 block">Name</label>
+              <label className="label-section mb-2 block">Name</label>
               <input
                 type="text"
                 value={qaName}
                 onChange={(e) => setQaName(e.target.value)}
                 placeholder="Creature name…"
-                className="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-gold-500 placeholder:text-slate-600"
+                className="w-full bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
               />
             </div>
             <div>
-              <label className="label-section mb-1 block">Type</label>
+              <label className="label-section mb-2 block">Type</label>
               <div className="flex gap-2">
                 {[
                   { val: 'quick', label: 'NPC / Summon' },
-                  { val: 'lair', label: 'Lair Action' },
+                  { val: 'lair',  label: 'Lair Action'  },
                 ].map(({ val, label }) => (
                   <button
                     key={val}
@@ -147,8 +137,8 @@ export function LeftPanel({ onAdd }) {
                     className={[
                       'flex-1 text-xs rounded px-2 py-1.5 border transition-colors',
                       qaType === val
-                        ? 'border-gold-500 bg-gold-500/10 text-gold-400'
-                        : 'border-slate-600 text-slate-400 hover:border-slate-500',
+                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400'
+                        : 'border-white/[0.1] text-[#787774] hover:text-[#e6e6e6] hover:border-white/[0.2]',
                     ].join(' ')}
                   >
                     {label}
@@ -159,18 +149,14 @@ export function LeftPanel({ onAdd }) {
             <button
               type="submit"
               disabled={!qaName.trim() && qaType !== 'lair'}
-              className="w-full bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-slate-200 text-sm rounded px-4 py-2 transition-colors"
+              className="w-full text-sm text-[#e6e6e6] hover:bg-white/[0.06] disabled:opacity-30 rounded px-4 py-2 transition-colors border border-white/[0.1]"
             >
               Add to Tracker
             </button>
           </form>
-
-          <div className="mt-6 border-t border-slate-800 pt-4">
-            <p className="text-slate-600 text-xs leading-relaxed">
-              Quick add creates a combatant with no statblock — useful for improvised NPCs,
-              summoned creatures, or anything not in the library.
-            </p>
-          </div>
+          <p className="mt-6 text-[#787774] text-[11px] leading-relaxed border-t border-white/[0.04] pt-4">
+            Quick add creates a combatant with no statblock — useful for improvised NPCs and summoned creatures.
+          </p>
         </div>
       )}
     </div>
