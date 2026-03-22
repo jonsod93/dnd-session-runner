@@ -105,6 +105,13 @@ function reducer(state, action) {
             : c
         ),
       }
+    case 'RENAME':
+      return {
+        ...state,
+        combatants: state.combatants.map((c) =>
+          c.id === action.id ? { ...c, name: action.name } : c
+        ),
+      }
     case 'CLEAR':
       return init
     default:
@@ -132,6 +139,13 @@ export function useCombatState() {
       (c) => c.name === name || c.name.match(new RegExp(`^${name} \\d+$`))
     )
     if (!existing.length) return name
+
+    // Rename the first unnumbered instance to "Name 1"
+    const unnumbered = state.combatants.find((c) => c.name === name)
+    if (unnumbered) {
+      dispatch({ type: 'RENAME', id: unnumbered.id, name: `${name} 1` })
+    }
+
     const numbered = state.combatants
       .map((c) => {
         const m = c.name.match(new RegExp(`^${name}( (\\d+))?$`))

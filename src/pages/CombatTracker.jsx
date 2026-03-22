@@ -15,9 +15,11 @@ import {
 } from '@dnd-kit/sortable'
 
 import { useCombatState } from '../hooks/useCombatState'
+import { useLibrary }      from '../hooks/useLibrary'
 import { LeftPanel }       from '../components/combat/LeftPanel'
 import { CombatantRow }    from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
+import { StatblockEditor } from '../components/combat/StatblockEditor'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
 import { DamageModal }     from '../components/combat/DamageModal'
 import { DiceRollToast }   from '../components/DiceRollToast'
@@ -26,6 +28,7 @@ import { uid }             from '../utils/combatUtils'
 
 export default function CombatTracker() {
   const combat = useCombatState()
+  const library = useLibrary()
 
   const [selectedId,        setSelectedId]        = useState(null)
   const [showInitModal,     setShowInitModal]     = useState(false)
@@ -35,6 +38,9 @@ export default function CombatTracker() {
   const [activeSpell,       setActiveSpell]       = useState(null)
   const [leftCollapsed,     setLeftCollapsed]     = useState(false)
   const [customLairActions, setCustomLairActions] = useState([])
+
+  // Editor state: { mode: 'new' } | { mode: 'edit', entry, customIndex }
+  const [editor, setEditor] = useState(null)
 
   const selectedCombatant = combat.combatants.find((c) => c.id === selectedId) ?? null
   const damageTarget      = combat.combatants.find((c) => c.id === damageTargetId) ?? null
@@ -109,15 +115,37 @@ export default function CombatTracker() {
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <LeftPanel
+        monsters={library.monsters}
+        pcs={library.pcs}
         onAdd={(entry) => {
           if (entry.type === 'lair' && hasLair) return
           combat.add(entry)
         }}
         collapsed={leftCollapsed}
         onToggleCollapse={() => setLeftCollapsed((v) => !v)}
+        onEditStatblock={(entry) => {
+          const idx = library.getCustomIndex(entry.Name)
+          setEditor({ mode: 'edit', entry, customIndex: idx >= 0 ? idx : -1 })
+        }}
+        onNewStatblock={() => setEditor({ mode: 'new' })}
       />
 
-      {/* ── Centre: tracker ─────────────────────────────────────────────── */}
+      {/* ── Centre: editor OR tracker ────────────────────────────────────── */}
+      {editor ? (
+        <StatblockEditor
+          initial={editor.mode === 'edit' ? editor.entry : undefined}
+          title={editor.mode === 'new' ? 'New Statblock' : `Edit: ${editor.entry?.Name}`}
+          onSave={(statblock) => {
+            if (editor.mode === 'edit' && editor.customIndex >= 0) {
+              library.updateCustomStatblock(editor.customIndex, statblock)
+            } else {
+              library.addCustomStatblock(statblock)
+            }
+            setEditor(null)
+          }}
+          onCancel={() => setEditor(null)}
+        />
+      ) : (
       <div className="flex-1 flex flex-col min-w-0 bg-[#1a1a1a]">
 
         {/* Toolbar */}
@@ -181,9 +209,7 @@ export default function CombatTracker() {
             <div className="w-8 shrink-0 text-center">#</div>
             {/* Name */}
             <div className="w-36 shrink-0">Name</div>
-            {/* Conditions spacer */}
-            <div className="flex-1" />
-            {/* AC + HP group centered */}
+            {/* AC + HP group */}
             <div className="flex items-center gap-4 shrink-0">
               <div className="w-14 flex justify-center" title="Armor Class">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -196,6 +222,8 @@ export default function CombatTracker() {
                 </svg>
               </div>
             </div>
+            {/* Conditions spacer */}
+            <div className="flex-1" />
             {/* Conditions button spacer */}
             <div className="w-[72px] shrink-0" />
             {/* Remove button spacer */}
@@ -246,6 +274,7 @@ export default function CombatTracker() {
           </DndContext>
         </div>
       </div>
+      )}
 
       {/* ── Right: statblock panel ───────────────────────────────────────── */}
       <StatblockPanel
