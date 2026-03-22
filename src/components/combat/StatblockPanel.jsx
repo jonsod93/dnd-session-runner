@@ -83,11 +83,12 @@ function ColoredDamageText({ text }) {
 // Detect the damage type that follows a dice expression in the text
 function detectDamageContext(fullText, segmentIndex, segments) {
   // Look at text segments after the current roll to find "X damage"
+  // Tolerates markdown markers (__,*) between the roll and damage type
   for (let j = segmentIndex + 1; j < segments.length && j <= segmentIndex + 3; j++) {
     if (segments[j].type === 'text') {
       const afterText = segments[j].text.toLowerCase()
       for (const dt of DAMAGE_TYPES) {
-        if (afterText.match(new RegExp(`^\\s*\\)?\\s*${dt}\\s+damage`))) return dt
+        if (afterText.match(new RegExp(`^[\\s_*)*]*${dt}\\s+damage`))) return dt
       }
     }
   }
@@ -223,10 +224,10 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
         }
         // Color average damage numbers that precede a colored damage roll
         // Pattern: "Hit: 5 (1d6+2) cold damage" — the "5 " before "(1d6+2)" gets colored
+        // Tolerates trailing markdown markers (__,*) between the number and dice roll
         if (seg.type === 'text' && i + 1 < segments.length && rollColors[i + 1]?.color) {
           const nextColor = rollColors[i + 1].color
-          // Check if text ends with a number (the average)
-          const m = seg.text.match(/^(.*?)(\d+)(\s*)$/)
+          const m = seg.text.match(/^(.*?)(\d+)(\s*[_*]*)$/)
           if (m) {
             return (
               <span key={i}>
@@ -239,17 +240,21 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
         }
         // Color "X damage" text that follows a colored damage roll
         // e.g., ") cold damage" after "(16d8)" should be colored
+        // Tolerates leading markdown markers (__,*) between the dice roll and damage type
         if (seg.type === 'text' && i > 0 && rollColors[i - 1]?.color) {
           const prevColor = rollColors[i - 1].color
-          const dmgMatch = seg.text.match(/^(\s*\)?\s*)(\w+\s+damage)\b(.*)$/i)
+          const dmgMatch = seg.text.match(/^([\s_*)]*)([a-zA-Z]+\s+damage)\b(.*)$/i)
           if (dmgMatch) {
-            return (
-              <span key={i}>
-                {dmgMatch[1]}
-                <span style={{ color: prevColor }} className="font-medium">{dmgMatch[2]}</span>
-                <HighlightedText text={dmgMatch[3]} />
-              </span>
-            )
+            const dmgType = dmgMatch[2].split(/\s+/)[0].toLowerCase()
+            if (DAMAGE_TYPES.includes(dmgType)) {
+              return (
+                <span key={i}>
+                  {dmgMatch[1]}
+                  <span style={{ color: prevColor }} className="font-medium">{dmgMatch[2]}</span>
+                  <HighlightedText text={dmgMatch[3]} />
+                </span>
+              )
+            }
           }
         }
         return <span key={i}><HighlightedText text={seg.text} /></span>

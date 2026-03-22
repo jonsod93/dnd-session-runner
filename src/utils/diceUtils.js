@@ -71,7 +71,8 @@ function _parseDice(text) {
   //   [+-]N to hit           → attack roll
   //   (NdM[ ± K])            → damage in parens (spaces around operator allowed)
   //   \bNdM[ ± K]\b          → standalone dice expr (spaces around operator allowed)
-  const re = /([+-]\d+\s+to\s+hit)|(\(\d+d\d+\s*(?:[+-]\s*\d+)?\s*\))|(\b\d+d\d+\s*(?:[+-]\s*\d+)?(?=\s|[^a-zA-Z]|$))/gi
+  // Note: [lL] accepted as "1" — common OCR/data typo (e.g. "l6d8" for "16d8")
+  const re = /([+-]\d+\s+to\s+hit)|(\([lL\d]+d\d+\s*(?:[+-]\s*\d+)?\s*\))|(\b[lL\d]+d\d+\s*(?:[+-]\s*\d+)?(?=\s|[^a-zA-Z]|$))/gi
   let lastIdx = 0
   let m
   while ((m = re.exec(text)) !== null) {
@@ -82,11 +83,11 @@ function _parseDice(text) {
       const modPart = m[1].match(/[+-]\d+/)[0]
       segments.push({ type: 'roll', text: m[1], expr: `d20${modPart}` })
     } else if (m[2]) {
-      // Strip spaces so "1d4 + 1" → expr "1d4+1"
-      const inner = m[2].slice(1, -1).replace(/\s+/g, '')
+      // Strip spaces and fix l→1 so "l6d8" → expr "16d8"
+      const inner = m[2].slice(1, -1).replace(/\s+/g, '').replace(/[lL]/g, '1')
       segments.push({ type: 'roll', text: m[2], expr: inner })
     } else if (m[3]) {
-      const expr = m[3].replace(/\s+/g, '')
+      const expr = m[3].replace(/\s+/g, '').replace(/[lL]/g, '1')
       segments.push({ type: 'roll', text: m[3], expr })
     }
     lastIdx = re.lastIndex
