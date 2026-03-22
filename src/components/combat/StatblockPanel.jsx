@@ -526,7 +526,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
         <PropLine label="Languages"              value={sb.Languages} />
       </div>
 
-      {(saves || skills || sb.DamageVulnerabilities || sb.DamageResistances ||
+      {(sb.Saves?.length || sb.Skills?.length || sb.DamageVulnerabilities || sb.DamageResistances ||
         sb.DamageImmunities || sb.ConditionImmunities || sb.Senses || sb.Languages) && <Rule />}
 
       <Section title="Traits"            items={sb.Traits}           {...sectionProps} />
