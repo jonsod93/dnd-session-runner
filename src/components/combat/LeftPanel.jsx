@@ -1,13 +1,11 @@
 import { useState, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { useLibrary } from '../../hooks/useLibrary'
 import { StatblockBody } from './StatblockPanel'
 
 const GRACE_MS = 350
 
-export function LeftPanel({ onAdd, collapsed, onToggleCollapse }) {
+export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, monsters, pcs }) {
   const [tab,   setTab]   = useState('npc')
-  const { monsters, pcs } = useLibrary()
   const [query, setQuery] = useState('')
   const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
@@ -47,7 +45,12 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse }) {
   const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
     if (!q) return monsters
-    return monsters.filter((c) => c.Name.toLowerCase().includes(q))
+    return monsters.filter((c) => {
+      const name   = (c.Name ?? '').toLowerCase()
+      const type   = (c.Type ?? '').toLowerCase()
+      const source = (c.Source ?? '').toLowerCase()
+      return name.includes(q) || type.includes(q) || source.includes(q)
+    })
   }, [monsters, query])
 
   const filteredPCs = useMemo(() => {
@@ -134,23 +137,30 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse }) {
       {/* ── NPC Library ────────────────────────────────────────────────── */}
       {tab === 'npc' && (
         <>
-          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0">
+          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-2">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search NPCs…"
-              className="w-full bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
+              className="flex-1 bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
             />
+            <button
+              onClick={() => onNewStatblock?.()}
+              className="shrink-0 text-[10px] text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-1.5 py-0.5 transition-colors"
+              title="Add new statblock from JSON"
+            >
+              + New
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto">
             {filteredNPCs.length === 0 && (
               <p className="text-[#787774] text-sm text-center py-6">No results</p>
             )}
             {filteredNPCs.map((entry) => (
-              <button
+              <div
                 key={entry.Id ?? entry.Name}
-                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
                 onClick={() => handleLibraryAdd(entry)}
                 onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
                 onMouseLeave={handleEntryMouseLeave}
@@ -165,9 +175,16 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse }) {
                   {entry.ChallengeRating && (
                     <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
                   )}
+                  <button
+                    className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-gold-400 text-[10px] transition-all"
+                    onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
+                    title="Edit statblock"
+                  >
+                    ✎
+                  </button>
                   <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </>
@@ -201,9 +218,6 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse }) {
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[10px] text-blue-400/80 border border-blue-400/30 px-1.5 py-0.5 rounded">
-                    PC
-                  </span>
                   <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </button>

@@ -84,37 +84,13 @@ export function CombatantRow({
         <span
           className={[
             'w-36 shrink-0 text-sm font-medium truncate',
-            isLair ? 'text-[#787774] italic' : isPC ? 'text-blue-400' : 'text-[#e6e6e6]',
+            isLair ? 'text-[#787774] italic' : isPC ? 'text-green-400' : 'text-[#e6e6e6]',
             isDead ? 'line-through' : '',
           ].join(' ')}
           title={combatant.name}
         >
           {combatant.name}
         </span>
-
-        {/* Conditions — flex-1 spacer, shows tags when present */}
-        {!isLair && (
-          <div
-            className="flex-1 flex flex-wrap gap-1 items-center min-w-0 px-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {combatant.conditions.map((cond) => (
-              <span
-                key={cond.id}
-                className={`inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded ${cond.color}`}
-              >
-                {cond.name}
-                <button
-                  className="opacity-50 hover:opacity-100 leading-none ml-0.5"
-                  onClick={(e) => { e.stopPropagation(); onRemoveCondition(combatant.id, cond.id) }}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-        {isLair && <div className="flex-1" />}
 
         {/* AC + HP group — centered with wider gap */}
         <div className="flex items-center gap-4 shrink-0">
@@ -149,6 +125,31 @@ export function CombatantRow({
             )}
           </div>
         </div>
+
+        {/* Conditions — flex-1 spacer, shows tags when present */}
+        {!isLair && (
+          <div
+            className="flex-1 flex flex-wrap gap-1 items-center justify-end min-w-0 px-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {combatant.conditions.map((cond) => (
+              <span
+                key={cond.id}
+                className={`inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded ${cond.color}`}
+                title={cond.info || CONDITIONS.find((c) => c.name === cond.name)?.info || ''}
+              >
+                {cond.name}
+                <button
+                  className="opacity-50 hover:opacity-100 leading-none ml-0.5"
+                  onClick={(e) => { e.stopPropagation(); onRemoveCondition(combatant.id, cond.id) }}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        {isLair && <div className="flex-1" />}
       </div>
 
       {/* ── Conditions button — right-aligned, always full opacity ─────── */}
@@ -223,7 +224,7 @@ function ConditionMenu({ anchor, onAdd, onClose }) {
           <button
             key={c.name}
             className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] transition-colors"
-            onClick={() => onAdd({ name: c.name, color: c.color })}
+            onClick={() => onAdd({ name: c.name, color: c.color, info: c.info || '' })}
             title={c.info || ''}
           >
             {c.name}

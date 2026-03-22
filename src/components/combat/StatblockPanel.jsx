@@ -111,6 +111,25 @@ function detectHitDamageType(fullText) {
   return null
 }
 
+// ── Highlight key terms (DCs, ranges) in plain text ──────────────────────────
+const KEY_TERM_RE = /\b(DC\s+\d+)|((?:\d+[\s-](?:foot|feet|ft\.?|mile|miles))\b(?:\s+(?:cone|sphere|cube|line|radius|emanation))?)/gi
+
+function HighlightedText({ text }) {
+  const parts = []
+  let lastIdx = 0
+  const re = new RegExp(KEY_TERM_RE.source, 'gi')
+  let m
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > lastIdx) parts.push(<span key={lastIdx}>{text.slice(lastIdx, m.index)}</span>)
+    parts.push(
+      <span key={m.index} className="text-[#e6e6e6] font-medium">{m[0]}</span>
+    )
+    lastIdx = re.lastIndex
+  }
+  if (lastIdx < text.length) parts.push(<span key={lastIdx}>{text.slice(lastIdx)}</span>)
+  return parts.length > 1 ? <>{parts}</> : <span>{text}</span>
+}
+
 // ── Rich text renderer: dice rolls + spell names ──────────────────────────────
 function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
   if (!text) return null
@@ -164,7 +183,7 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
           return (
             <button
               key={i}
-              className="text-blue-300/80 hover:text-blue-300 underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
+              className="text-[#e6e6e6] hover:text-white underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
               onClick={(e) => {
                 e.stopPropagation()
                 onSpellClick?.(seg.text)
@@ -184,14 +203,14 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
           if (m) {
             return (
               <span key={i}>
-                {m[1]}
+                <HighlightedText text={m[1]} />
                 <span style={{ color: nextColor }} className="font-medium">{m[2]}</span>
                 {m[3]}
               </span>
             )
           }
         }
-        return <span key={i}>{seg.text}</span>
+        return <span key={i}><HighlightedText text={seg.text} /></span>
       })}
     </span>
   )
@@ -420,8 +439,13 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
     <div className="flex-1 flex flex-col min-h-0">
       {/* ── Sticky header: type, stats, ability scores ──────────────── */}
       <div className="shrink-0 px-4 py-3 bg-[#1e1e1e] border-b border-white/[0.06]">
-        {/* Type & source */}
-        <p className="text-xs text-[#787774] italic mb-0.5">{sb.Type}</p>
+        {/* Type & CR */}
+        <div className="flex items-baseline justify-between gap-2 mb-0.5">
+          <p className="text-xs text-[#787774] italic">{sb.Type}</p>
+          {sb.ChallengeRating && (
+            <span className="text-xs text-[#787774] font-medium shrink-0">CR {sb.ChallengeRating}</span>
+          )}
+        </div>
         {sb.Source && (
           <p className="text-[11px] text-[#787774]/60 mb-3">Source: {sb.Source}</p>
         )}
@@ -440,12 +464,6 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
               <span className="text-[#787774]">HP </span>
               <span className="font-medium text-[#e6e6e6]">{sb.HP.Value}</span>
               {sb.HP.Notes ? <span className="text-[#787774]"> ({sb.HP.Notes})</span> : null}
-            </span>
-          )}
-          {sb.ChallengeRating && (
-            <span className="text-xs">
-              <span className="text-[#787774]">CR </span>
-              <span className="font-medium text-[#e6e6e6]">{sb.ChallengeRating}</span>
             </span>
           )}
           {sb.Speed && (

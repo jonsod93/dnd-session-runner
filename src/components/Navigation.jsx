@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 
 const tabs = [
   { label: 'Combat Tracker', to: '/' },
@@ -6,6 +7,8 @@ const tabs = [
 ]
 
 export default function Navigation() {
+  const { logout } = useAuth()
+
   return (
     <nav className="h-12 bg-[#1a1a1a] border-b border-white/[0.06] flex items-stretch px-5 shrink-0">
       {/* App title */}
@@ -37,6 +40,16 @@ export default function Navigation() {
           </NavLink>
         ))}
       </div>
+
+      <div className="flex-1" />
+
+      {/* Logout */}
+      <button
+        onClick={logout}
+        className="flex items-center text-xs text-[#787774] hover:text-[#e6e6e6] transition-colors"
+      >
+        Sign Out
+      </button>
     </nav>
   )
 }

@@ -110,7 +110,7 @@ function SpellMeta({ spell }) {
   const label  = level === 0
     ? `${school ?? ''} cantrip`.trim()
     : `${ordinal(level)}-level ${(school ?? '').toLowerCase()}`.trim()
-  return <span className="text-[11px] text-[#787774] italic">{label}</span>
+  return <span className="text-xs text-[#787774] italic">{label}</span>
 }
 
 function SpellBody({ spell }) {
@@ -126,7 +126,7 @@ function SpellBody({ spell }) {
       {props.length > 0 && (
         <div className="flex flex-wrap gap-x-6 gap-y-0.5 mb-3">
           {props.map((p, i) => (
-            <span key={i} className="text-[11px] text-[#787774]">{p}</span>
+            <span key={i} className="text-xs text-[#787774]">{p}</span>
           ))}
         </div>
       )}
