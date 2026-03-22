@@ -71,8 +71,8 @@ export function SpellDrawer({ spellName, onClose }) {
 
   return (
     <div
-      className="fixed bottom-0 inset-x-0 z-40 bg-[#1e1e1e] border-t border-white/[0.1] flex flex-col"
-      style={{ maxHeight: '38vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }}
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-40 bg-[#1e1e1e] border border-white/[0.1] rounded-t-lg flex flex-col"
+      style={{ maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }}
     >
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]">

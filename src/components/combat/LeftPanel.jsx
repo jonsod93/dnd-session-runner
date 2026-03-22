@@ -5,10 +5,11 @@ import { StatblockBody } from './StatblockPanel'
 
 const GRACE_MS = 350
 
-export function LeftPanel({ onAdd }) {
-  const [tab,   setTab]   = useState('library')
-  const { all } = useLibrary()
+export function LeftPanel({ onAdd, collapsed, onToggleCollapse }) {
+  const [tab,   setTab]   = useState('npc')
+  const { monsters, pcs } = useLibrary()
   const [query, setQuery] = useState('')
+  const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
 
@@ -43,11 +44,17 @@ export function LeftPanel({ onAdd }) {
 
   // ──────────────────────────────────────────────────────────────────────────
 
-  const filtered = useMemo(() => {
+  const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
-    if (!q) return all
-    return all.filter((c) => c.Name.toLowerCase().includes(q))
-  }, [all, query])
+    if (!q) return monsters
+    return monsters.filter((c) => c.Name.toLowerCase().includes(q))
+  }, [monsters, query])
+
+  const filteredPCs = useMemo(() => {
+    const q = pcQuery.toLowerCase().trim()
+    if (!q) return pcs
+    return pcs.filter((c) => c.Name.toLowerCase().includes(q))
+  }, [pcs, pcQuery])
 
   const handleLibraryAdd = (entry) => {
     if (entry._libType === 'pc') {
@@ -75,12 +82,29 @@ export function LeftPanel({ onAdd }) {
     setQaName('')
   }
 
+  if (collapsed) {
+    return (
+      <div className="w-10 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col items-center pt-3">
+        <button
+          onClick={onToggleCollapse}
+          className="text-[#787774] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-white/[0.06]"
+          title="Show library"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M6 3l5 5-5 5" />
+          </svg>
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="w-64 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col">
-      {/* Tabs */}
+      {/* Tabs + collapse button */}
       <div className="flex border-b border-white/[0.06] shrink-0">
         {[
-          { key: 'library',  label: 'Library'    },
+          { key: 'npc',      label: 'NPC'       },
+          { key: 'pc',       label: 'PC'        },
           { key: 'quickadd', label: 'Quick Add'  },
         ].map(({ key, label }) => (
           <button
@@ -96,25 +120,34 @@ export function LeftPanel({ onAdd }) {
             {label}
           </button>
         ))}
+        <button
+          onClick={onToggleCollapse}
+          className="px-2 text-[#787774] hover:text-[#e6e6e6] transition-colors shrink-0"
+          title="Collapse library"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M10 3l-5 5 5 5" />
+          </svg>
+        </button>
       </div>
 
-      {/* ── Library ─────────────────────────────────────────────────────── */}
-      {tab === 'library' && (
+      {/* ── NPC Library ────────────────────────────────────────────────── */}
+      {tab === 'npc' && (
         <>
           <div className="px-3 py-2 border-b border-white/[0.04] shrink-0">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search…"
+              placeholder="Search NPCs…"
               className="w-full bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
             />
           </div>
           <div className="flex-1 overflow-y-auto">
-            {filtered.length === 0 && (
+            {filteredNPCs.length === 0 && (
               <p className="text-[#787774] text-sm text-center py-6">No results</p>
             )}
-            {filtered.map((entry) => (
+            {filteredNPCs.map((entry) => (
               <button
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
@@ -124,20 +157,53 @@ export function LeftPanel({ onAdd }) {
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
-                  {entry._libType === 'monster' && entry.Type && (
+                  {entry.Type && (
                     <div className="text-[11px] text-[#787774] truncate mt-0.5">{entry.Type}</div>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {entry._libType === 'pc' ? (
-                    <span className="text-[10px] text-blue-400/80 border border-blue-400/30 px-1.5 py-0.5 rounded">
-                      PC
-                    </span>
-                  ) : (
-                    entry.ChallengeRating && (
-                      <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
-                    )
+                  {entry.ChallengeRating && (
+                    <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
                   )}
+                  <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── PC Library ─────────────────────────────────────────────────── */}
+      {tab === 'pc' && (
+        <>
+          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0">
+            <input
+              type="text"
+              value={pcQuery}
+              onChange={(e) => setPcQuery(e.target.value)}
+              placeholder="Search PCs…"
+              className="w-full bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
+            />
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {filteredPCs.length === 0 && (
+              <p className="text-[#787774] text-sm text-center py-6">No results</p>
+            )}
+            {filteredPCs.map((entry) => (
+              <button
+                key={entry.Id ?? entry.Name}
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
+                onClick={() => handleLibraryAdd(entry)}
+                onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
+                onMouseLeave={handleEntryMouseLeave}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-[10px] text-blue-400/80 border border-blue-400/30 px-1.5 py-0.5 rounded">
+                    PC
+                  </span>
                   <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </button>

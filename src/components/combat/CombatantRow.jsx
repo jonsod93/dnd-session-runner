@@ -116,35 +116,38 @@ export function CombatantRow({
         )}
         {isLair && <div className="flex-1" />}
 
-        {/* AC column — fixed width, always at same horizontal position */}
-        <div className="w-14 shrink-0">
-          {combatant.ac != null && (
-            <span className="text-sm">
-              <span className="text-[#787774] text-xs">AC </span>
-              <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-            </span>
-          )}
-        </div>
-
-        {/* HP + T — fixed width */}
-        <div
-          className="w-[100px] shrink-0 flex items-center gap-1.5"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {combatant.hp != null && (
-            <>
-              <span className={`text-sm font-mono font-medium ${hpColor}`}>
-                {combatant.hp.current}/{combatant.hp.max}
+        {/* AC + HP group — centered with wider gap */}
+        <div className="flex items-center gap-4 shrink-0">
+          {/* AC column — fixed width */}
+          <div className="w-14 shrink-0 flex justify-center">
+            {combatant.ac != null && (
+              <span className="text-sm">
+                <span className="text-[#787774] text-xs">AC </span>
+                <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
               </span>
-              <button
-                className="text-[10px] font-mono text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-1.5 py-0.5 rounded transition-colors"
-                onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-                title="Apply damage/healing (T)"
-              >
-                T
-              </button>
-            </>
-          )}
+            )}
+          </div>
+
+          {/* HP + T — fixed width */}
+          <div
+            className="w-[100px] shrink-0 flex items-center gap-1.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {combatant.hp != null && (
+              <>
+                <span className={`text-sm font-mono font-medium ${hpColor}`}>
+                  {combatant.hp.current}/{combatant.hp.max}
+                </span>
+                <button
+                  className="text-[10px] font-mono text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-1.5 py-0.5 rounded transition-colors"
+                  onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+                  title="Apply damage/healing (T)"
+                >
+                  T
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -221,6 +224,7 @@ function ConditionMenu({ anchor, onAdd, onClose }) {
             key={c.name}
             className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] transition-colors"
             onClick={() => onAdd({ name: c.name, color: c.color })}
+            title={c.info || ''}
           >
             {c.name}
           </button>
