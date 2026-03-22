@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -20,6 +20,9 @@ import { CombatantRow }    from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
 import { DamageModal }     from '../components/combat/DamageModal'
+import { DiceRollToast }   from '../components/DiceRollToast'
+import { SpellDrawer }     from '../components/SpellDrawer'
+import { uid }             from '../utils/combatUtils'
 
 export default function CombatTracker() {
   const combat = useCombatState()
@@ -28,6 +31,8 @@ export default function CombatTracker() {
   const [showInitModal,    setShowInitModal]     = useState(false)
   const [damageTargetId,   setDamageTargetId]    = useState(null)
   const [showClearConfirm, setShowClearConfirm]  = useState(false)
+  const [rolls,            setRolls]             = useState([])
+  const [activeSpell,      setActiveSpell]       = useState(null)
 
   const selectedCombatant = combat.combatants.find((c) => c.id === selectedId) ?? null
   const damageTarget      = combat.combatants.find((c) => c.id === damageTargetId) ?? null
@@ -39,7 +44,16 @@ export default function CombatTracker() {
     }
   }, [combat.combatants, selectedId])
 
-  // ── Keyboard shortcuts ──────────────────────────────────────────────────
+  // ── Dice roll handler ────────────────────────────────────────────────────
+  const handleRoll = useCallback((result) => {
+    setRolls((prev) => [...prev, { ...result, id: uid() }])
+  }, [])
+
+  const handleExpireRoll = useCallback((id) => {
+    setRolls((prev) => prev.filter((r) => r.id !== id))
+  }, [])
+
+  // ── Keyboard shortcuts ───────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
       const tag = document.activeElement?.tagName
@@ -55,7 +69,7 @@ export default function CombatTracker() {
     return () => window.removeEventListener('keydown', handler)
   }, [combat])
 
-  // ── Drag & drop ─────────────────────────────────────────────────────────
+  // ── Drag & drop ──────────────────────────────────────────────────────────
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -202,6 +216,8 @@ export default function CombatTracker() {
         onUsageChange={(key, value) => {
           if (selectedId) combat.updateUsage(selectedId, key, value)
         }}
+        onRoll={handleRoll}
+        onSpellClick={setActiveSpell}
       />
 
       {/* ── Modals ───────────────────────────────────────────────────────── */}
@@ -219,6 +235,16 @@ export default function CombatTracker() {
           onConfirm={(amount) => { combat.applyDamage(damageTargetId, amount); setDamageTargetId(null) }}
           onClose={() => setDamageTargetId(null)}
         />
+      )}
+
+      {/* ── Dice roll toast ──────────────────────────────────────────────── */}
+      {rolls.length > 0 && (
+        <DiceRollToast rolls={rolls} onExpire={handleExpireRoll} />
+      )}
+
+      {/* ── Spell drawer ─────────────────────────────────────────────────── */}
+      {activeSpell && (
+        <SpellDrawer spellName={activeSpell} onClose={() => setActiveSpell(null)} />
       )}
     </div>
   )

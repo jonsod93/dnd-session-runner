@@ -1,4 +1,6 @@
 import { abilityMod, formatMod } from '../../utils/combatUtils'
+import { parseRichText, evalDiceExpr } from '../../utils/diceUtils'
+import { SPELL_REGEX } from '../../data/srdSpellNames'
 
 const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
 
@@ -44,23 +46,68 @@ function Rule() {
 function PropLine({ label, value }) {
   if (!value) return null
   return (
-    <p className="text-[11px] text-[#e6e6e6] leading-relaxed">
+    <p className="text-xs text-[#e6e6e6] leading-relaxed">
       <span className="font-medium text-[#e6e6e6]">{label} </span>
       <span className="text-[#787774]">{value}</span>
     </p>
   )
 }
 
-function AbilityEntry({ item, usage, onUsageChange }) {
-  const usageInfo = parseUsage(item)
+// ── Rich text renderer: dice rolls + spell names ──────────────────────────────
+function RichContent({ text, onRoll, onSpellClick, className }) {
+  if (!text) return null
+  const segments = parseRichText(text, SPELL_REGEX)
   return (
-    <div className="mb-3">
+    <span className={className}>
+      {segments.map((seg, i) => {
+        if (seg.type === 'roll') {
+          return (
+            <button
+              key={i}
+              className="font-mono text-amber-300/80 hover:text-amber-300 underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
+                const result = evalDiceExpr(seg.expr)
+                if (result && onRoll) onRoll(result)
+              }}
+              title={`Roll ${seg.expr}`}
+            >
+              {seg.text}
+            </button>
+          )
+        }
+        if (seg.type === 'spell') {
+          return (
+            <button
+              key={i}
+              className="text-blue-300/80 hover:text-blue-300 underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
+                onSpellClick?.(seg.text)
+              }}
+              title={`View ${seg.text}`}
+            >
+              {seg.text}
+            </button>
+          )
+        }
+        return <span key={i}>{seg.text}</span>
+      })}
+    </span>
+  )
+}
+
+function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
+  const usageInfo = parseUsage(item)
+  const content   = item.Content ?? item.Description
+  return (
+    <div className="mb-3.5">
       <div className="flex items-start flex-wrap gap-x-1.5 gap-y-0.5">
-        <span className="text-[11px] font-semibold text-[#e6e6e6] leading-relaxed">
+        <span className="text-xs font-semibold text-[#e6e6e6] leading-relaxed">
           {item.Name}
         </span>
         {item.Usage && (
-          <span className="text-[11px] text-[#787774] italic">({item.Usage})</span>
+          <span className="text-xs text-[#787774] italic">({item.Usage})</span>
         )}
         {usageInfo && (
           <UsageBoxes
@@ -71,16 +118,16 @@ function AbilityEntry({ item, usage, onUsageChange }) {
           />
         )}
       </div>
-      {(item.Content || item.Description) && (
-        <p className="text-[11px] text-[#787774] leading-relaxed mt-0.5 whitespace-pre-wrap">
-          {item.Content ?? item.Description}
+      {content && (
+        <p className="text-xs text-[#787774] leading-relaxed mt-0.5 whitespace-pre-wrap">
+          <RichContent text={content} onRoll={onRoll} onSpellClick={onSpellClick} />
         </p>
       )}
     </div>
   )
 }
 
-function Section({ title, items, usage, onUsageChange, legendaryPerRound }) {
+function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll, onSpellClick }) {
   if (!items?.length) return null
   return (
     <div className="mb-1">
@@ -101,6 +148,8 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound }) {
           item={item}
           usage={usage}
           onUsageChange={onUsageChange}
+          onRoll={onRoll}
+          onSpellClick={onSpellClick}
         />
       ))}
     </div>
@@ -108,7 +157,7 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound }) {
 }
 
 // ── Main panel ────────────────────────────────────────────────────────────────
-export function StatblockPanel({ combatant, onClear, onUsageChange }) {
+export function StatblockPanel({ combatant, onClear, onUsageChange, onRoll, onSpellClick }) {
   return (
     <div className="w-80 shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col">
       {/* Header */}
@@ -147,49 +196,53 @@ export function StatblockPanel({ combatant, onClear, onUsageChange }) {
           sb={combatant.statblock}
           usage={combatant.usage ?? {}}
           onUsageChange={onUsageChange}
+          onRoll={onRoll}
+          onSpellClick={onSpellClick}
         />
       )}
     </div>
   )
 }
 
-function StatblockBody({ sb, usage, onUsageChange }) {
+export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }) {
   const saves  = sb.Saves?.map((s) => `${s.Name} ${formatMod(s.Modifier)}`).join(', ')
   const skills = sb.Skills?.map((s) => `${s.Name} ${formatMod(s.Modifier)}`).join(', ')
   const legendaryPerRound = sb.LegendaryActions?.length ? (sb.LegendaryActionsCount ?? 3) : null
 
+  const sectionProps = { usage, onUsageChange, onRoll, onSpellClick }
+
   return (
     <div className="flex-1 overflow-y-auto px-4 py-3">
       {/* Type & source */}
-      <p className="text-[11px] text-[#787774] italic mb-0.5">{sb.Type}</p>
+      <p className="text-xs text-[#787774] italic mb-0.5">{sb.Type}</p>
       {sb.Source && (
-        <p className="text-[10px] text-[#787774]/60 mb-3">Source: {sb.Source}</p>
+        <p className="text-[11px] text-[#787774]/60 mb-3">Source: {sb.Source}</p>
       )}
 
       {/* Core stats */}
       <div className="flex flex-wrap gap-x-4 gap-y-0.5 mb-2">
         {sb.AC?.Value != null && (
-          <span className="text-[11px]">
+          <span className="text-xs">
             <span className="text-[#787774]">AC </span>
             <span className="font-medium text-[#e6e6e6]">{sb.AC.Value}</span>
             {sb.AC.Notes ? <span className="text-[#787774]"> ({sb.AC.Notes})</span> : null}
           </span>
         )}
         {sb.HP?.Value != null && (
-          <span className="text-[11px]">
+          <span className="text-xs">
             <span className="text-[#787774]">HP </span>
             <span className="font-medium text-[#e6e6e6]">{sb.HP.Value}</span>
             {sb.HP.Notes ? <span className="text-[#787774]"> ({sb.HP.Notes})</span> : null}
           </span>
         )}
         {sb.ChallengeRating && (
-          <span className="text-[11px]">
+          <span className="text-xs">
             <span className="text-[#787774]">CR </span>
             <span className="font-medium text-[#e6e6e6]">{sb.ChallengeRating}</span>
           </span>
         )}
         {sb.Speed && (
-          <span className="text-[11px]">
+          <span className="text-xs">
             <span className="text-[#787774]">Speed </span>
             <span className="text-[#e6e6e6]">{sb.Speed}</span>
           </span>
@@ -205,10 +258,10 @@ function StatblockBody({ sb, usage, onUsageChange }) {
             {ABILITIES.map((a) => (
               <div key={a}>
                 <div className="label-section mb-0.5">{a}</div>
-                <div className="text-[#e6e6e6] font-medium font-mono text-[11px]">
+                <div className="text-[#e6e6e6] font-medium font-mono text-xs">
                   {sb.Abilities[a]}
                 </div>
-                <div className="text-[#787774] text-[10px]">
+                <div className="text-[#787774] text-[11px]">
                   ({formatMod(abilityMod(sb.Abilities[a]))})
                 </div>
               </div>
@@ -233,24 +286,23 @@ function StatblockBody({ sb, usage, onUsageChange }) {
       {(saves || skills || sb.DamageVulnerabilities || sb.DamageResistances ||
         sb.DamageImmunities || sb.ConditionImmunities || sb.Senses || sb.Languages) && <Rule />}
 
-      <Section title="Traits"            items={sb.Traits}           usage={usage} onUsageChange={onUsageChange} />
-      <Section title="Actions"           items={sb.Actions}          usage={usage} onUsageChange={onUsageChange} />
-      <Section title="Bonus Actions"     items={sb.BonusActions}     usage={usage} onUsageChange={onUsageChange} />
-      <Section title="Reactions"         items={sb.Reactions}        usage={usage} onUsageChange={onUsageChange} />
+      <Section title="Traits"            items={sb.Traits}           {...sectionProps} />
+      <Section title="Actions"           items={sb.Actions}          {...sectionProps} />
+      <Section title="Bonus Actions"     items={sb.BonusActions}     {...sectionProps} />
+      <Section title="Reactions"         items={sb.Reactions}        {...sectionProps} />
       <Section
         title="Legendary Actions"
         items={sb.LegendaryActions}
-        usage={usage}
-        onUsageChange={onUsageChange}
         legendaryPerRound={legendaryPerRound}
+        {...sectionProps}
       />
-      <Section title="Mythic Actions"    items={sb.MythicActions}    usage={usage} onUsageChange={onUsageChange} />
-      <Section title="Lair Actions"      items={sb.LairActions}      usage={usage} onUsageChange={onUsageChange} />
+      <Section title="Mythic Actions"    items={sb.MythicActions}    {...sectionProps} />
+      <Section title="Lair Actions"      items={sb.LairActions}      {...sectionProps} />
 
       {sb.Description && (
         <>
           <Rule />
-          <p className="text-[11px] text-[#787774] italic leading-relaxed">{sb.Description}</p>
+          <p className="text-xs text-[#787774] italic leading-relaxed">{sb.Description}</p>
         </>
       )}
       <div className="h-4" />

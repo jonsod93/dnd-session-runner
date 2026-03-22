@@ -1,0 +1,140 @@
+import { useState, useEffect } from 'react'
+import { spellNameToSlug } from '../data/srdSpellNames'
+
+const CACHE_PREFIX = 'mythranos-spell-v1-'
+
+export function SpellDrawer({ spellName, onClose }) {
+  const [spell,   setSpell]   = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState(null)
+
+  useEffect(() => {
+    if (!spellName) return
+    setLoading(true)
+    setError(null)
+    setSpell(null)
+
+    const slug      = spellNameToSlug(spellName)
+    const cacheKey  = CACHE_PREFIX + slug
+    const cached    = localStorage.getItem(cacheKey)
+
+    if (cached) {
+      setSpell(JSON.parse(cached))
+      setLoading(false)
+      return
+    }
+
+    fetch(`https://api.open5e.com/v2/spells/${slug}/`)
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status)
+        return r.json()
+      })
+      .then((data) => {
+        localStorage.setItem(cacheKey, JSON.stringify(data))
+        setSpell(data)
+        setLoading(false)
+      })
+      .catch(() => {
+        // Fallback: try search endpoint
+        fetch(`https://api.open5e.com/v2/spells/?search=${encodeURIComponent(spellName)}&limit=1`)
+          .then((r) => r.ok ? r.json() : Promise.reject())
+          .then((data) => {
+            const result = data.results?.[0]
+            if (!result) throw new Error('not found')
+            localStorage.setItem(cacheKey, JSON.stringify(result))
+            setSpell(result)
+            setLoading(false)
+          })
+          .catch(() => {
+            setError('Spell data not available.')
+            setLoading(false)
+          })
+      })
+  }, [spellName])
+
+  // Escape to close
+  useEffect(() => {
+    const h = (e) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed bottom-0 inset-x-0 z-40 bg-[#1e1e1e] border-t border-white/[0.1] flex flex-col"
+      style={{ maxHeight: '38vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }}
+    >
+      {/* Header */}
+      <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <h3 className="text-sm font-medium text-[#e6e6e6]">
+            {loading ? 'Loading…' : (spell?.name ?? spellName)}
+          </h3>
+          {!loading && spell && <SpellMeta spell={spell} />}
+        </div>
+        <button
+          onClick={onClose}
+          className="text-[#787774] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto px-6 py-4">
+        {loading && (
+          <p className="text-[#787774] text-sm">Loading spell data…</p>
+        )}
+        {error && (
+          <p className="text-red-400/70 text-sm">{error}</p>
+        )}
+        {spell && <SpellBody spell={spell} />}
+      </div>
+    </div>
+  )
+}
+
+function SpellMeta({ spell }) {
+  const level  = spell.level
+  const school = typeof spell.school === 'object' ? spell.school?.name : spell.school
+  const label  = level === 0
+    ? `${school ?? ''} cantrip`.trim()
+    : `${ordinal(level)}-level ${(school ?? '').toLowerCase()}`.trim()
+  return <span className="text-[11px] text-[#787774] italic">{label}</span>
+}
+
+function SpellBody({ spell }) {
+  const props = [
+    spell.casting_time && `Casting Time: ${spell.casting_time}`,
+    spell.range        && `Range: ${spell.range}`,
+    spell.components   && `Components: ${spell.components}`,
+    spell.duration     && `Duration: ${spell.duration}`,
+  ].filter(Boolean)
+
+  return (
+    <div>
+      {props.length > 0 && (
+        <div className="flex flex-wrap gap-x-6 gap-y-0.5 mb-3">
+          {props.map((p, i) => (
+            <span key={i} className="text-[11px] text-[#787774]">{p}</span>
+          ))}
+        </div>
+      )}
+      {spell.desc && (
+        <p className="text-sm text-[#e6e6e6] leading-relaxed whitespace-pre-wrap">{spell.desc}</p>
+      )}
+      {spell.higher_level && (
+        <p className="text-xs text-[#787774] leading-relaxed mt-3 whitespace-pre-wrap">
+          <span className="font-medium text-[#e6e6e6]">At Higher Levels. </span>
+          {spell.higher_level}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] || s[v] || s[0])
+}

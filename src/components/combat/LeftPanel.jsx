@@ -1,12 +1,47 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useLibrary } from '../../hooks/useLibrary'
+import { StatblockBody } from './StatblockPanel'
+
+const GRACE_MS = 350
 
 export function LeftPanel({ onAdd }) {
-  const [tab, setTab] = useState('library')
+  const [tab,   setTab]   = useState('library')
   const { all } = useLibrary()
   const [query, setQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
+
+  // ── Hover preview state ───────────────────────────────────────────────────
+  const [preview,       setPreview]       = useState(null) // { entry, anchor }
+  const graceTimer                        = useRef(null)
+
+  const clearGrace = useCallback(() => clearTimeout(graceTimer.current), [])
+
+  const startGrace = useCallback(() => {
+    graceTimer.current = setTimeout(() => setPreview(null), GRACE_MS)
+  }, [])
+
+  const handleEntryMouseEnter = useCallback((entry, e) => {
+    if (!entry.HP && !entry.AC && !entry.Abilities) return // skip entries with no statblock data
+    clearGrace()
+    const rect = e.currentTarget.getBoundingClientRect()
+    setPreview({ entry, top: rect.top })
+  }, [clearGrace])
+
+  const handleEntryMouseLeave = useCallback(() => {
+    startGrace()
+  }, [startGrace])
+
+  const handlePreviewMouseEnter = useCallback(() => {
+    clearGrace()
+  }, [clearGrace])
+
+  const handlePreviewMouseLeave = useCallback(() => {
+    startGrace()
+  }, [startGrace])
+
+  // ──────────────────────────────────────────────────────────────────────────
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -84,6 +119,8 @@ export function LeftPanel({ onAdd }) {
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
                 onClick={() => handleLibraryAdd(entry)}
+                onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
+                onMouseLeave={handleEntryMouseLeave}
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
@@ -159,6 +196,55 @@ export function LeftPanel({ onAdd }) {
           </p>
         </div>
       )}
+
+      {/* ── Hover preview portal ─────────────────────────────────────────── */}
+      {preview && createPortal(
+        <LibraryPreview
+          entry={preview.entry}
+          top={preview.top}
+          onMouseEnter={handlePreviewMouseEnter}
+          onMouseLeave={handlePreviewMouseLeave}
+        />,
+        document.body
+      )}
+    </div>
+  )
+}
+
+// ── Library statblock preview ─────────────────────────────────────────────────
+function LibraryPreview({ entry, top, onMouseEnter, onMouseLeave }) {
+  const PANEL_W   = 288
+  const PANEL_H   = 480
+  const LEFT      = 256 + 8 // left panel width + gap
+
+  // Clamp vertically so preview doesn't go off-screen
+  const clampedTop = Math.min(
+    Math.max(top, 48 + 8),           // below nav
+    window.innerHeight - PANEL_H - 8  // above bottom
+  )
+
+  return (
+    <div
+      className="fixed z-30 bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden"
+      style={{
+        left:   LEFT,
+        top:    clampedTop,
+        width:  PANEL_W,
+        height: PANEL_H,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {/* Preview header */}
+      <div className="shrink-0 px-4 py-2.5 border-b border-white/[0.06]">
+        <p className="text-sm font-medium text-[#e6e6e6] truncate">{entry.Name}</p>
+        {entry.Type && (
+          <p className="text-[11px] text-[#787774] italic truncate mt-0.5">{entry.Type}</p>
+        )}
+      </div>
+      {/* Statblock body */}
+      <StatblockBody sb={entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} />
     </div>
   )
 }
