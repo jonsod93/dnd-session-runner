@@ -22,12 +22,12 @@ export function evalDiceExpr(exprRaw) {
     }
   }
 
-  // NdM[±K]
-  const diceM = expr.match(/^(\d+)d(\d+)([+-]\d+)?$/)
+  // NdM[±K] — allow optional spaces around the operator (e.g. "1d4 + 1")
+  const diceM = expr.match(/^(\d+)d(\d+)\s*([+-]\s*\d+)?$/)
   if (diceM) {
     const count  = parseInt(diceM[1])
     const sides  = parseInt(diceM[2])
-    const mod    = diceM[3] ? parseInt(diceM[3]) : 0
+    const mod    = diceM[3] ? parseInt(diceM[3].replace(/\s+/g, '')) : 0
     const rolls  = Array.from({ length: count }, () => rollDie(sides))
     const sum    = rolls.reduce((a, b) => a + b, 0)
     const total  = sum + mod
@@ -68,10 +68,10 @@ export function parseRichText(text, spellRegex) {
 function _parseDice(text) {
   const segments = []
   // Match (priority order):
-  //   [+-]N to hit     → attack roll
-  //   (NdM[±K])        → damage in parens
-  //   \bNdM[±K]\b      → standalone dice expr
-  const re = /([+-]\d+\s+to\s+hit)|(\(\d+d\d+(?:[+-]\d+)?\))|(\b\d+d\d+(?:[+-]\d+)?\b)/gi
+  //   [+-]N to hit           → attack roll
+  //   (NdM[ ± K])            → damage in parens (spaces around operator allowed)
+  //   \bNdM[ ± K]\b          → standalone dice expr (spaces around operator allowed)
+  const re = /([+-]\d+\s+to\s+hit)|(\(\d+d\d+\s*(?:[+-]\s*\d+)?\s*\))|(\b\d+d\d+\s*(?:[+-]\s*\d+)?(?=\s|[^a-zA-Z]|$))/gi
   let lastIdx = 0
   let m
   while ((m = re.exec(text)) !== null) {
@@ -82,9 +82,12 @@ function _parseDice(text) {
       const modPart = m[1].match(/[+-]\d+/)[0]
       segments.push({ type: 'roll', text: m[1], expr: `d20${modPart}` })
     } else if (m[2]) {
-      segments.push({ type: 'roll', text: m[2], expr: m[2].slice(1, -1) })
+      // Strip spaces so "1d4 + 1" → expr "1d4+1"
+      const inner = m[2].slice(1, -1).replace(/\s+/g, '')
+      segments.push({ type: 'roll', text: m[2], expr: inner })
     } else if (m[3]) {
-      segments.push({ type: 'roll', text: m[3], expr: m[3] })
+      const expr = m[3].replace(/\s+/g, '')
+      segments.push({ type: 'roll', text: m[3], expr })
     }
     lastIdx = re.lastIndex
   }
