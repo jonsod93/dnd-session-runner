@@ -1,0 +1,16 @@
+node_modules
+dist
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+Thumbs.db
+.vercel
+.claude/
+
+# Map images — too large for git (96MB+). Use Git LFS or external storage.
+# See README for options.
+public/maps/*.jpg
+public/maps/*.png
+public/maps/*.webp
