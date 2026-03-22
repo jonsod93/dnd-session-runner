@@ -1,10 +1,50 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { rollInitiative } from '../../utils/combatUtils'
 
+function isMinion(statblock) {
+  if (!statblock?.Traits) return false
+  return statblock.Traits.some((t) => {
+    const text = `${t.Name ?? ''} ${t.Content ?? ''} ${t.Description ?? ''}`.toLowerCase()
+    return text.includes('minion')
+  })
+}
+
+function getMinionBaseName(name) {
+  return name.replace(/\s+\d+$/, '')
+}
+
 export function InitiativeModal({ combatants, onConfirm, onClose }) {
+  // Group minions by base name — show one row per group
+  const { displayRows, minionGroups } = useMemo(() => {
+    const groups = {}     // baseName → [combatant ids]
+    const display = []
+    const seen = new Set()
+
+    for (const c of combatants) {
+      if (isMinion(c.statblock)) {
+        const base = getMinionBaseName(c.name)
+        if (!groups[base]) groups[base] = []
+        groups[base].push(c.id)
+        if (!seen.has(base)) {
+          seen.add(base)
+          display.push({ ...c, _minionGroup: base, _minionCount: 0 })
+        }
+      } else {
+        display.push(c)
+      }
+    }
+    // Update counts
+    for (const row of display) {
+      if (row._minionGroup) {
+        row._minionCount = groups[row._minionGroup].length
+      }
+    }
+    return { displayRows: display, minionGroups: groups }
+  }, [combatants])
+
   const buildRolls = () => {
     const map = {}
-    combatants.forEach((c) => {
+    displayRows.forEach((c) => {
       if (c.type === 'monster' || c.type === 'quick') {
         map[c.id] = rollInitiative(c.statblock)
       } else {
@@ -24,9 +64,18 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
 
   const handleConfirm = () => {
     const map = {}
+    // For minion groups, apply same value to all members
     Object.entries(values).forEach(([id, v]) => {
       const n = parseInt(v, 10)
-      if (!isNaN(n)) map[id] = n
+      if (isNaN(n)) return
+      const row = displayRows.find((r) => r.id === id)
+      if (row?._minionGroup) {
+        for (const memberId of minionGroups[row._minionGroup]) {
+          map[memberId] = n
+        }
+      } else {
+        map[id] = n
+      }
     })
     onConfirm(map)
   }
@@ -66,13 +115,15 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
 
         {/* Rows */}
         <div className="overflow-y-auto flex-1 divide-y divide-white/[0.04]">
-          {combatants.map((c) => (
+          {displayRows.map((c) => (
             <div key={c.id} className="flex items-center px-5 py-3 gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#e6e6e6] truncate">{c.name}</span>
+                  <span className="text-sm text-[#e6e6e6] truncate">
+                    {c._minionGroup ? getMinionBaseName(c.name) : c.name}
+                  </span>
                   {c.type === 'pc' && (
-                    <span className="text-[10px] text-blue-400/80 border border-blue-400/30 px-1.5 rounded">
+                    <span className="text-[10px] text-green-400/80 border border-green-400/30 px-1.5 rounded">
                       PC
                     </span>
                   )}
@@ -81,12 +132,18 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                       NPC
                     </span>
                   )}
+                  {c._minionCount > 1 && (
+                    <span className="text-[10px] text-teal-400/80 border border-teal-400/30 px-1.5 rounded">
+                      ×{c._minionCount}
+                    </span>
+                  )}
                 </div>
                 {c.type === 'monster' && c.statblock && (
                   <span className="text-[11px] text-[#787774]">
                     {c.statblock.InitiativeModifier !== undefined
                       ? `Init ${c.statblock.InitiativeModifier >= 0 ? '+' : ''}${c.statblock.InitiativeModifier}`
                       : `Dex ${c.statblock.Abilities?.Dex ?? '?'}`}
+                    {c._minionGroup ? ' · Minion' : ''}
                   </span>
                 )}
               </div>
@@ -99,7 +156,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
               />
             </div>
           ))}
-          {combatants.length === 0 && (
+          {displayRows.length === 0 && (
             <p className="text-[#787774] text-sm text-center py-6">No combatants to roll for.</p>
           )}
         </div>

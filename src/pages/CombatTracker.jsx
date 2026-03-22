@@ -15,9 +15,11 @@ import {
 } from '@dnd-kit/sortable'
 
 import { useCombatState } from '../hooks/useCombatState'
+import { useLibrary }      from '../hooks/useLibrary'
 import { LeftPanel }       from '../components/combat/LeftPanel'
 import { CombatantRow }    from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
+import { StatblockEditor } from '../components/combat/StatblockEditor'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
 import { DamageModal }     from '../components/combat/DamageModal'
 import { DiceRollToast }   from '../components/DiceRollToast'
@@ -26,13 +28,19 @@ import { uid }             from '../utils/combatUtils'
 
 export default function CombatTracker() {
   const combat = useCombatState()
+  const library = useLibrary()
 
-  const [selectedId,       setSelectedId]       = useState(null)
-  const [showInitModal,    setShowInitModal]     = useState(false)
-  const [damageTargetId,   setDamageTargetId]    = useState(null)
-  const [showClearConfirm, setShowClearConfirm]  = useState(false)
-  const [rolls,            setRolls]             = useState([])
-  const [activeSpell,      setActiveSpell]       = useState(null)
+  const [selectedId,        setSelectedId]        = useState(null)
+  const [showInitModal,     setShowInitModal]     = useState(false)
+  const [damageTargetId,    setDamageTargetId]    = useState(null)
+  const [showClearConfirm,  setShowClearConfirm]  = useState(false)
+  const [rolls,             setRolls]             = useState([])
+  const [activeSpell,       setActiveSpell]       = useState(null)
+  const [leftCollapsed,     setLeftCollapsed]     = useState(false)
+  const [customLairActions, setCustomLairActions] = useState([])
+
+  // Editor state: { mode: 'new' } | { mode: 'edit', entry, customIndex }
+  const [editor, setEditor] = useState(null)
 
   const selectedCombatant = combat.combatants.find((c) => c.id === selectedId) ?? null
   const damageTarget      = combat.combatants.find((c) => c.id === damageTargetId) ?? null
@@ -64,10 +72,15 @@ export default function CombatTracker() {
         const active = combat.combatants.find((c) => c.id === combat.activeTurnId)
         if (active?.hp) setDamageTargetId(active.id)
       }
+      if (e.key === 'Delete' && selectedId) {
+        e.preventDefault()
+        combat.remove(selectedId)
+        setSelectedId(null)
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [combat])
+  }, [combat, selectedId])
 
   // ── Drag & drop ──────────────────────────────────────────────────────────
   const sensors = useSensors(
@@ -107,13 +120,48 @@ export default function CombatTracker() {
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <LeftPanel
+        monsters={library.monsters}
+        pcs={library.pcs}
         onAdd={(entry) => {
           if (entry.type === 'lair' && hasLair) return
           combat.add(entry)
         }}
+        collapsed={leftCollapsed}
+        onToggleCollapse={() => setLeftCollapsed((v) => !v)}
+        onEditStatblock={(entry) => {
+          const idx = library.getCustomIndex(entry.Name)
+          setEditor({ mode: 'edit', entry, customIndex: idx >= 0 ? idx : -1 })
+        }}
+        onNewStatblock={() => setEditor({ mode: 'new' })}
+        onDeleteStatblock={(name) => {
+          const idx = library.getCustomIndex(name)
+          if (idx >= 0) library.removeCustomStatblock(idx)
+        }}
       />
 
-      {/* ── Centre: tracker ─────────────────────────────────────────────── */}
+      {/* ── Centre: editor OR tracker ────────────────────────────────────── */}
+      {editor ? (
+        <StatblockEditor
+          initial={editor.mode === 'edit' ? editor.entry : undefined}
+          title={editor.mode === 'new' ? 'New Statblock' : `Edit: ${editor.entry?.Name}`}
+          onSave={(statblock) => {
+            if (editor.mode === 'edit') {
+              // Check for existing custom entry by original name or new name
+              const origIdx = editor.customIndex >= 0 ? editor.customIndex : library.getCustomIndex(editor.entry?.Name)
+              const nameIdx = origIdx < 0 ? library.getCustomIndex(statblock.Name) : origIdx
+              if (nameIdx >= 0) {
+                library.updateCustomStatblock(nameIdx, statblock)
+              } else {
+                library.addCustomStatblock(statblock)
+              }
+            } else {
+              library.addCustomStatblock(statblock)
+            }
+            setEditor(null)
+          }}
+          onCancel={() => setEditor(null)}
+        />
+      ) : (
       <div className="flex-1 flex flex-col min-w-0 bg-[#1a1a1a]">
 
         {/* Toolbar */}
@@ -166,6 +214,39 @@ export default function CombatTracker() {
           )}
         </div>
 
+        {/* Header row */}
+        {combat.combatants.length > 0 && (
+          <div className="shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-[10px] text-[#787774] uppercase tracking-wider font-medium">
+            {/* Drag handle spacer */}
+            <div className="w-[10px] shrink-0" />
+            {/* Active arrow spacer */}
+            <div className="w-3 shrink-0" />
+            {/* Initiative */}
+            <div className="w-8 shrink-0 text-center">#</div>
+            {/* Name */}
+            <div className="w-36 shrink-0">Name</div>
+            {/* AC + HP group */}
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="w-14 flex justify-center" title="Armor Class">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <div className="w-[100px] flex" title="Hit Points">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </div>
+            </div>
+            {/* Conditions spacer */}
+            <div className="flex-1" />
+            {/* Conditions button spacer */}
+            <div className="w-[72px] shrink-0" />
+            {/* Remove button spacer */}
+            <div className="w-4 shrink-0 ml-0.5" />
+          </div>
+        )}
+
         {/* Combatant list */}
         <div className="flex-1 overflow-y-auto">
           {combat.combatants.length === 0 && (
@@ -209,16 +290,21 @@ export default function CombatTracker() {
           </DndContext>
         </div>
       </div>
+      )}
 
       {/* ── Right: statblock panel ───────────────────────────────────────── */}
       <StatblockPanel
         combatant={selectedCombatant}
+        combatants={combat.combatants}
         onClear={() => setSelectedId(null)}
         onUsageChange={(key, value) => {
           if (selectedId) combat.updateUsage(selectedId, key, value)
         }}
         onRoll={handleRoll}
         onSpellClick={setActiveSpell}
+        customLairActions={customLairActions}
+        onAddCustomLairAction={(text) => setCustomLairActions((prev) => [...prev, text])}
+        onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
       />
 
       {/* ── Modals ───────────────────────────────────────────────────────── */}

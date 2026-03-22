@@ -2,17 +2,29 @@ import { Routes, Route } from 'react-router-dom'
 import Navigation from './components/Navigation.jsx'
 import CombatTracker from './pages/CombatTracker.jsx'
 import MapPage from './pages/MapPage.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
+
+function AuthGate({ children }) {
+  const { authed } = useAuth()
+  if (!authed) return <LoginPage />
+  return children
+}
 
 export default function App() {
   return (
-    <div className="flex flex-col h-full bg-slate-950">
-      <Navigation />
-      <main className="flex-1 overflow-hidden">
-        <Routes>
-          <Route path="/" element={<CombatTracker />} />
-          <Route path="/map" element={<MapPage />} />
-        </Routes>
-      </main>
-    </div>
+    <AuthProvider>
+      <AuthGate>
+        <div className="flex flex-col h-full bg-slate-950">
+          <Navigation />
+          <main className="flex-1 overflow-hidden">
+            <Routes>
+              <Route path="/" element={<CombatTracker />} />
+              <Route path="/map" element={<MapPage />} />
+            </Routes>
+          </main>
+        </div>
+      </AuthGate>
+    </AuthProvider>
   )
 }

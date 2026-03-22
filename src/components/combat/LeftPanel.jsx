@@ -1,16 +1,16 @@
 import { useState, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { useLibrary } from '../../hooks/useLibrary'
 import { StatblockBody } from './StatblockPanel'
 
 const GRACE_MS = 350
 
-export function LeftPanel({ onAdd }) {
-  const [tab,   setTab]   = useState('library')
-  const { all } = useLibrary()
+export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, monsters, pcs }) {
+  const [tab,   setTab]   = useState('npc')
   const [query, setQuery] = useState('')
+  const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
+  const [deleteConfirm, setDeleteConfirm] = useState(null) // { name, type: 'npc'|'pc' }
 
   // ── Hover preview state ───────────────────────────────────────────────────
   const [preview,       setPreview]       = useState(null) // { entry, anchor }
@@ -43,11 +43,22 @@ export function LeftPanel({ onAdd }) {
 
   // ──────────────────────────────────────────────────────────────────────────
 
-  const filtered = useMemo(() => {
+  const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
-    if (!q) return all
-    return all.filter((c) => c.Name.toLowerCase().includes(q))
-  }, [all, query])
+    if (!q) return monsters
+    return monsters.filter((c) => {
+      const name   = (c.Name ?? '').toLowerCase()
+      const type   = (c.Type ?? '').toLowerCase()
+      const source = (c.Source ?? '').toLowerCase()
+      return name.includes(q) || type.includes(q) || source.includes(q)
+    })
+  }, [monsters, query])
+
+  const filteredPCs = useMemo(() => {
+    const q = pcQuery.toLowerCase().trim()
+    if (!q) return pcs
+    return pcs.filter((c) => c.Name.toLowerCase().includes(q))
+  }, [pcs, pcQuery])
 
   const handleLibraryAdd = (entry) => {
     if (entry._libType === 'pc') {
@@ -75,12 +86,29 @@ export function LeftPanel({ onAdd }) {
     setQaName('')
   }
 
+  if (collapsed) {
+    return (
+      <div className="w-10 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col items-center pt-3">
+        <button
+          onClick={onToggleCollapse}
+          className="text-[#787774] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-white/[0.06]"
+          title="Show library"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M6 3l5 5-5 5" />
+          </svg>
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="w-64 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col">
-      {/* Tabs */}
+      {/* Tabs + collapse button */}
       <div className="flex border-b border-white/[0.06] shrink-0">
         {[
-          { key: 'library',  label: 'Library'    },
+          { key: 'npc',      label: 'NPC'       },
+          { key: 'pc',       label: 'PC'        },
           { key: 'quickadd', label: 'Quick Add'  },
         ].map(({ key, label }) => (
           <button
@@ -96,25 +124,99 @@ export function LeftPanel({ onAdd }) {
             {label}
           </button>
         ))}
+        <button
+          onClick={onToggleCollapse}
+          className="px-2 text-[#787774] hover:text-[#e6e6e6] transition-colors shrink-0"
+          title="Collapse library"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M10 3l-5 5 5 5" />
+          </svg>
+        </button>
       </div>
 
-      {/* ── Library ─────────────────────────────────────────────────────── */}
-      {tab === 'library' && (
+      {/* ── NPC Library ────────────────────────────────────────────────── */}
+      {tab === 'npc' && (
         <>
-          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0">
+          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-2">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search…"
+              placeholder="Search NPCs…"
+              className="flex-1 bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
+            />
+            <button
+              onClick={() => onNewStatblock?.()}
+              className="shrink-0 text-[10px] text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-1.5 py-0.5 transition-colors"
+              title="Add new statblock from JSON"
+            >
+              + New
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {filteredNPCs.length === 0 && (
+              <p className="text-[#787774] text-sm text-center py-6">No results</p>
+            )}
+            {filteredNPCs.map((entry) => (
+              <div
+                key={entry.Id ?? entry.Name}
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
+                onClick={() => handleLibraryAdd(entry)}
+                onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
+                onMouseLeave={handleEntryMouseLeave}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
+                  {entry.Type && (
+                    <div className="text-[11px] text-[#787774] truncate mt-0.5">{entry.Type}</div>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {entry.ChallengeRating && (
+                    <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
+                  )}
+                  {entry._custom && (
+                    <button
+                      className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-red-400 text-[10px] transition-all"
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc' }) }}
+                      title="Delete statblock"
+                    >
+                      ✕
+                    </button>
+                  )}
+                  <button
+                    className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-gold-400 text-[10px] transition-all"
+                    onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
+                    title="Edit statblock"
+                  >
+                    ✎
+                  </button>
+                  <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── PC Library ─────────────────────────────────────────────────── */}
+      {tab === 'pc' && (
+        <>
+          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0">
+            <input
+              type="text"
+              value={pcQuery}
+              onChange={(e) => setPcQuery(e.target.value)}
+              placeholder="Search PCs…"
               className="w-full bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
             />
           </div>
           <div className="flex-1 overflow-y-auto">
-            {filtered.length === 0 && (
+            {filteredPCs.length === 0 && (
               <p className="text-[#787774] text-sm text-center py-6">No results</p>
             )}
-            {filtered.map((entry) => (
+            {filteredPCs.map((entry) => (
               <button
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
@@ -124,20 +226,8 @@ export function LeftPanel({ onAdd }) {
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
-                  {entry._libType === 'monster' && entry.Type && (
-                    <div className="text-[11px] text-[#787774] truncate mt-0.5">{entry.Type}</div>
-                  )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {entry._libType === 'pc' ? (
-                    <span className="text-[10px] text-blue-400/80 border border-blue-400/30 px-1.5 py-0.5 rounded">
-                      PC
-                    </span>
-                  ) : (
-                    entry.ChallengeRating && (
-                      <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
-                    )
-                  )}
                   <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </button>
@@ -195,6 +285,44 @@ export function LeftPanel({ onAdd }) {
             Quick add creates a combatant with no statblock — useful for improvised NPCs and summoned creatures.
           </p>
         </div>
+      )}
+
+      {/* ── Delete confirmation modal ───────────────────────────────────── */}
+      {deleteConfirm && createPortal(
+        <div
+          className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setDeleteConfirm(null)}
+        >
+          <div
+            className="bg-[#252525] border border-white/[0.1] rounded-lg w-full max-w-sm p-5"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete Statblock</h3>
+            <p className="text-xs text-[#787774] mb-4">
+              Are you sure you want to delete <span className="text-[#e6e6e6] font-medium">{deleteConfirm.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="text-xs text-[#787774] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-3 py-1.5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type)
+                  setDeleteConfirm(null)
+                }}
+                className="text-xs bg-red-500/80 hover:bg-red-500 text-white font-medium rounded px-3 py-1.5 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Hover preview portal ─────────────────────────────────────────── */}

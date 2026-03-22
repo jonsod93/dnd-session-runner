@@ -46,7 +46,16 @@ function reducer(state, action) {
       const { combatants, activeTurnId } = state
       if (!combatants.length) return state
       const idx = combatants.findIndex((c) => c.id === activeTurnId)
-      return { ...state, activeTurnId: combatants[(idx + 1) % combatants.length].id }
+      const nextId = combatants[(idx + 1) % combatants.length].id
+      // Auto-clear legendary action usage for the combatant whose turn starts
+      const updated = combatants.map((c) => {
+        if (c.id !== nextId) return c
+        if (!c.statblock?.LegendaryActions?.length) return c
+        const newUsage = { ...(c.usage ?? {}) }
+        delete newUsage['__Legendary Actions']
+        return { ...c, usage: newUsage }
+      })
+      return { ...state, combatants: updated, activeTurnId: nextId }
     }
     case 'DAMAGE':
       return {
@@ -96,6 +105,13 @@ function reducer(state, action) {
             : c
         ),
       }
+    case 'RENAME':
+      return {
+        ...state,
+        combatants: state.combatants.map((c) =>
+          c.id === action.id ? { ...c, name: action.name } : c
+        ),
+      }
     case 'CLEAR':
       return init
     default:
@@ -123,6 +139,13 @@ export function useCombatState() {
       (c) => c.name === name || c.name.match(new RegExp(`^${name} \\d+$`))
     )
     if (!existing.length) return name
+
+    // Rename the first unnumbered instance to "Name 1"
+    const unnumbered = state.combatants.find((c) => c.name === name)
+    if (unnumbered) {
+      dispatch({ type: 'RENAME', id: unnumbered.id, name: `${name} 1` })
+    }
+
     const numbered = state.combatants
       .map((c) => {
         const m = c.name.match(new RegExp(`^${name}( (\\d+))?$`))
@@ -133,13 +156,43 @@ export function useCombatState() {
     return `${name} ${max + 1}`
   }
 
+  // Check if a statblock describes a minion (has "minion" in trait text)
+  function isMinion(statblock) {
+    if (!statblock?.Traits) return false
+    return statblock.Traits.some((t) => {
+      const text = `${t.Name ?? ''} ${t.Content ?? ''} ${t.Description ?? ''}`.toLowerCase()
+      return text.includes('minion')
+    })
+  }
+
+  // Find existing minion initiative for a creature base name
+  function findMinionInitiative(baseName) {
+    for (const c of state.combatants) {
+      // Match same base creature name (before the disambiguation number)
+      const cBase = c.name.replace(/\s+\d+$/, '')
+      if (cBase === baseName && c.initiative != null && isMinion(c.statblock)) {
+        return c.initiative
+      }
+    }
+    return null
+  }
+
   const add = (entry) => {
     const name = entry.type === 'lair' ? 'Lair Action' : disambiguate(entry.name)
+
     // PCs roll manually; everything else gets an auto-rolled initiative
-    const initiative =
-      entry.type === 'lair' ? 20 :
-      entry.type === 'pc'   ? null :
-      rollInitiative(entry.statblock)
+    // Minions share initiative with existing minions of same base name
+    let initiative
+    if (entry.type === 'lair') {
+      initiative = 20
+    } else if (entry.type === 'pc') {
+      initiative = null
+    } else if (isMinion(entry.statblock)) {
+      const existing = findMinionInitiative(entry.name)
+      initiative = existing ?? rollInitiative(entry.statblock)
+    } else {
+      initiative = rollInitiative(entry.statblock)
+    }
 
     const c = {
       id: uid(),

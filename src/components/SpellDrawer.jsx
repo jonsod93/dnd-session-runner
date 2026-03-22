@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { spellNameToSlug } from '../data/srdSpellNames'
+import { HighlightedText, RichContent } from './combat/StatblockPanel'
 
 const CACHE_PREFIX = 'mythranos-spell-v2-'
 
@@ -71,8 +72,8 @@ export function SpellDrawer({ spellName, onClose }) {
 
   return (
     <div
-      className="fixed bottom-0 inset-x-0 z-40 bg-[#1e1e1e] border-t border-white/[0.1] flex flex-col"
-      style={{ maxHeight: '38vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }}
+      className="fixed left-1/2 -translate-x-1/2 z-40 bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col"
+      style={{ bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }}
     >
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]">
@@ -110,7 +111,7 @@ function SpellMeta({ spell }) {
   const label  = level === 0
     ? `${school ?? ''} cantrip`.trim()
     : `${ordinal(level)}-level ${(school ?? '').toLowerCase()}`.trim()
-  return <span className="text-[11px] text-[#787774] italic">{label}</span>
+  return <span className="text-xs text-[#787774] italic">{label}</span>
 }
 
 function SpellBody({ spell }) {
@@ -126,17 +127,19 @@ function SpellBody({ spell }) {
       {props.length > 0 && (
         <div className="flex flex-wrap gap-x-6 gap-y-0.5 mb-3">
           {props.map((p, i) => (
-            <span key={i} className="text-[11px] text-[#787774]">{p}</span>
+            <span key={i} className="text-xs text-[#787774]"><HighlightedText text={p} /></span>
           ))}
         </div>
       )}
       {spell.desc && (
-        <p className="text-sm text-[#e6e6e6] leading-relaxed whitespace-pre-wrap">{spell.desc}</p>
+        <p className="text-sm text-[#787774] leading-relaxed whitespace-pre-wrap">
+          <RichContent text={spell.desc} />
+        </p>
       )}
       {spell.higher_level && (
         <p className="text-xs text-[#787774] leading-relaxed mt-3 whitespace-pre-wrap">
           <span className="font-medium text-[#e6e6e6]">At Higher Levels. </span>
-          {spell.higher_level}
+          <RichContent text={spell.higher_level} />
         </p>
       )}
     </div>
