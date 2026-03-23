@@ -227,11 +227,12 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
             </button>
           )
         }
-        // Color average damage numbers that precede a colored damage roll
-        // Pattern: "Hit: 5 (1d6+2) cold damage" — the "5 " before "(1d6+2)" gets colored
+        // Color average damage numbers that precede a dice roll
+        // Uses the damage type color if detected, otherwise defaults to white (#e6e6e6)
+        // Pattern: "Hit: 5 (1d6+2) cold damage" or "takes an extra 10 (3d6) damage"
         // Tolerates trailing markdown markers (__,*) between the number and dice roll
-        if (seg.type === 'text' && i + 1 < segments.length && rollColors[i + 1]?.color) {
-          const nextColor = rollColors[i + 1].color
+        if (seg.type === 'text' && i + 1 < segments.length && segments[i + 1].type === 'roll') {
+          const nextColor = rollColors[i + 1]?.color ?? '#e6e6e6'
           const m = seg.text.match(/^(.*?)(\d+)(\s*[_*]*)$/)
           if (m) {
             return (
