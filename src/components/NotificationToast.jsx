@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const DURATION = 3000
+const DURATION = 5000
 
 export function useNotifications() {
   const [items, setItems] = useState([])
@@ -21,7 +21,7 @@ export function NotificationToast({ items, onExpire }) {
   if (!items.length) return null
 
   return (
-    <div className="fixed top-4 right-4 z-[3000] flex flex-col gap-2 items-end pointer-events-none">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[3000] flex flex-col gap-2 items-center pointer-events-none">
       {items.map((item) => (
         <ToastItem key={item.id} item={item} onExpire={onExpire} />
       ))}
@@ -61,7 +61,7 @@ function ToastItem({ item, onExpire }) {
       className={[
         'pointer-events-auto border rounded-lg shadow-xl px-4 py-2.5 max-w-sm transition-all duration-300',
         colors[item.type] || colors.info,
-        visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4',
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2',
       ].join(' ')}
     >
       <div className="flex items-center gap-2">

@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { MapContainer, ImageOverlay, useMapEvents } from 'react-leaflet'
+import { useState, useCallback, useEffect } from 'react'
+import { MapContainer, ImageOverlay, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { usePOIs } from '../hooks/usePOIs'
@@ -25,7 +25,7 @@ const MAP_CONFIG = {
     [12960, 23040],
   ],
   center: [6480, 11520],
-  zoom: 0,
+  zoom: -2,
   minZoom: -2,
   maxZoom: 3,
 }
@@ -38,6 +38,22 @@ function MapClickHandler({ onRightClick }) {
       onRightClick([e.latlng.lat, e.latlng.lng])
     },
   })
+  return null
+}
+
+// Module-level: survives navigation but resets on page refresh
+let savedView = null
+
+function MapViewRestorer() {
+  const map = useMap()
+  useEffect(() => {
+    if (savedView) {
+      map.setView(savedView.center, savedView.zoom, { animate: false })
+    }
+    return () => {
+      savedView = { center: map.getCenter(), zoom: map.getZoom() }
+    }
+  }, [map])
   return null
 }
 
@@ -97,6 +113,7 @@ export default function MapPage() {
           zIndex={10}
         />
 
+        <MapViewRestorer />
         <MapClickHandler onRightClick={handleRightClick} />
 
         {pois.map((poi) => (

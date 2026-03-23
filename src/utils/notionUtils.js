@@ -25,10 +25,40 @@ export function blocksToPreview(blocks, maxLength = 400) {
     } else if (type === 'quote') {
       const text = richTextToPlain(block.quote?.rich_text)
       if (text) lines.push(text)
+    } else if (type === 'toggle') {
+      const text = richTextToPlain(block.toggle?.rich_text)
+      if (text) lines.push(text)
     }
   }
   const result = lines.join('\n')
   return result.length > maxLength ? result.slice(0, maxLength) + '…' : result
+}
+
+// Recursively fetch all blocks, expanding children of toggles, columns, etc.
+export async function fetchBlocksRecursive(pageId, maxDepth = 3) {
+  const topBlocks = await fetchPageBlocks(pageId)
+  return flattenBlocks(topBlocks, maxDepth)
+}
+
+async function flattenBlocks(blocks, depthLeft) {
+  const result = []
+  for (const block of blocks) {
+    result.push(block)
+    if (block.has_children && depthLeft > 0) {
+      const type = block.type
+      // Expand toggles, column_lists, columns, synced_block, and any other container
+      if (type === 'toggle' || type === 'column_list' || type === 'column' || type === 'synced_block') {
+        try {
+          const children = await fetchPageBlocks(block.id)
+          const nested = await flattenBlocks(children, depthLeft - 1)
+          result.push(...nested)
+        } catch {
+          // Skip blocks we can't fetch
+        }
+      }
+    }
+  }
+  return result
 }
 
 // Extract property values from a Notion page object
