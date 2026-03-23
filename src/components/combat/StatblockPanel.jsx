@@ -129,8 +129,8 @@ const KEY_TERM_RE = new RegExp(
     // "DC equals X" or "DC equals 10 + ..." patterns
     'DC\\s+equals\\s+[\\d+\\s+\\w\'\u2019]+' +
     '|' +
-    // "spell save DC"
-    '\\bspell\\s+save\\s+DC\\b' +
+    // "spell save DC [N]"
+    '\\bspell\\s+save\\s+DC(?:\\s+\\d+)?' +
     '|' +
     // AC followed by a number
     '\\bAC\\s+\\d+' +
@@ -284,8 +284,11 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName, enable
 function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
   const usageInfo = parseUsage(item)
   const content   = item.Content ?? item.Description
-  // Only enable spell name linking in spellcasting-related traits
-  const isSpellcastingSection = /spellcasting|innate spellcasting|shared spellcasting/i.test(item.Name ?? '')
+  // Enable spell name linking when the trait is about spellcasting
+  // Matches: "Spellcasting", "Innate Spellcasting", "Utility Spells", "Combat Spells", etc.
+  const nameOrContent = `${item.Name ?? ''} ${content ?? ''}`
+  const isSpellcastingSection = /spellcasting/i.test(item.Name ?? '')
+    || (/\bspells?\b/i.test(item.Name ?? '') && /can cast|spellcasting ability|spell save/i.test(nameOrContent))
   return (
     <div className="mb-3.5">
       <div className="flex items-start flex-wrap gap-x-1.5 gap-y-0.5">
