@@ -338,7 +338,7 @@ export default function CombatTracker() {
 
       {/* ── Spell drawer ─────────────────────────────────────────────────── */}
       {activeSpell && (
-        <SpellDrawer spellName={activeSpell} onClose={() => setActiveSpell(null)} />
+        <SpellDrawer spellName={activeSpell} onClose={() => setActiveSpell(null)} onRoll={handleRoll} />
       )}
 
       {/* ── Notifications ──────────────────────────────────────────────── */}

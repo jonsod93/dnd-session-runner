@@ -126,11 +126,23 @@ const KEY_TERM_RE = new RegExp(
     // DC X [Ability] saving throw (full phrase — ability name only captured with "saving throw")
     'DC\\s+\\d+(?:\\s+(?:' + ABILITY_NAMES + ')\\s+saving\\s+throw)?' +
     '|' +
+    // "DC equals X" or "DC equals 10 + ..." patterns
+    'DC\\s+equals\\s+[\\d+\\s+\\w\'\u2019]+' +
+    '|' +
+    // "spell save DC"
+    '\\bspell\\s+save\\s+DC\\b' +
+    '|' +
     // AC followed by a number
     '\\bAC\\s+\\d+' +
     '|' +
+    // Level references: "3rd level or lower", "4th level or higher", "Nth-level"
+    '\\b\\d+(?:st|nd|rd|th)[- ]level(?:\\s+(?:or\\s+(?:lower|higher|above|below)))?\\b' +
+    '|' +
     // Ability (Skill) check — e.g. "Wisdom (Perception) check"
     '\\b(?:' + ABILITY_NAMES + ')\\s*\\(\\s*(?:' + SKILL_NAMES + ')\\s*\\)(?:\\s+checks?)?' +
+    '|' +
+    // "ability check(s)", "ability score(s)", "spellcasting ability", "saving throw(s)"
+    '\\b(?:ability\\s+checks?|ability\\s+scores?|spellcasting\\s+ability|saving\\s+throws?)\\b' +
     '|' +
     // Standalone ability score names (full words only)
     '\\b(?:' + ABILITY_NAMES + ')\\b' +
@@ -164,9 +176,9 @@ function HighlightedText({ text }) {
 export { HighlightedText, RichContent, DAMAGE_TYPES }
 
 // ── Rich text renderer: dice rolls + spell names ──────────────────────────────
-function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
+function RichContent({ text, onRoll, onSpellClick, className, actionName, enableSpellLinks = true }) {
   if (!text) return null
-  const segments = parseRichText(text, SPELL_REGEX)
+  const segments = parseRichText(text, enableSpellLinks ? SPELL_REGEX : null)
 
   // Pre-compute damage type for each roll segment
   const rollColors = segments.map((seg, i) => {
@@ -272,6 +284,8 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName }) {
 function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
   const usageInfo = parseUsage(item)
   const content   = item.Content ?? item.Description
+  // Only enable spell name linking in spellcasting-related traits
+  const isSpellcastingSection = /spellcasting|innate spellcasting|shared spellcasting/i.test(item.Name ?? '')
   return (
     <div className="mb-3.5">
       <div className="flex items-start flex-wrap gap-x-1.5 gap-y-0.5">
@@ -292,7 +306,7 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
       </div>
       {content && (
         <p className="text-xs text-[#787774] leading-relaxed mt-0.5 whitespace-pre-wrap">
-          <RichContent text={content} onRoll={onRoll} onSpellClick={onSpellClick} actionName={item.Name} />
+          <RichContent text={content} onRoll={onRoll} onSpellClick={onSpellClick} actionName={item.Name} enableSpellLinks={isSpellcastingSection} />
         </p>
       )}
     </div>
