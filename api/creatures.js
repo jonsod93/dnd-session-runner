@@ -1,6 +1,6 @@
-const path = require('path')
-const fs = require('fs')
-const { put, list } = require('@vercel/blob')
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import { put, list } from '@vercel/blob'
 
 const BLOB_PATH = 'library.json'
 
@@ -21,8 +21,8 @@ async function writeBlob(data) {
 }
 
 function readBundledJson() {
-  const filePath = path.join(process.cwd(), 'src', 'data', 'improved-initiative.json')
-  const raw = fs.readFileSync(filePath, 'utf-8')
+  const filePath = join(process.cwd(), 'src', 'data', 'improved-initiative.json')
+  const raw = readFileSync(filePath, 'utf-8')
   return JSON.parse(raw)
 }
 
@@ -37,7 +37,7 @@ function checkAuth(req) {
 
 // ── Handler ─────────────────────────────────────────────────────────────────
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store')
 
   try {
