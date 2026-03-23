@@ -134,9 +134,9 @@ export default function CombatTracker() {
           setEditor({ mode: 'edit', entry })
         }}
         onNewStatblock={() => setEditor({ mode: 'new' })}
-        onDeleteStatblock={async (name) => {
+        onDeleteStatblock={async (name, _type, actualKey) => {
           try {
-            await library.deleteCreature(name)
+            await library.deleteCreature(name, actualKey)
             notifications.notify(`Deleted "${name}"`, 'success')
           } catch (err) {
             notifications.notify(`Failed to delete: ${err.message}`, 'error')
@@ -151,8 +151,8 @@ export default function CombatTracker() {
           title={editor.mode === 'new' ? 'New Statblock' : `Edit: ${editor.entry?.Name}`}
           onSave={async (statblock) => {
             try {
-              const originalName = editor.mode === 'edit' ? editor.entry?.Name : null
-              await library.saveCreature(statblock, originalName)
+              const originalKey = editor.mode === 'edit' ? editor.entry?._key : null
+              await library.saveCreature(statblock, originalKey)
               notifications.notify(
                 editor.mode === 'edit'
                   ? `Saved "${statblock.Name}"`

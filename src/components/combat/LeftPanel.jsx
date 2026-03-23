@@ -178,7 +178,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   )}
                   <button
                     className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-red-400 text-[10px] transition-all"
-                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc' }) }}
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc', key: entry._key }) }}
                     title="Delete statblock"
                   >
                     ✕
@@ -310,7 +310,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               </button>
               <button
                 onClick={() => {
-                  onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type)
+                  onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type, deleteConfirm.key)
                   setDeleteConfirm(null)
                 }}
                 className="text-xs bg-red-500/80 hover:bg-red-500 text-white font-medium rounded px-3 py-1.5 transition-colors"
