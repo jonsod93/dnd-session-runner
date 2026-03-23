@@ -10,6 +10,9 @@ const COLORS = [
   { value: '#a78bfa', label: 'Purple' },
   { value: '#fb923c', label: 'Orange' },
   { value: '#e6e6e6', label: 'White' },
+  { value: '#1a1a1a', label: 'Black', border: '#555' },
+  { value: '#5c3d2e', label: 'Dark Brown' },
+  { value: 'transparent', label: 'Transparent', border: '#787774', dashed: true },
 ]
 
 export function POIEditor({ poi, position, onSave, onCancel }) {
@@ -146,9 +149,14 @@ export function POIEditor({ poi, position, onSave, onCancel }) {
                   onClick={() => setColor(c.value)}
                   className={[
                     'w-6 h-6 rounded-full border-2 transition-all',
-                    color === c.value ? 'border-white scale-110' : 'border-transparent hover:border-white/40',
+                    color === c.value ? 'border-white scale-110' : 'hover:border-white/40',
+                    color !== c.value && !c.border ? 'border-transparent' : '',
                   ].join(' ')}
-                  style={{ backgroundColor: c.value }}
+                  style={{
+                    backgroundColor: c.value,
+                    borderColor: color === c.value ? undefined : c.border,
+                    borderStyle: c.dashed ? 'dashed' : undefined,
+                  }}
                   title={c.label}
                 />
               ))}
