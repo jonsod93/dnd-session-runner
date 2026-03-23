@@ -118,17 +118,22 @@ function detectHitDamageType(fullText) {
 
 // ── Highlight key terms in plain text ────────────────────────────────────────
 // Matches: DC X [Ability] saving throw, AC X, ability score names,
-// slash ranges like 30/120, and distance measurements
+// ability (skill) checks, slash ranges like 30/120, and distance measurements
+const ABILITY_NAMES = 'Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma'
+const SKILL_NAMES = 'Athletics|Acrobatics|Sleight of Hand|Stealth|Arcana|History|Investigation|Nature|Religion|Animal Handling|Insight|Medicine|Perception|Survival|Deception|Intimidation|Performance|Persuasion'
 const KEY_TERM_RE = new RegExp(
   '(' +
-    // DC X [Ability] saving throw (full phrase)
-    'DC\\s+\\d+(?:\\s+(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma))?(?:\\s+saving\\s+throw)?' +
+    // DC X [Ability] saving throw (full phrase — ability name only captured with "saving throw")
+    'DC\\s+\\d+(?:\\s+(?:' + ABILITY_NAMES + ')\\s+saving\\s+throw)?' +
     '|' +
     // AC followed by a number
     '\\bAC\\s+\\d+' +
     '|' +
+    // Ability (Skill) check — e.g. "Wisdom (Perception) check"
+    '\\b(?:' + ABILITY_NAMES + ')\\s*\\(\\s*(?:' + SKILL_NAMES + ')\\s*\\)(?:\\s+checks?)?' +
+    '|' +
     // Standalone ability score names (full words only)
-    '\\b(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\\b' +
+    '\\b(?:' + ABILITY_NAMES + ')\\b' +
     '|' +
     // Slash ranges like 30/120 ft, 80/320 ft.
     '\\b\\d+\\/\\d+(?:\\s*(?:ft\\.?|feet|foot|miles?))?' +
