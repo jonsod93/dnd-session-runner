@@ -4,7 +4,7 @@ import { HighlightedText, RichContent } from './combat/StatblockPanel'
 
 const CACHE_PREFIX = 'mythranos-spell-v2-'
 
-export function SpellDrawer({ spellName, onClose }) {
+export function SpellDrawer({ spellName, onClose, onRoll }) {
   const [spell,   setSpell]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
@@ -99,7 +99,7 @@ export function SpellDrawer({ spellName, onClose }) {
         {error && (
           <p className="text-red-400/70 text-sm">{error}</p>
         )}
-        {spell && <SpellBody spell={spell} />}
+        {spell && <SpellBody spell={spell} onRoll={onRoll} />}
       </div>
     </div>
   )
@@ -114,7 +114,7 @@ function SpellMeta({ spell }) {
   return <span className="text-xs text-[#787774] italic">{label}</span>
 }
 
-function SpellBody({ spell }) {
+function SpellBody({ spell, onRoll }) {
   const props = [
     spell.casting_time && `Casting Time: ${spell.casting_time}`,
     spell.range        && `Range: ${spell.range}`,
@@ -133,13 +133,13 @@ function SpellBody({ spell }) {
       )}
       {spell.desc && (
         <p className="text-sm text-[#787774] leading-relaxed whitespace-pre-wrap">
-          <RichContent text={spell.desc} />
+          <RichContent text={spell.desc} onRoll={onRoll} enableSpellLinks={false} actionName={spell.name} />
         </p>
       )}
       {spell.higher_level && (
         <p className="text-xs text-[#787774] leading-relaxed mt-3 whitespace-pre-wrap">
           <span className="font-medium text-[#e6e6e6]">At Higher Levels. </span>
-          <RichContent text={spell.higher_level} />
+          <RichContent text={spell.higher_level} onRoll={onRoll} enableSpellLinks={false} actionName={spell.name} />
         </p>
       )}
     </div>
