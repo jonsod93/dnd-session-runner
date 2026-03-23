@@ -32,7 +32,7 @@ export default function Navigation() {
                 'flex items-center px-3 text-sm border-b-2 transition-colors duration-150',
                 isActive
                   ? 'border-gold-400 text-[#e6e6e6]'
-                  : 'border-transparent text-[#787774] hover:text-[#e6e6e6]',
+                  : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
               ].join(' ')
             }
           >
@@ -46,7 +46,7 @@ export default function Navigation() {
       {/* Logout */}
       <button
         onClick={logout}
-        className="flex items-center text-xs text-[#787774] hover:text-[#e6e6e6] transition-colors"
+        className="flex items-center text-sm text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
       >
         Sign Out
       </button>

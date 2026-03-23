@@ -138,7 +138,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-[#e6e6e6]">{poi.name}</span>
                 {preview?.types?.length > 0 && (
-                  <span className="text-[10px] text-[#787774] border border-white/[0.1] px-1.5 py-0.5 rounded">
+                  <span className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded">
                     {preview.types[0]}
                   </span>
                 )}
@@ -148,20 +148,20 @@ export function POIMarker({ poi, onEdit, onRemove }) {
             {/* Body */}
             <div className="px-3 py-2">
               {loading && (
-                <p className="text-[11px] text-[#787774] italic">Loading preview...</p>
+                <p className="text-xs text-[#b8b5b0] italic">Loading preview...</p>
               )}
               {!loading && preview?.blurb && (
-                <p className="text-[11px] text-[#787774] leading-relaxed line-clamp-4">
+                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">
                   {preview.blurb}
                 </p>
               )}
               {!loading && preview?.content && !preview.blurb && (
-                <p className="text-[11px] text-[#787774] leading-relaxed line-clamp-4">
+                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">
                   {preview.content}
                 </p>
               )}
               {!loading && !preview && !poi.notionPageId && (
-                <p className="text-[11px] text-[#787774] italic">No linked page</p>
+                <p className="text-xs text-[#9a9894] italic">No linked page</p>
               )}
             </div>
 
@@ -173,12 +173,12 @@ export function POIMarker({ poi, onEdit, onRemove }) {
                     href={notionPageUrl(poi.notionPageId)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] text-gold-400 hover:text-gold-300 transition-colors"
+                    className="text-xs text-gold-400 hover:text-gold-300 transition-colors"
                   >
                     View page
                   </a>
                   <button
-                    className="text-[10px] text-[#787774] hover:text-[#e6e6e6] transition-colors"
+                    className="text-xs text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
                     onClick={() => setShowFullInfo(true)}
                   >
                     Full info
@@ -187,13 +187,13 @@ export function POIMarker({ poi, onEdit, onRemove }) {
               )}
               <div className="flex-1" />
               <button
-                className="text-[10px] text-[#787774] hover:text-[#e6e6e6] transition-colors"
+                className="text-xs text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
                 onClick={() => { onEdit?.(poi) }}
               >
                 Edit
               </button>
               <button
-                className="text-[10px] text-[#787774] hover:text-red-400 transition-colors"
+                className="text-xs text-[#9a9894] hover:text-red-400 transition-colors"
                 onClick={() => { onRemove?.(poi.id) }}
               >
                 Delete
@@ -279,7 +279,7 @@ function LocationInfoModal({ poi, preview, onClose }) {
             <div className="flex items-center gap-3">
               <h2 className="text-base font-medium text-[#e6e6e6]">{poi.name}</h2>
               {preview?.types?.map((t) => (
-                <span key={t} className="text-[10px] text-[#787774] border border-white/[0.1] px-1.5 py-0.5 rounded">
+                <span key={t} className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded">
                   {t}
                 </span>
               ))}
@@ -290,13 +290,13 @@ function LocationInfoModal({ poi, preview, onClose }) {
                   href={notionPageUrl(poi.notionPageId)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-gold-400 hover:text-gold-300 transition-colors"
+                  className="text-sm text-gold-400 hover:text-gold-300 transition-colors"
                 >
                   Open in Notion
                 </a>
               )}
               <button
-                className="text-[#787774] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+                className="text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
                 onClick={onClose}
               >
                 ✕
@@ -306,7 +306,7 @@ function LocationInfoModal({ poi, preview, onClose }) {
 
           {/* Blurb */}
           {preview?.blurb && (
-            <p className="text-xs text-[#787774] mt-2 italic">{preview.blurb}</p>
+            <p className="text-sm text-[#b8b5b0] mt-2 italic">{preview.blurb}</p>
           )}
 
           {/* Relation badges */}
@@ -320,12 +320,12 @@ function LocationInfoModal({ poi, preview, onClose }) {
                   if (!items?.length) return null
                   return (
                     <div key={key} className="flex items-start gap-1.5">
-                      <span className="text-[10px] text-[#787774] uppercase tracking-wider mt-0.5 shrink-0">{label}:</span>
+                      <span className="text-xs text-[#9a9894] uppercase tracking-wider mt-0.5 shrink-0">{label}:</span>
                       <div className="flex flex-wrap gap-1">
                         {items.map((item) => (
                           <span
                             key={item.id}
-                            className="text-[10px] text-[#e6e6e6] bg-white/[0.06] border border-white/[0.08] px-1.5 py-0.5 rounded"
+                            className="text-xs text-[#e6e6e6] bg-white/[0.06] border border-white/[0.08] px-1.5 py-0.5 rounded"
                           >
                             {item.title}
                           </span>
@@ -342,15 +342,15 @@ function LocationInfoModal({ poi, preview, onClose }) {
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {loading && (
-            <p className="text-sm text-[#787774] italic">Loading page content...</p>
+            <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
           )}
           {!loading && fullContent && (
-            <div className="text-sm text-[#787774] leading-relaxed whitespace-pre-wrap">
+            <div className="text-sm text-[#b8b5b0] leading-relaxed whitespace-pre-wrap">
               {fullContent}
             </div>
           )}
           {!loading && !fullContent && (
-            <p className="text-sm text-[#787774] italic">No content available.</p>
+            <p className="text-sm text-[#b8b5b0] italic">No content available.</p>
           )}
         </div>
       </div>

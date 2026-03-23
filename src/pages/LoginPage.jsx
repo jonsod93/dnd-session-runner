@@ -18,11 +18,11 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-xl font-bold text-[#e6e6e6] text-center mb-1">Mythranos</h1>
-        <p className="text-xs text-[#787774] text-center mb-8">D&D Session Runner</p>
+        <p className="text-sm text-[#9a9894] text-center mb-8">D&D Session Runner</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs text-[#787774] mb-1.5">Username</label>
+            <label className="block text-sm text-[#9a9894] mb-1.5">Username</label>
             <input
               type="text"
               value={username}
@@ -33,7 +33,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-xs text-[#787774] mb-1.5">Password</label>
+            <label className="block text-sm text-[#9a9894] mb-1.5">Password</label>
             <input
               type="password"
               value={password}

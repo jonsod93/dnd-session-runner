@@ -66,9 +66,9 @@ function PropLine({ label, value, colorDamageTypes }) {
   if (!value) return null
   const text = Array.isArray(value) ? value.join(', ') : value
   return (
-    <p className="text-xs text-[#e6e6e6] leading-relaxed">
+    <p className="text-sm text-[#e6e6e6] leading-relaxed">
       <span className="font-medium text-[#e6e6e6]">{label} </span>
-      {colorDamageTypes ? <ColoredDamageText text={text} /> : <span className="text-[#787774]">{text}</span>}
+      {colorDamageTypes ? <ColoredDamageText text={text} /> : <span className="text-[#b8b5b0]">{text}</span>}
     </p>
   )
 }
@@ -95,7 +95,7 @@ function ColoredDamageText({ text }) {
     lastIdx = re.lastIndex
   }
   if (lastIdx < text.length) parts.push(<span key={lastIdx}>{text.slice(lastIdx)}</span>)
-  return <span className="text-[#787774]">{parts.length > 0 ? parts : text}</span>
+  return <span className="text-[#b8b5b0]">{parts.length > 0 ? parts : text}</span>
 }
 
 // Detect the damage type that follows a dice expression in the text
@@ -182,7 +182,7 @@ function HighlightedText({ text }) {
   while ((m = re.exec(text)) !== null) {
     if (m.index > lastIdx) parts.push(<span key={lastIdx}>{text.slice(lastIdx, m.index)}</span>)
     parts.push(
-      <span key={m.index} className="text-[#c8c8c8] font-semibold">{m[0]}</span>
+      <span key={m.index} className="text-[#e6e6e6] font-semibold">{m[0]}</span>
     )
     lastIdx = re.lastIndex
   }
@@ -314,7 +314,7 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
           {item.Name}
         </span>
         {item.Usage && (
-          <span className="text-xs text-[#787774] italic">({item.Usage})</span>
+          <span className="text-sm text-[#9a9894] italic">({item.Usage})</span>
         )}
         {usageInfo && (
           <UsageBoxes
@@ -326,7 +326,7 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
         )}
       </div>
       {content && (
-        <p className="text-xs text-[#787774] leading-relaxed mt-0.5 whitespace-pre-wrap">
+        <p className="text-sm text-[#b8b5b0] leading-relaxed mt-0.5 whitespace-pre-wrap">
           <RichContent text={content} onRoll={onRoll} onSpellClick={onSpellClick} actionName={item.Name} enableSpellLinks={isSpellcastingSection} />
         </p>
       )}
@@ -338,7 +338,7 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
             {groups.map((g) => (
               <div key={g.suffix} className="flex items-center gap-1">
-                <span className="text-[11px] text-[#787774]">{g.label}</span>
+                <span className="text-xs text-[#9a9894]">{g.label}</span>
                 <UsageBoxes
                   trackKey={`${item.Name}::${g.suffix}`}
                   count={g.count}
@@ -397,13 +397,13 @@ function LairActionBody({ combatants, customLairActions, onAddCustomLairAction, 
       <div className="mb-4">
         <p className="label-section mb-2">Custom</p>
         {customLairActions.length === 0 && (
-          <p className="text-[11px] text-[#787774] mb-2">No custom lair actions added.</p>
+          <p className="text-xs text-[#9a9894] mb-2">No custom lair actions added.</p>
         )}
         {customLairActions.map((action, i) => (
           <div key={i} className="flex items-start gap-2 mb-2">
-            <p className="text-xs text-[#e6e6e6] leading-relaxed flex-1">{action}</p>
+            <p className="text-sm text-[#e6e6e6] leading-relaxed flex-1">{action}</p>
             <button
-              className="text-[#787774] hover:text-red-400 text-xs shrink-0 mt-0.5"
+              className="text-[#9a9894] hover:text-red-400 text-sm shrink-0 mt-0.5"
               onClick={() => onRemoveCustomLairAction(i)}
             >
               ✕
@@ -420,9 +420,9 @@ function LairActionBody({ combatants, customLairActions, onAddCustomLairAction, 
           {actions.map((action, i) => (
             <div key={i} className="mb-2.5">
               {action.Name && (
-                <p className="text-xs font-semibold text-[#e6e6e6] leading-relaxed">{action.Name}</p>
+                <p className="text-sm font-semibold text-[#e6e6e6] leading-relaxed">{action.Name}</p>
               )}
-              <p className="text-xs text-[#787774] leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-[#b8b5b0] leading-relaxed whitespace-pre-wrap">
                 {action.Content ?? action.Description}
               </p>
             </div>
@@ -431,7 +431,7 @@ function LairActionBody({ combatants, customLairActions, onAddCustomLairAction, 
       ))}
 
       {grouped.length === 0 && customLairActions.length === 0 && (
-        <p className="text-[#787774] text-sm text-center mt-4">
+        <p className="text-[#b8b5b0] text-sm text-center mt-4">
           No lair actions found in current combat.
         </p>
       )}
@@ -455,12 +455,12 @@ function AddCustomLairAction({ onAdd }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Add custom lair action…"
-        className="flex-1 bg-transparent border-b border-white/[0.1] py-1 text-xs text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+        className="flex-1 bg-transparent border-b border-white/[0.1] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
       />
       <button
         type="submit"
         disabled={!text.trim()}
-        className="text-xs text-[#787774] hover:text-[#e6e6e6] disabled:opacity-30 px-2 py-1 rounded transition-colors"
+        className="text-sm text-[#9a9894] hover:text-[#e6e6e6] disabled:opacity-30 px-2 py-1 rounded transition-colors"
       >
         +
       </button>
@@ -483,7 +483,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
             </h3>
             <button
               onClick={onClear}
-              className="text-[#787774] hover:text-[#e6e6e6] shrink-0 text-sm leading-none transition-colors"
+              className="text-[#9a9894] hover:text-[#e6e6e6] shrink-0 text-sm leading-none transition-colors"
               title="Clear view"
             >
               ✕
@@ -497,7 +497,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
       {/* Body */}
       {!combatant ? (
         <div className="flex-1 flex items-center justify-center px-6 text-center">
-          <p className="text-[#787774] text-sm leading-relaxed">
+          <p className="text-[#b8b5b0] text-sm leading-relaxed">
             Click on a combatant row to view statblock details.
           </p>
         </div>
@@ -510,7 +510,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
         />
       ) : !combatant.statblock ? (
         <div className="flex-1 flex items-center justify-center px-6 text-center">
-          <p className="text-[#787774] text-sm">No statblock available.</p>
+          <p className="text-[#b8b5b0] text-sm">No statblock available.</p>
         </div>
       ) : (
         <StatblockBody
@@ -550,34 +550,34 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
       <div className="shrink-0 px-4 py-3 bg-[#1e1e1e] border-b border-white/[0.06]">
         {/* Type & CR */}
         <div className="flex items-baseline justify-between gap-2 mb-0.5">
-          <p className="text-xs text-[#787774] italic">{sb.Type}</p>
+          <p className="text-sm text-[#9a9894] italic">{sb.Type}</p>
           {sb.ChallengeRating && (
-            <span className="text-xs text-[#787774] font-medium shrink-0">CR {sb.ChallengeRating}</span>
+            <span className="text-sm text-[#9a9894] font-medium shrink-0">CR {sb.ChallengeRating}</span>
           )}
         </div>
         {sb.Source && (
-          <p className="text-[11px] text-[#787774]/60 mb-3">Source: {sb.Source}</p>
+          <p className="text-xs text-[#787774]/60 mb-3">Source: {sb.Source}</p>
         )}
 
         {/* Core stats */}
         <div className="flex flex-wrap gap-x-4 gap-y-0.5 mb-2">
           {sb.AC?.Value != null && (
-            <span className="text-xs">
-              <span className="text-[#787774]">AC </span>
+            <span className="text-sm">
+              <span className="text-[#9a9894]">AC </span>
               <span className="font-medium text-[#e6e6e6]">{sb.AC.Value}</span>
-              {sb.AC.Notes ? <span className="text-[#787774]"> ({sb.AC.Notes})</span> : null}
+              {sb.AC.Notes ? <span className="text-[#b8b5b0]"> ({sb.AC.Notes})</span> : null}
             </span>
           )}
           {sb.HP?.Value != null && (
-            <span className="text-xs">
-              <span className="text-[#787774]">HP </span>
+            <span className="text-sm">
+              <span className="text-[#9a9894]">HP </span>
               <span className="font-medium text-[#e6e6e6]">{sb.HP.Value}</span>
-              {sb.HP.Notes ? <span className="text-[#787774]"> ({sb.HP.Notes})</span> : null}
+              {sb.HP.Notes ? <span className="text-[#b8b5b0]"> ({sb.HP.Notes})</span> : null}
             </span>
           )}
           {sb.Speed && (
-            <span className="text-xs">
-              <span className="text-[#787774]">Speed </span>
+            <span className="text-sm">
+              <span className="text-[#9a9894]">Speed </span>
               <span className="text-[#e6e6e6]">{sb.Speed}</span>
             </span>
           )}
@@ -591,10 +591,10 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
               {ABILITIES.map((a) => (
                 <div key={a}>
                   <div className="label-section mb-0.5">{a}</div>
-                  <div className="text-[#e6e6e6] font-medium font-mono text-xs">
+                  <div className="text-[#e6e6e6] font-medium font-mono text-sm">
                     {sb.Abilities[a]}
                   </div>
-                  <div className="text-[#787774] text-[11px]">
+                  <div className="text-[#9a9894] text-xs">
                     ({formatMod(abilityMod(sb.Abilities[a]))})
                   </div>
                 </div>
@@ -611,9 +611,9 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
       <div className="space-y-1 mb-2">
         {/* Rollable saving throws */}
         {sb.Saves?.length > 0 && (
-          <p className="text-xs text-[#e6e6e6] leading-relaxed">
+          <p className="text-sm text-[#e6e6e6] leading-relaxed">
             <span className="font-medium text-[#e6e6e6]">Saving Throws </span>
-            <span className="text-[#787774]">
+            <span className="text-[#b8b5b0]">
               {sb.Saves.map((s, i) => (
                 <span key={s.Name}>
                   {i > 0 && ', '}
@@ -631,9 +631,9 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
         )}
         {/* Rollable skills */}
         {sb.Skills?.length > 0 && (
-          <p className="text-xs text-[#e6e6e6] leading-relaxed">
+          <p className="text-sm text-[#e6e6e6] leading-relaxed">
             <span className="font-medium text-[#e6e6e6]">Skills </span>
-            <span className="text-[#787774]">
+            <span className="text-[#b8b5b0]">
               {sb.Skills.map((s, i) => (
                 <span key={s.Name}>
                   {i > 0 && ', '}
@@ -673,7 +673,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
       {sb.Description && (
         <>
           <Rule />
-          <p className="text-xs text-[#787774] italic leading-relaxed">{sb.Description}</p>
+          <p className="text-sm text-[#b8b5b0] italic leading-relaxed">{sb.Description}</p>
         </>
       )}
       <div className="h-4" />

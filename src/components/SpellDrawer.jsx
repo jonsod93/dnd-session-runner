@@ -85,7 +85,7 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
         </div>
         <button
           onClick={onClose}
-          className="text-[#787774] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+          className="text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
         >
           ✕
         </button>
@@ -94,7 +94,7 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
         {loading && (
-          <p className="text-[#787774] text-sm">Loading spell data…</p>
+          <p className="text-[#b8b5b0] text-sm">Loading spell data…</p>
         )}
         {error && (
           <p className="text-red-400/70 text-sm">{error}</p>
@@ -111,7 +111,7 @@ function SpellMeta({ spell }) {
   const label  = level === 0
     ? `${school ?? ''} cantrip`.trim()
     : `${ordinal(level)}-level ${(school ?? '').toLowerCase()}`.trim()
-  return <span className="text-xs text-[#787774] italic">{label}</span>
+  return <span className="text-sm text-[#9a9894] italic">{label}</span>
 }
 
 function SpellBody({ spell, onRoll }) {
@@ -127,17 +127,17 @@ function SpellBody({ spell, onRoll }) {
       {props.length > 0 && (
         <div className="flex flex-wrap gap-x-6 gap-y-0.5 mb-3">
           {props.map((p, i) => (
-            <span key={i} className="text-xs text-[#787774]"><HighlightedText text={p} /></span>
+            <span key={i} className="text-sm text-[#9a9894]"><HighlightedText text={p} /></span>
           ))}
         </div>
       )}
       {spell.desc && (
-        <p className="text-sm text-[#787774] leading-relaxed whitespace-pre-wrap">
+        <p className="text-sm text-[#b8b5b0] leading-relaxed whitespace-pre-wrap">
           <RichContent text={spell.desc} onRoll={onRoll} enableSpellLinks={false} actionName={spell.name} />
         </p>
       )}
       {spell.higher_level && (
-        <p className="text-xs text-[#787774] leading-relaxed mt-3 whitespace-pre-wrap">
+        <p className="text-sm text-[#b8b5b0] leading-relaxed mt-3 whitespace-pre-wrap">
           <span className="font-medium text-[#e6e6e6]">At Higher Levels. </span>
           <RichContent text={spell.higher_level} onRoll={onRoll} enableSpellLinks={false} actionName={spell.name} />
         </p>

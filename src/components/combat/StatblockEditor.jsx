@@ -64,7 +64,7 @@ export function StatblockEditor({ initial, onSave, onCancel, title }) {
         </button>
         <button
           onClick={onCancel}
-          className="text-xs text-[#787774] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-3 py-1.5 transition-colors"
+          className="text-sm text-[#9a9894] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-3 py-1.5 transition-colors"
         >
           Cancel
         </button>
