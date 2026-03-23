@@ -46,9 +46,28 @@ export function notionPageUrl(pageId) {
   return `https://www.notion.so/${pageId.replace(/-/g, '')}`
 }
 
+// Helper: call Notion API via our proxy
+// In dev mode, Vite proxy handles /api/notion/* directly.
+// In production, we use /api/notion with X-Notion-Path header.
+async function notionFetch(notionPath, options = {}) {
+  const isDev = import.meta.env.DEV
+  if (isDev) {
+    // Vite proxy rewrites /api/notion/* to api.notion.com/*
+    return fetch(`/api/notion/${notionPath}`, options)
+  }
+  // Production: single serverless function with path in header
+  return fetch('/api/notion', {
+    ...options,
+    headers: {
+      ...options.headers,
+      'X-Notion-Path': notionPath,
+    },
+  })
+}
+
 // Search the Locations database via the proxy
 export async function searchLocations(query) {
-  const res = await fetch(`/api/notion/v1/databases/${LOCATIONS_DB_ID}/query`, {
+  const res = await notionFetch(`v1/databases/${LOCATIONS_DB_ID}/query`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -69,7 +88,7 @@ export async function searchLocations(query) {
 
 // Fetch a single page's blocks for preview
 export async function fetchPageBlocks(pageId) {
-  const res = await fetch(`/api/notion/v1/blocks/${pageId}/children?page_size=30`)
+  const res = await notionFetch(`v1/blocks/${pageId}/children?page_size=30`)
   if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
   const data = await res.json()
   return data.results ?? []
@@ -77,7 +96,7 @@ export async function fetchPageBlocks(pageId) {
 
 // Fetch a single page's properties
 export async function fetchPageProps(pageId) {
-  const res = await fetch(`/api/notion/v1/pages/${pageId}`)
+  const res = await notionFetch(`v1/pages/${pageId}`)
   if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
   return extractPageProps(await res.json())
 }
