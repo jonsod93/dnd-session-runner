@@ -216,6 +216,7 @@ function ConditionMenu({ anchor, onAdd, onClose }) {
       ref={menuRef}
       className="fixed z-50 bg-[#252525] border border-white/[0.1] rounded-lg shadow-xl overflow-y-auto"
       style={{ width: MENU_W, ...posStyle }}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="py-1">
         {CONDITIONS.map((c) => (
