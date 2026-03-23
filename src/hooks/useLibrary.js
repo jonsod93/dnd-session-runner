@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import rawData from '../data/improved-initiative.json'
 
 function safeParse(val) {
@@ -17,12 +17,22 @@ function creatureKey(name) {
 
 // ── Persistence helpers ─────────────────────────────────────────────────────
 const IS_DEV = import.meta.env.DEV
+const LS_CACHE_KEY = 'mythranos:creature-cache'
 const LS_EDITS_KEY = 'mythranos:creature-edits'
 const LS_DELETES_KEY = 'mythranos:creature-deletes'
 
-// Dev mode: write to the JSON file on disk via Vite dev-server plugin
-async function apiSaveCreature(statblock, oldKey) {
-  if (!IS_DEV) return { ok: true, local: true }
+// Auth token for write operations (set via VITE_API_SECRET env var)
+const API_SECRET = import.meta.env.VITE_API_SECRET || ''
+
+function authHeaders() {
+  const headers = { 'Content-Type': 'application/json' }
+  if (API_SECRET) headers['Authorization'] = `Bearer ${API_SECRET}`
+  return headers
+}
+
+// ── Dev mode: Vite plugin endpoints ─────────────────────────────────────────
+
+async function devSaveCreature(statblock, oldKey) {
   const res = await fetch('/api/library/creature', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -33,8 +43,7 @@ async function apiSaveCreature(statblock, oldKey) {
   return data
 }
 
-async function apiDeleteCreature(name) {
-  if (!IS_DEV) return { ok: true, local: true }
+async function devDeleteCreature(name) {
   const res = await fetch('/api/library/creature', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
@@ -45,84 +54,145 @@ async function apiDeleteCreature(name) {
   return data
 }
 
-// Production mode: persist edits and deletions to localStorage
-function loadLocalEdits() {
+// ── Production mode: Vercel serverless API endpoints ────────────────────────
+
+async function prodSaveCreature(statblock, oldKey) {
+  const res = await fetch('/api/creatures', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ statblock, key: oldKey || undefined }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to save creature')
+  return data
+}
+
+async function prodDeleteCreature(name) {
+  const res = await fetch('/api/creatures', {
+    method: 'DELETE',
+    headers: authHeaders(),
+    body: JSON.stringify({ name }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to delete creature')
+  return data
+}
+
+// ── localStorage cache (production only) ────────────────────────────────────
+
+function loadCachedCreatures() {
   try {
-    const raw = localStorage.getItem(LS_EDITS_KEY)
-    return raw ? JSON.parse(raw) : {} // { [creatureKey]: statblock }
+    const raw = localStorage.getItem(LS_CACHE_KEY)
+    return raw ? JSON.parse(raw) : null
   } catch {
-    return {}
+    return null
   }
 }
 
-function loadLocalDeletes() {
+function saveCachedCreatures(data) {
   try {
-    const raw = localStorage.getItem(LS_DELETES_KEY)
-    return raw ? JSON.parse(raw) : [] // [creatureKey, ...]
+    localStorage.setItem(LS_CACHE_KEY, JSON.stringify(data))
   } catch {
-    return []
+    // localStorage full or unavailable - ignore
   }
 }
 
-function saveLocalEdit(key, statblock, oldKey) {
-  const edits = loadLocalEdits()
-  if (oldKey && oldKey !== key) delete edits[oldKey]
-  edits[key] = statblock
-  localStorage.setItem(LS_EDITS_KEY, JSON.stringify(edits))
-  // If this creature was previously deleted, un-delete it
-  const deletes = loadLocalDeletes().filter((k) => k !== key)
-  localStorage.setItem(LS_DELETES_KEY, JSON.stringify(deletes))
+// ── One-time migration: replay old localStorage edits into the API ──────────
+
+async function migrateLocalEdits() {
+  const editsRaw = localStorage.getItem(LS_EDITS_KEY)
+  const deletesRaw = localStorage.getItem(LS_DELETES_KEY)
+  const edits = editsRaw ? JSON.parse(editsRaw) : {}
+  const deletes = deletesRaw ? JSON.parse(deletesRaw) : []
+
+  const hasEdits = Object.keys(edits).length > 0
+  const hasDeletes = deletes.length > 0
+  if (!hasEdits && !hasDeletes) return
+
+  console.log('[useLibrary] Migrating localStorage edits to server...')
+
+  // Replay edits
+  for (const [, statblock] of Object.entries(edits)) {
+    try {
+      await prodSaveCreature(statblock, null)
+    } catch (err) {
+      console.warn('[useLibrary] Migration: failed to save', statblock.Name, err)
+    }
+  }
+
+  // Replay deletes
+  for (const key of deletes) {
+    const name = key.replace(/^Creatures\./, '')
+    try {
+      await prodDeleteCreature(name)
+    } catch (err) {
+      console.warn('[useLibrary] Migration: failed to delete', name, err)
+    }
+  }
+
+  // Clear old keys
+  localStorage.removeItem(LS_EDITS_KEY)
+  localStorage.removeItem(LS_DELETES_KEY)
+  console.log('[useLibrary] Migration complete')
 }
 
-function saveLocalDelete(key) {
-  // Add to deletes list
-  const deletes = loadLocalDeletes()
-  if (!deletes.includes(key)) deletes.push(key)
-  localStorage.setItem(LS_DELETES_KEY, JSON.stringify(deletes))
-  // Remove from edits if present
-  const edits = loadLocalEdits()
-  delete edits[key]
-  localStorage.setItem(LS_EDITS_KEY, JSON.stringify(edits))
+// ── Build a monster Map from raw server/bundled data ────────────────────────
+
+function buildMonsterMap(sourceData) {
+  const map = new Map()
+  Object.entries(sourceData)
+    .filter(([k]) => k.startsWith('Creatures.'))
+    .forEach(([k, v]) => {
+      map.set(k, {
+        ...v,
+        _libType: 'monster',
+        _key: k,
+        ChallengeRating: v.ChallengeRating ?? v.Challenge ?? null,
+      })
+    })
+  return map
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useLibrary() {
-  // Mutable copy of monsters, seeded from the static import + localStorage overrides
+  // Seed from localStorage cache (instant) or bundled JSON (fallback)
   const [monsterMap, setMonsterMap] = useState(() => {
-    const map = new Map()
-
-    // 1. Load bundled creatures
-    Object.entries(rawData)
-      .filter(([k]) => k.startsWith('Creatures.'))
-      .forEach(([k, v]) => {
-        map.set(k, {
-          ...v,
-          _libType: 'monster',
-          _key: k,
-          ChallengeRating: v.ChallengeRating ?? v.Challenge ?? null,
-        })
-      })
-
-    // 2. In production, apply localStorage edits and deletions
     if (!IS_DEV) {
-      const edits = loadLocalEdits()
-      for (const [k, v] of Object.entries(edits)) {
-        map.set(k, {
-          ...v,
-          _libType: 'monster',
-          _key: k,
-          ChallengeRating: v.ChallengeRating ?? v.Challenge ?? null,
-        })
-      }
-      const deletes = loadLocalDeletes()
-      for (const k of deletes) {
-        map.delete(k)
+      const cached = loadCachedCreatures()
+      if (cached) return buildMonsterMap(cached)
+    }
+    return buildMonsterMap(rawData)
+  })
+
+  const [isLoading, setIsLoading] = useState(!IS_DEV)
+  const hasFetched = useRef(false)
+
+  // In production, fetch fresh data from the server on mount
+  useEffect(() => {
+    if (IS_DEV || hasFetched.current) return
+    hasFetched.current = true
+
+    async function sync() {
+      try {
+        // Migrate any old localStorage edits first
+        await migrateLocalEdits()
+
+        const res = await fetch('/api/creatures')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+
+        setMonsterMap(buildMonsterMap(data))
+        saveCachedCreatures(data)
+      } catch (err) {
+        console.warn('[useLibrary] Failed to sync from server, using cached data:', err.message)
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    return map
-  })
+    sync()
+  }, [])
 
   const monsters = useMemo(
     () => [...monsterMap.values()].sort((a, b) => a.Name.localeCompare(b.Name)),
@@ -149,7 +219,7 @@ export function useLibrary() {
       .sort((a, b) => a.Name.localeCompare(b.Name))
   }, [])
 
-  // ── Add or update a creature (writes to JSON file) ──────────────────────────
+  // ── Add or update a creature ──────────────────────────────────────────────
 
   const saveCreature = useCallback(async (statblock, originalName) => {
     const oldKey = originalName ? creatureKey(originalName) : null
@@ -157,7 +227,6 @@ export function useLibrary() {
     // Optimistic local update
     setMonsterMap((prev) => {
       const next = new Map(prev)
-      // Remove old key if renaming
       if (oldKey && oldKey !== creatureKey(statblock.Name)) {
         next.delete(oldKey)
       }
@@ -174,15 +243,15 @@ export function useLibrary() {
     // Strip internal fields before persisting
     const { _libType, _key, _custom, ...clean } = statblock
 
-    // Persist: dev writes to JSON file, production writes to localStorage
+    // Persist
     if (IS_DEV) {
-      await apiSaveCreature(clean, oldKey)
+      await devSaveCreature(clean, oldKey)
     } else {
-      saveLocalEdit(creatureKey(statblock.Name), clean, oldKey)
+      await prodSaveCreature(clean, oldKey)
     }
   }, [])
 
-  // ── Delete a creature (writes to JSON file) ────────────────────────────────
+  // ── Delete a creature ─────────────────────────────────────────────────────
 
   const deleteCreature = useCallback(async (name) => {
     const key = creatureKey(name)
@@ -194,15 +263,15 @@ export function useLibrary() {
       return next
     })
 
-    // Persist: dev writes to JSON file, production writes to localStorage
+    // Persist
     if (IS_DEV) {
-      await apiDeleteCreature(name)
+      await devDeleteCreature(name)
     } else {
-      saveLocalDelete(creatureKey(name))
+      await prodDeleteCreature(name)
     }
   }, [])
 
-  // ── Lookup helper ──────────────────────────────────────────────────────────
+  // ── Lookup helper ─────────────────────────────────────────────────────────
 
   const hasCreature = useCallback(
     (name) => monsterMap.has(creatureKey(name)),
@@ -216,5 +285,6 @@ export function useLibrary() {
     saveCreature,
     deleteCreature,
     hasCreature,
+    isLoading,
   }
 }
