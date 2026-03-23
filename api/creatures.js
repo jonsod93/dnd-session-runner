@@ -9,15 +9,13 @@ const BLOB_PATH = 'library.json'
 async function readBlob() {
   const { blobs } = await list({ prefix: BLOB_PATH })
   if (blobs.length === 0) return null
-  // For private stores, use downloadUrl (signed URL) instead of url
-  const downloadUrl = blobs[0].downloadUrl || blobs[0].url
-  const response = await fetch(downloadUrl)
+  const response = await fetch(blobs[0].url)
   return response.json()
 }
 
 async function writeBlob(data) {
   await put(BLOB_PATH, JSON.stringify(data), {
-    access: 'private',
+    access: 'public',
     addRandomSuffix: false,
   })
 }
