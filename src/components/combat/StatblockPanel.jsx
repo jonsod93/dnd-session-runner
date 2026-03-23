@@ -358,8 +358,9 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
   if (!items?.length) return null
   return (
     <div className="mb-1">
+      <hr className="border-white/[0.06] my-3" />
       <div className="flex items-center gap-2 mb-2">
-        <p className="label-section">{title}</p>
+        <p className="label-section leading-none">{title}</p>
         {legendaryPerRound != null && (
           <UsageBoxes
             trackKey={`__${title}`}
@@ -655,9 +656,6 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
         <PropLine label="Senses"                 value={sb.Senses} />
         <PropLine label="Languages"              value={sb.Languages} />
       </div>
-
-      {(sb.Saves?.length || sb.Skills?.length || sb.DamageVulnerabilities || sb.DamageResistances ||
-        sb.DamageImmunities || sb.ConditionImmunities || sb.Senses || sb.Languages) && <Rule />}
 
       <Section title="Traits"            items={sb.Traits}           {...sectionProps} />
       <Section title="Actions"           items={sb.Actions}          {...sectionProps} />
