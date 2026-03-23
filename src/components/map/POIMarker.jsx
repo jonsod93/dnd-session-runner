@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Marker, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { notionPageUrl, fetchPageProps, fetchPageBlocks, fetchBlocksRecursive, blocksToPreview } from '../../utils/notionUtils'
+import { notionPageUrl, fetchPageProps, fetchPageBlocks, fetchBlocksRecursive, blocksToPreview, blocksToStructured } from '../../utils/notionUtils'
 
 // ── Icon types ───────────────────────────────────────────────────────────────
 const PIN_TYPES = {
@@ -220,7 +220,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
 
 // ── Full location info modal ─────────────────────────────────────────────────
 function LocationInfoModal({ poi, preview, onClose }) {
-  const [fullContent, setFullContent] = useState(null)
+  const [contentBlocks, setContentBlocks] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -229,16 +229,15 @@ function LocationInfoModal({ poi, preview, onClose }) {
     return () => window.removeEventListener('keydown', h)
   }, [onClose])
 
-  // Fetch full page content
+  // Fetch full page content as structured blocks
   useEffect(() => {
     if (!poi.notionPageId) { setLoading(false); return }
     let cancelled = false
 
     fetchBlocksRecursive(poi.notionPageId)
-      .then((blocks) => blocksToPreview(blocks, 50000))
-      .then((content) => {
+      .then((blocks) => {
         if (cancelled) return
-        setFullContent(content)
+        setContentBlocks(blocksToStructured(blocks))
         setLoading(false)
       })
       .catch(() => {
@@ -301,12 +300,52 @@ function LocationInfoModal({ poi, preview, onClose }) {
           {loading && (
             <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
           )}
-          {!loading && fullContent && (
-            <div className="text-sm text-[#b8b5b0] leading-relaxed whitespace-pre-wrap">
-              {fullContent}
+          {!loading && contentBlocks?.length > 0 && (
+            <div className="space-y-0">
+              {contentBlocks.map((block, i) => {
+                if (block.type === 'heading') {
+                  const Tag = block.level === 1 ? 'h2' : block.level === 2 ? 'h3' : 'h4'
+                  const size = block.level === 1 ? 'text-base' : block.level === 2 ? 'text-sm' : 'text-sm'
+                  return (
+                    <Tag key={i} className={`${size} font-semibold text-[#e6e6e6] ${i > 0 ? 'mt-5' : ''} mb-1.5`}>
+                      {block.text}
+                    </Tag>
+                  )
+                }
+                if (block.type === 'list-item') {
+                  return (
+                    <p key={i} className="text-sm text-[#b8b5b0] leading-relaxed pl-4 mb-0.5">
+                      <span className="text-[#9a9894] mr-1.5">-</span>{block.text}
+                    </p>
+                  )
+                }
+                if (block.type === 'quote') {
+                  return (
+                    <blockquote key={i} className="text-sm text-[#b8b5b0] italic leading-relaxed border-l-2 border-white/[0.12] pl-3 my-2">
+                      {block.text}
+                    </blockquote>
+                  )
+                }
+                if (block.type === 'callout') {
+                  return (
+                    <div key={i} className="text-sm text-[#b8b5b0] leading-relaxed bg-white/[0.03] rounded px-3 py-2 my-2">
+                      {block.text}
+                    </div>
+                  )
+                }
+                if (block.type === 'divider') {
+                  return <hr key={i} className="border-white/[0.06] my-3" />
+                }
+                // paragraph
+                return (
+                  <p key={i} className="text-sm text-[#b8b5b0] leading-relaxed mb-1.5">
+                    {block.text}
+                  </p>
+                )
+              })}
             </div>
           )}
-          {!loading && !fullContent && (
+          {!loading && (!contentBlocks || contentBlocks.length === 0) && (
             <p className="text-sm text-[#b8b5b0] italic">No content available.</p>
           )}
         </div>

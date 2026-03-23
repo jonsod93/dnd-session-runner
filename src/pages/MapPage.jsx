@@ -46,12 +46,26 @@ let savedView = null
 
 function MapViewRestorer() {
   const map = useMap()
+
+  // Continuously track the view so we always have a valid saved position,
+  // avoiding the need to call map.getCenter() during cleanup (which crashes
+  // if the Leaflet DOM has already been torn down).
   useEffect(() => {
     if (savedView) {
       map.setView(savedView.center, savedView.zoom, { animate: false })
     }
+
+    const trackView = () => {
+      try {
+        savedView = { center: map.getCenter(), zoom: map.getZoom() }
+      } catch {
+        // Leaflet DOM already gone - keep whatever we last saved
+      }
+    }
+
+    map.on('moveend zoomend', trackView)
     return () => {
-      savedView = { center: map.getCenter(), zoom: map.getZoom() }
+      map.off('moveend zoomend', trackView)
     }
   }, [map])
   return null

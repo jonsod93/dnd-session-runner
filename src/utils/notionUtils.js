@@ -7,7 +7,7 @@ export function richTextToPlain(richText) {
   return richText.map((t) => t.plain_text ?? t.text?.content ?? '').join('')
 }
 
-// Extract a preview string from Notion page blocks
+// Extract a preview string from Notion page blocks (plain text, for tooltips)
 export function blocksToPreview(blocks, maxLength = 400) {
   const lines = []
   for (const block of blocks) {
@@ -34,6 +34,37 @@ export function blocksToPreview(blocks, maxLength = 400) {
   return result.length > maxLength ? result.slice(0, maxLength) + '…' : result
 }
 
+// Extract structured blocks for rich rendering (headings, paragraphs, lists, etc.)
+// Returns [{ type: 'heading'|'paragraph'|'list-item'|'quote'|'callout'|'divider', text, level? }]
+export function blocksToStructured(blocks) {
+  const result = []
+  for (const block of blocks) {
+    const type = block.type
+    if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
+      const text = richTextToPlain(block[type]?.rich_text)
+      if (text) result.push({ type: 'heading', text, level: parseInt(type.slice(-1)) })
+    } else if (type === 'paragraph') {
+      const text = richTextToPlain(block.paragraph?.rich_text)
+      if (text) result.push({ type: 'paragraph', text })
+    } else if (type === 'bulleted_list_item' || type === 'numbered_list_item') {
+      const text = richTextToPlain(block[type]?.rich_text)
+      if (text) result.push({ type: 'list-item', text })
+    } else if (type === 'callout') {
+      const text = richTextToPlain(block.callout?.rich_text)
+      if (text) result.push({ type: 'callout', text })
+    } else if (type === 'quote') {
+      const text = richTextToPlain(block.quote?.rich_text)
+      if (text) result.push({ type: 'quote', text })
+    } else if (type === 'toggle') {
+      const text = richTextToPlain(block.toggle?.rich_text)
+      if (text) result.push({ type: 'heading', text, level: 3 })
+    } else if (type === 'divider') {
+      result.push({ type: 'divider' })
+    }
+  }
+  return result
+}
+
 // Recursively fetch all blocks, expanding children of toggles, columns, etc.
 export async function fetchBlocksRecursive(pageId, maxDepth = 3) {
   const topBlocks = await fetchPageBlocks(pageId)
@@ -46,8 +77,10 @@ async function flattenBlocks(blocks, depthLeft) {
     result.push(block)
     if (block.has_children && depthLeft > 0) {
       const type = block.type
-      // Expand toggles, column_lists, columns, synced_block, and any other container
-      if (type === 'toggle' || type === 'column_list' || type === 'column' || type === 'synced_block') {
+      // Expand toggles, toggleable headings, column_lists, columns, synced_block, and any other container
+      const expandable = type === 'toggle' || type === 'column_list' || type === 'column' || type === 'synced_block'
+        || type === 'heading_1' || type === 'heading_2' || type === 'heading_3'
+      if (expandable) {
         try {
           const children = await fetchPageBlocks(block.id)
           const nested = await flattenBlocks(children, depthLeft - 1)
