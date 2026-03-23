@@ -150,8 +150,8 @@ const KEY_TERM_RE = new RegExp(
     // Slash ranges like 30/120 ft, 80/320 ft.
     '\\b\\d+\\/\\d+(?:\\s*(?:ft\\.?|feet|foot|miles?))?' +
     '|' +
-    // Distance measurements with area shapes
-    '(?:\\d+[\\s-](?:foot|feet|ft\\.?|mile|miles))\\b(?:\\s+(?:cone|sphere|cube|line|radius|emanation))?' +
+    // Distance measurements with area shapes (supports comma-separated numbers like 1,000)
+    '(?:\\d[\\d,]*[\\s-](?:foot|feet|ft\\.?|mile|miles))\\b(?:\\s+(?:cone|sphere|cube|line|radius|emanation))?' +
   ')',
   'gi'
 )
