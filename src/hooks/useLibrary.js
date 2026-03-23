@@ -1,8 +1,6 @@
 import { useMemo, useState, useCallback } from 'react'
 import rawData from '../data/improved-initiative.json'
 
-const CUSTOM_KEY = 'mythranos-custom-statblocks-v1'
-
 function safeParse(val) {
   if (!val) return []
   try {
@@ -13,34 +11,60 @@ function safeParse(val) {
   }
 }
 
-function loadCustom() {
-  try {
-    return JSON.parse(localStorage.getItem(CUSTOM_KEY) || '[]')
-  } catch {
-    return []
-  }
+function creatureKey(name) {
+  return `Creatures.${name}`
 }
 
-function saveCustom(list) {
-  localStorage.setItem(CUSTOM_KEY, JSON.stringify(list))
+// ── API helpers (write to the JSON file on disk via Vite dev-server plugin) ──
+
+async function apiSaveCreature(statblock, oldKey) {
+  const res = await fetch('/api/library/creature', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ statblock, key: oldKey || undefined }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to save creature')
+  return data
 }
+
+async function apiDeleteCreature(name) {
+  const res = await fetch('/api/library/creature', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to delete creature')
+  return data
+}
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useLibrary() {
-  const [custom, setCustom] = useState(loadCustom)
-
-  const base = useMemo(() => {
-    // Monsters: all top-level keys starting with "Creatures."
-    const monsters = Object.entries(rawData)
+  // Mutable copy of monsters, seeded from the static import
+  const [monsterMap, setMonsterMap] = useState(() => {
+    const map = new Map()
+    Object.entries(rawData)
       .filter(([k]) => k.startsWith('Creatures.'))
-      .map(([, v]) => ({
-        ...v,
-        _libType: 'monster',
-        // Normalize CR: prefer ChallengeRating, fall back to Challenge field
-        ChallengeRating: v.ChallengeRating ?? v.Challenge ?? null,
-      }))
-      .sort((a, b) => a.Name.localeCompare(b.Name))
+      .forEach(([k, v]) => {
+        map.set(k, {
+          ...v,
+          _libType: 'monster',
+          _key: k,
+          ChallengeRating: v.ChallengeRating ?? v.Challenge ?? null,
+        })
+      })
+    return map
+  })
 
-    // PCs: top-level "PersistentCharacters.<hash>" keys + legacy array formats
+  const monsters = useMemo(
+    () => [...monsterMap.values()].sort((a, b) => a.Name.localeCompare(b.Name)),
+    [monsterMap]
+  )
+
+  // PCs (read-only from static import)
+  const pcs = useMemo(() => {
     const topLevelPCs = Object.entries(rawData)
       .filter(([k]) => k.startsWith('PersistentCharacters.'))
       .map(([, v]) => v)
@@ -49,7 +73,7 @@ export function useLibrary() {
       ...safeParse(rawData['ImprovedInitiative.PlayerCharacters']),
     ]
     const seen = new Set()
-    const pcs = [...topLevelPCs, ...legacyPCs]
+    return [...topLevelPCs, ...legacyPCs]
       .filter((pc) => {
         if (!pc.Name || seen.has(pc.Name)) return false
         seen.add(pc.Name)
@@ -57,57 +81,66 @@ export function useLibrary() {
       })
       .map((pc) => ({ ...pc, _libType: 'pc' }))
       .sort((a, b) => a.Name.localeCompare(b.Name))
-
-    return { monsters, pcs }
   }, [])
 
-  // Merge custom statblocks into monster list
-  const monsters = useMemo(() => {
-    const customMonsters = custom
-      .filter((c) => c._libType !== 'pc')
-      .map((c) => ({ ...c, _libType: 'monster', _custom: true }))
-    return [...customMonsters, ...base.monsters]
-  }, [base.monsters, custom])
+  // ── Add or update a creature (writes to JSON file) ──────────────────────────
 
-  const pcs = base.pcs
+  const saveCreature = useCallback(async (statblock, originalName) => {
+    const oldKey = originalName ? creatureKey(originalName) : null
 
-  const addCustomStatblock = useCallback((statblock) => {
-    setCustom((prev) => {
-      const next = [...prev, { ...statblock, _custom: true }]
-      saveCustom(next)
+    // Optimistic local update
+    setMonsterMap((prev) => {
+      const next = new Map(prev)
+      // Remove old key if renaming
+      if (oldKey && oldKey !== creatureKey(statblock.Name)) {
+        next.delete(oldKey)
+      }
+      const key = creatureKey(statblock.Name)
+      next.set(key, {
+        ...statblock,
+        _libType: 'monster',
+        _key: key,
+        ChallengeRating: statblock.ChallengeRating ?? statblock.Challenge ?? null,
+      })
       return next
     })
+
+    // Strip internal fields before persisting
+    const { _libType, _key, _custom, ...clean } = statblock
+
+    // Persist to disk
+    await apiSaveCreature(clean, oldKey)
   }, [])
 
-  const updateCustomStatblock = useCallback((index, statblock) => {
-    setCustom((prev) => {
-      const next = [...prev]
-      next[index] = { ...statblock, _custom: true }
-      saveCustom(next)
+  // ── Delete a creature (writes to JSON file) ────────────────────────────────
+
+  const deleteCreature = useCallback(async (name) => {
+    const key = creatureKey(name)
+
+    // Optimistic local update
+    setMonsterMap((prev) => {
+      const next = new Map(prev)
+      next.delete(key)
       return next
     })
+
+    // Persist to disk
+    await apiDeleteCreature(name)
   }, [])
 
-  const removeCustomStatblock = useCallback((index) => {
-    setCustom((prev) => {
-      const next = prev.filter((_, i) => i !== index)
-      saveCustom(next)
-      return next
-    })
-  }, [])
+  // ── Lookup helper ──────────────────────────────────────────────────────────
 
-  const getCustomIndex = useCallback((name) => {
-    return custom.findIndex((c) => c.Name === name)
-  }, [custom])
+  const hasCreature = useCallback(
+    (name) => monsterMap.has(creatureKey(name)),
+    [monsterMap]
+  )
 
   return {
     monsters,
     pcs,
     all: [...pcs, ...monsters],
-    custom,
-    addCustomStatblock,
-    updateCustomStatblock,
-    removeCustomStatblock,
-    getCustomIndex,
+    saveCreature,
+    deleteCreature,
+    hasCreature,
   }
 }

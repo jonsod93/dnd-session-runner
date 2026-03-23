@@ -23,12 +23,14 @@ import { StatblockEditor } from '../components/combat/StatblockEditor'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
 import { DamageModal }     from '../components/combat/DamageModal'
 import { DiceRollToast }   from '../components/DiceRollToast'
+import { NotificationToast, useNotifications } from '../components/NotificationToast'
 import { SpellDrawer }     from '../components/SpellDrawer'
 import { uid }             from '../utils/combatUtils'
 
 export default function CombatTracker() {
   const combat = useCombatState()
   const library = useLibrary()
+  const notifications = useNotifications()
 
   const [selectedId,        setSelectedId]        = useState(null)
   const [showInitModal,     setShowInitModal]     = useState(false)
@@ -129,13 +131,16 @@ export default function CombatTracker() {
         collapsed={leftCollapsed}
         onToggleCollapse={() => setLeftCollapsed((v) => !v)}
         onEditStatblock={(entry) => {
-          const idx = library.getCustomIndex(entry.Name)
-          setEditor({ mode: 'edit', entry, customIndex: idx >= 0 ? idx : -1 })
+          setEditor({ mode: 'edit', entry })
         }}
         onNewStatblock={() => setEditor({ mode: 'new' })}
-        onDeleteStatblock={(name) => {
-          const idx = library.getCustomIndex(name)
-          if (idx >= 0) library.removeCustomStatblock(idx)
+        onDeleteStatblock={async (name) => {
+          try {
+            await library.deleteCreature(name)
+            notifications.notify(`Deleted "${name}"`, 'success')
+          } catch (err) {
+            notifications.notify(`Failed to delete: ${err.message}`, 'error')
+          }
         }}
       />
 
@@ -144,20 +149,20 @@ export default function CombatTracker() {
         <StatblockEditor
           initial={editor.mode === 'edit' ? editor.entry : undefined}
           title={editor.mode === 'new' ? 'New Statblock' : `Edit: ${editor.entry?.Name}`}
-          onSave={(statblock) => {
-            if (editor.mode === 'edit') {
-              // Check for existing custom entry by original name or new name
-              const origIdx = editor.customIndex >= 0 ? editor.customIndex : library.getCustomIndex(editor.entry?.Name)
-              const nameIdx = origIdx < 0 ? library.getCustomIndex(statblock.Name) : origIdx
-              if (nameIdx >= 0) {
-                library.updateCustomStatblock(nameIdx, statblock)
-              } else {
-                library.addCustomStatblock(statblock)
-              }
-            } else {
-              library.addCustomStatblock(statblock)
+          onSave={async (statblock) => {
+            try {
+              const originalName = editor.mode === 'edit' ? editor.entry?.Name : null
+              await library.saveCreature(statblock, originalName)
+              notifications.notify(
+                editor.mode === 'edit'
+                  ? `Saved "${statblock.Name}"`
+                  : `Created "${statblock.Name}"`,
+                'success'
+              )
+              setEditor(null)
+            } catch (err) {
+              notifications.notify(`Failed to save: ${err.message}`, 'error')
             }
-            setEditor(null)
           }}
           onCancel={() => setEditor(null)}
         />
@@ -333,6 +338,9 @@ export default function CombatTracker() {
       {activeSpell && (
         <SpellDrawer spellName={activeSpell} onClose={() => setActiveSpell(null)} />
       )}
+
+      {/* ── Notifications ──────────────────────────────────────────────── */}
+      <NotificationToast items={notifications.items} onExpire={notifications.expire} />
     </div>
   )
 }
