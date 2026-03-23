@@ -14,6 +14,24 @@ function parseUsage(item) {
   return null
 }
 
+// Parse X/day groups from spellcasting content text
+// e.g. "3/day each: clairvoyance, geas ... 1/day: wish" → [{count:3, label:'3/day each'}, {count:1, label:'1/day'}]
+function parseSpellcastingUsage(content) {
+  if (!content) return []
+  const groups = []
+  const re = /(\d+)\s*\/\s*day(?: each)?\s*:/gi
+  let m
+  while ((m = re.exec(content)) !== null) {
+    const count = parseInt(m[1])
+    const label = m[0].replace(/:$/, '').trim()
+    const suffix = `${count}/day`
+    // Deduplicate if same count appears twice (unlikely but safe)
+    const key = groups.some((g) => g.suffix === suffix) ? `${suffix}#${groups.length}` : suffix
+    groups.push({ count, label, suffix: key })
+  }
+  return groups
+}
+
 // ── Usage checkbox strip ──────────────────────────────────────────────────────
 function UsageBoxes({ trackKey, count, usage, onUsageChange }) {
   if (!onUsageChange) return null
@@ -312,6 +330,26 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
           <RichContent text={content} onRoll={onRoll} onSpellClick={onSpellClick} actionName={item.Name} enableSpellLinks={isSpellcastingSection} />
         </p>
       )}
+      {/* X/day usage checkboxes for spellcasting traits */}
+      {isSpellcastingSection && (() => {
+        const groups = parseSpellcastingUsage(content)
+        if (!groups.length) return null
+        return (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
+            {groups.map((g) => (
+              <div key={g.suffix} className="flex items-center gap-1">
+                <span className="text-[11px] text-[#787774]">{g.label}</span>
+                <UsageBoxes
+                  trackKey={`${item.Name}::${g.suffix}`}
+                  count={g.count}
+                  usage={usage}
+                  onUsageChange={onUsageChange}
+                />
+              </div>
+            ))}
+          </div>
+        )
+      })()}
     </div>
   )
 }
