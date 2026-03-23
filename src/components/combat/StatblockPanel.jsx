@@ -284,8 +284,11 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName, enable
 function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
   const usageInfo = parseUsage(item)
   const content   = item.Content ?? item.Description
-  // Only enable spell name linking in spellcasting-related traits
-  const isSpellcastingSection = /spellcasting|innate spellcasting|shared spellcasting/i.test(item.Name ?? '')
+  // Enable spell name linking when the trait is about spellcasting
+  // Matches: "Spellcasting", "Innate Spellcasting", "Utility Spells", "Combat Spells", etc.
+  const nameOrContent = `${item.Name ?? ''} ${content ?? ''}`
+  const isSpellcastingSection = /spellcasting/i.test(item.Name ?? '')
+    || (/\bspells?\b/i.test(item.Name ?? '') && /can cast|spellcasting ability|spell save/i.test(nameOrContent))
   return (
     <div className="mb-3.5">
       <div className="flex items-start flex-wrap gap-x-1.5 gap-y-0.5">
