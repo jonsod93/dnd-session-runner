@@ -86,9 +86,9 @@ export async function searchLocations(query) {
   return (data.results ?? []).map(extractPageProps)
 }
 
-// Fetch a single page's blocks for preview
-export async function fetchPageBlocks(pageId) {
-  const res = await notionFetch(`v1/blocks/${pageId}/children?page_size=30`)
+// Fetch a single page's blocks
+export async function fetchPageBlocks(pageId, pageSize = 100) {
+  const res = await notionFetch(`v1/blocks/${pageId}/children?page_size=${pageSize}`)
   if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
   const data = await res.json()
   return data.results ?? []
@@ -99,4 +99,66 @@ export async function fetchPageProps(pageId) {
   const res = await notionFetch(`v1/pages/${pageId}`)
   if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
   return extractPageProps(await res.json())
+}
+
+// Extract relation property items (each has { id })
+function extractRelations(prop) {
+  if (!prop?.relation) return []
+  return prop.relation.map((r) => ({ id: r.id, title: '' }))
+}
+
+// Fetch a page with full relation data resolved to titles
+// Returns { ...extractPageProps, relations: { childLocations, npcs, organizations, ... } }
+export async function fetchFullPage(pageId) {
+  const res = await notionFetch(`v1/pages/${pageId}`)
+  if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
+  const page = await res.json()
+  const props = page.properties ?? {}
+  const basic = extractPageProps(page)
+
+  // Map Notion property names to our relation keys
+  const RELATION_MAP = {
+    'Child Locations': 'childLocations',
+    'NPCs': 'npcs',
+    'Orgs': 'organizations',
+    'Peoples': 'peoples',
+    'Quests': 'quests',
+    'Items': 'items',
+    'Killed Here': 'killedHere',
+  }
+
+  // Collect all relation IDs and resolve titles in parallel
+  const relations = {}
+  const toResolve = [] // [{ key, index, id }]
+
+  for (const [propName, relKey] of Object.entries(RELATION_MAP)) {
+    const items = extractRelations(props[propName])
+    relations[relKey] = items
+    items.forEach((item, idx) => {
+      toResolve.push({ key: relKey, index: idx, id: item.id })
+    })
+  }
+
+  // Resolve titles in batches (max 10 concurrent)
+  if (toResolve.length > 0) {
+    const batchSize = 10
+    for (let i = 0; i < toResolve.length; i += batchSize) {
+      const batch = toResolve.slice(i, i + batchSize)
+      const results = await Promise.allSettled(
+        batch.map(({ id }) =>
+          notionFetch(`v1/pages/${id}`)
+            .then((r) => r.ok ? r.json() : null)
+            .then((p) => p ? richTextToPlain(p.properties?.Name?.title) || p.properties?.title?.title?.[0]?.plain_text || 'Untitled' : 'Untitled')
+        )
+      )
+      batch.forEach(({ key, index }, j) => {
+        const result = results[j]
+        if (result.status === 'fulfilled') {
+          relations[key][index].title = result.value
+        }
+      })
+    }
+  }
+
+  return { ...basic, relations }
 }
