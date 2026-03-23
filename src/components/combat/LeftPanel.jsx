@@ -190,7 +190,6 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   >
                     ✎
                   </button>
-                  <span className="text-[#9a9894] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </div>
             ))}
@@ -224,9 +223,6 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[#9a9894] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </button>
             ))}
