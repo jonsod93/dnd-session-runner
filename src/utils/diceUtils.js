@@ -5,7 +5,8 @@ export function rollDie(sides) {
 // Evaluate a dice expression string like "2d6+8", "d20+4", "1d4-1"
 // Returns { label, detail, total } or null if invalid
 export function evalDiceExpr(exprRaw) {
-  const expr = exprRaw.trim().toLowerCase()
+  // Normalize l/L → 1 (common OCR/data typo) before parsing
+  const expr = exprRaw.trim().toLowerCase().replace(/l/g, '1')
 
   // d20±N (attack roll format)
   const attackM = expr.match(/^d20([+-]\d+)?$/)
@@ -71,8 +72,8 @@ function _parseDice(text) {
   //   [+-]N to hit           → attack roll
   //   (NdM[ ± K])            → damage in parens (spaces around operator allowed)
   //   \bNdM[ ± K]\b          → standalone dice expr (spaces around operator allowed)
-  // Note: [lL] accepted as "1" — common OCR/data typo (e.g. "l6d8" for "16d8")
-  const re = /([+-]\d+\s+to\s+hit)|(\([lL\d]+d\d+\s*(?:[+-]\s*\d+)?\s*\))|(\b[lL\d]+d\d+\s*(?:[+-]\s*\d+)?(?=\s|[^a-zA-Z]|$))/gi
+  // Note: [lL] accepted as "1" — common OCR/data typo (e.g. "l6d8" for "16d8", "1d6 -l" for "1d6 -1")
+  const re = /([+-]\d+\s+to\s+hit)|(\([lL\d]+d\d+\s*(?:[+-]\s*[lL\d]+)?\s*\))|(\b[lL\d]+d\d+\s*(?:[+-]\s*[lL\d]+)?(?=\s|[^a-zA-Z]|$))/gi
   let lastIdx = 0
   let m
   while ((m = re.exec(text)) !== null) {

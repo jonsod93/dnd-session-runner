@@ -93,7 +93,7 @@ export function CombatantRow({
         </span>
 
         {/* AC + HP group — centered with wider gap */}
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-4 shrink-0" style={{ marginLeft: 25 }}>
           {/* AC column — fixed width */}
           <div className="w-14 shrink-0 flex justify-center">
             {combatant.ac != null && (
