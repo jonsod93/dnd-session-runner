@@ -1,3 +1,0 @@
-public/maps/*.jpg filter=lfs diff=lfs merge=lfs -text
-public/maps/*.png filter=lfs diff=lfs merge=lfs -text
-public/maps/*.webp filter=lfs diff=lfs merge=lfs -text
