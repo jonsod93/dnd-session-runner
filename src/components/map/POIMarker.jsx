@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Marker, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { notionPageUrl, fetchPageProps, fetchPageBlocks, fetchFullPage, blocksToPreview } from '../../utils/notionUtils'
+import { notionPageUrl, fetchPageProps, fetchPageBlocks, fetchBlocksRecursive, blocksToPreview } from '../../utils/notionUtils'
 
 // ── Icon types ───────────────────────────────────────────────────────────────
 const PIN_TYPES = {
@@ -20,6 +20,7 @@ export { PIN_TYPES }
 
 function makeIcon(icon = 'generic', color = '#facc15') {
   const sym = PIN_TYPES[icon]?.svg ?? '◉'
+  const isTransparent = color === 'transparent'
   return L.divIcon({
     className: '',
     iconSize: [48, 48],
@@ -27,8 +28,8 @@ function makeIcon(icon = 'generic', color = '#facc15') {
     html: `<div style="
       width:48px;height:48px;display:flex;align-items:center;justify-content:center;
       font-size:32px;color:${color};
-      text-shadow:0 0 6px rgba(0,0,0,0.9),0 0 12px rgba(0,0,0,0.6);
-      cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+      ${isTransparent ? '' : 'text-shadow:0 0 6px rgba(0,0,0,0.9),0 0 12px rgba(0,0,0,0.6);'}
+      cursor:pointer;${isTransparent ? '' : 'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.7));'}
     ">${sym}</div>`,
   })
 }
@@ -220,7 +221,6 @@ export function POIMarker({ poi, onEdit, onRemove }) {
 // ── Full location info modal ─────────────────────────────────────────────────
 function LocationInfoModal({ poi, preview, onClose }) {
   const [fullContent, setFullContent] = useState(null)
-  const [relations, setRelations] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -229,19 +229,16 @@ function LocationInfoModal({ poi, preview, onClose }) {
     return () => window.removeEventListener('keydown', h)
   }, [onClose])
 
-  // Fetch full page content and relations
+  // Fetch full page content
   useEffect(() => {
     if (!poi.notionPageId) { setLoading(false); return }
     let cancelled = false
 
-    Promise.all([
-      fetchPageBlocks(poi.notionPageId).then((blocks) => blocksToPreview(blocks, 10000)),
-      fetchFullPage(poi.notionPageId),
-    ])
-      .then(([content, pageData]) => {
+    fetchBlocksRecursive(poi.notionPageId)
+      .then((blocks) => blocksToPreview(blocks, 50000))
+      .then((content) => {
         if (cancelled) return
         setFullContent(content)
-        setRelations(pageData.relations)
         setLoading(false)
       })
       .catch(() => {
@@ -250,17 +247,6 @@ function LocationInfoModal({ poi, preview, onClose }) {
 
     return () => { cancelled = true }
   }, [poi.notionPageId])
-
-  // Relation badge categories with labels
-  const RELATION_LABELS = [
-    { key: 'childLocations', label: 'Sublocations' },
-    { key: 'npcs', label: 'NPCs' },
-    { key: 'organizations', label: 'Organizations' },
-    { key: 'peoples', label: 'Peoples' },
-    { key: 'quests', label: 'Quests' },
-    { key: 'items', label: 'Items' },
-    { key: 'killedHere', label: 'Killed Here' },
-  ]
 
   return (
     <div
@@ -308,35 +294,6 @@ function LocationInfoModal({ poi, preview, onClose }) {
           {preview?.blurb && (
             <p className="text-sm text-[#b8b5b0] mt-2 italic">{preview.blurb}</p>
           )}
-
-          {/* Relation badges */}
-          {relations && (() => {
-            const hasAny = RELATION_LABELS.some(({ key }) => relations[key]?.length)
-            if (!hasAny) return null
-            return (
-              <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3">
-                {RELATION_LABELS.map(({ key, label }) => {
-                  const items = relations[key]
-                  if (!items?.length) return null
-                  return (
-                    <div key={key} className="flex items-start gap-1.5">
-                      <span className="text-xs text-[#9a9894] uppercase tracking-wider mt-0.5 shrink-0">{label}:</span>
-                      <div className="flex flex-wrap gap-1">
-                        {items.map((item) => (
-                          <span
-                            key={item.id}
-                            className="text-xs text-[#e6e6e6] bg-white/[0.06] border border-white/[0.08] px-1.5 py-0.5 rounded"
-                          >
-                            {item.title}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })()}
         </div>
 
         {/* Body */}

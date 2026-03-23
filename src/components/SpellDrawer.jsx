@@ -117,7 +117,7 @@ function SpellMeta({ spell }) {
 function SpellBody({ spell, onRoll }) {
   const props = [
     spell.casting_time && `Casting Time: ${spell.casting_time}`,
-    spell.range        && `Range: ${spell.range}`,
+    spell.range        && `Range: ${spell.range === '0.1' ? 'Touch' : `${spell.range}ft.`}`,
     spell.components   && `Components: ${spell.components}`,
     spell.duration     && `Duration: ${spell.duration}`,
   ].filter(Boolean)

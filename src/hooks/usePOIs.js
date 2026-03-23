@@ -1,45 +1,88 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 
-const STORAGE_KEY = 'mythranos-map-pois-v1'
+const LS_CACHE_KEY = 'mythranos-map-pois-v1'
+const IS_DEV = import.meta.env.DEV
+const API_SECRET = import.meta.env.VITE_API_SECRET || ''
 
-function load() {
+function authHeaders() {
+  const headers = { 'Content-Type': 'application/json' }
+  if (API_SECRET) headers['Authorization'] = `Bearer ${API_SECRET}`
+  return headers
+}
+
+function loadCache() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    return JSON.parse(localStorage.getItem(LS_CACHE_KEY) || '[]')
   } catch {
     return []
   }
 }
 
-function save(pois) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(pois))
+function saveCache(pois) {
+  try {
+    localStorage.setItem(LS_CACHE_KEY, JSON.stringify(pois))
+  } catch {
+    // localStorage full or unavailable
+  }
+}
+
+async function fetchPOIs() {
+  const res = await fetch('/api/pois')
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+async function persistPOIs(pois) {
+  const res = await fetch('/api/pois', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ pois }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
 }
 
 export function usePOIs() {
-  const [pois, setPois] = useState(load)
+  const [pois, setPois] = useState(loadCache)
+  const hasFetched = useRef(false)
+
+  // Sync from server on mount
+  useEffect(() => {
+    if (hasFetched.current) return
+    hasFetched.current = true
+
+    fetchPOIs()
+      .then((serverPois) => {
+        setPois(serverPois)
+        saveCache(serverPois)
+      })
+      .catch((err) => {
+        console.warn('[usePOIs] Failed to sync from server, using cached data:', err.message)
+      })
+  }, [])
+
+  // Helper: update state, cache, and persist
+  const update = useCallback((updater) => {
+    setPois((prev) => {
+      const next = updater(prev)
+      saveCache(next)
+      persistPOIs(next).catch((err) => {
+        console.warn('[usePOIs] Failed to persist:', err.message)
+      })
+      return next
+    })
+  }, [])
 
   const addPOI = useCallback((poi) => {
-    setPois((prev) => {
-      const next = [...prev, { ...poi, id: crypto.randomUUID() }]
-      save(next)
-      return next
-    })
-  }, [])
+    update((prev) => [...prev, { ...poi, id: crypto.randomUUID() }])
+  }, [update])
 
   const updatePOI = useCallback((id, updates) => {
-    setPois((prev) => {
-      const next = prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
-      save(next)
-      return next
-    })
-  }, [])
+    update((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)))
+  }, [update])
 
   const removePOI = useCallback((id) => {
-    setPois((prev) => {
-      const next = prev.filter((p) => p.id !== id)
-      save(next)
-      return next
-    })
-  }, [])
+    update((prev) => prev.filter((p) => p.id !== id))
+  }, [update])
 
   return { pois, addPOI, updatePOI, removePOI }
 }
