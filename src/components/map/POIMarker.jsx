@@ -29,7 +29,7 @@ function makeIcon(icon = 'generic', color = '#facc15') {
       width:48px;height:48px;display:flex;align-items:center;justify-content:center;
       font-size:32px;color:${color};
       ${isTransparent ? '' : 'text-shadow:0 0 6px rgba(0,0,0,0.9),0 0 12px rgba(0,0,0,0.6);'}
-      cursor:pointer;${isTransparent ? '' : 'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.7));'}
+      cursor:pointer;
     ">${sym}</div>`,
   })
 }
@@ -50,6 +50,19 @@ export function POIMarker({ poi, onEdit, onRemove }) {
   const icon = makeIcon(poi.icon, poi.color)
 
   const isVisible = hovered || tooltipHovered
+
+  // Close this tooltip when another POI is hovered
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail !== poi.id) {
+        setHovered(false)
+        setTooltipHovered(false)
+        clearTimeout(hideTimer.current)
+      }
+    }
+    map.getContainer().addEventListener('poi-hover', handler)
+    return () => map.getContainer().removeEventListener('poi-hover', handler)
+  }, [map, poi.id])
 
   // Position the tooltip above the marker in screen coordinates
   const updateTooltipPos = useCallback(() => {
@@ -116,7 +129,10 @@ export function POIMarker({ poi, onEdit, onRemove }) {
         position={poi.position}
         icon={icon}
         eventHandlers={{
-          mouseover: () => { cancelHide(); setHovered(true); updateTooltipPos() },
+          mouseover: () => {
+            map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
+            cancelHide(); setHovered(true); updateTooltipPos()
+          },
           mouseout: () => scheduleHide(),
           contextmenu: (e) => {
             L.DomEvent.preventDefault(e)
