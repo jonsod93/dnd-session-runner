@@ -107,7 +107,6 @@ export function CombatantRow({
           {/* HP + T — fixed width */}
           <div
             className="w-[100px] shrink-0 flex items-center gap-1.5"
-            onClick={(e) => e.stopPropagation()}
           >
             {combatant.hp != null && (
               <>
@@ -130,7 +129,6 @@ export function CombatantRow({
         {!isLair && (
           <div
             className="flex-1 flex flex-wrap gap-1 items-center justify-end min-w-0 px-2"
-            onClick={(e) => e.stopPropagation()}
           >
             {combatant.conditions.map((cond) => (
               <span
