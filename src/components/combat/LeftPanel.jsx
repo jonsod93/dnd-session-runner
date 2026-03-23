@@ -176,15 +176,13 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   {entry.ChallengeRating && (
                     <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
                   )}
-                  {entry._custom && (
-                    <button
-                      className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-red-400 text-[10px] transition-all"
-                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc' }) }}
-                      title="Delete statblock"
-                    >
-                      ✕
-                    </button>
-                  )}
+                  <button
+                    className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-red-400 text-[10px] transition-all"
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc' }) }}
+                    title="Delete statblock"
+                  >
+                    ✕
+                  </button>
                   <button
                     className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-gold-400 text-[10px] transition-all"
                     onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
