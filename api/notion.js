@@ -1,7 +1,7 @@
 /**
- * Catch-all proxy for Notion API requests.
- * Rewrites /api/notion/v1/... to https://api.notion.com/v1/...
- * and injects the Notion API key and version header.
+ * Proxy for Notion API requests.
+ * Client sends the Notion sub-path via X-Notion-Path header.
+ * e.g. X-Notion-Path: v1/databases/abc123/query
  */
 export default async function handler(req, res) {
   const notionKey = process.env.NOTION_API_KEY
@@ -9,13 +9,14 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'NOTION_API_KEY not configured' })
   }
 
-  // Build the Notion API URL from the catch-all path
-  const path = req.query.path
-  const notionPath = Array.isArray(path) ? path.join('/') : path
+  const notionPath = req.headers['x-notion-path']
+  if (!notionPath) {
+    return res.status(400).json({ error: 'Missing X-Notion-Path header' })
+  }
+
   const url = `https://api.notion.com/${notionPath}`
 
   try {
-    // Forward the request to Notion
     const fetchOptions = {
       method: req.method,
       headers: {
