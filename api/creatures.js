@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import { put, list } from '@vercel/blob'
 
@@ -21,9 +21,22 @@ async function writeBlob(data) {
 }
 
 function readBundledJson() {
-  const filePath = join(process.cwd(), 'src', 'data', 'improved-initiative.json')
-  const raw = readFileSync(filePath, 'utf-8')
-  return JSON.parse(raw)
+  // Try several possible paths - Vercel's file layout varies
+  const candidates = [
+    join(process.cwd(), 'src', 'data', 'improved-initiative.json'),
+    join(process.cwd(), '..', 'src', 'data', 'improved-initiative.json'),
+    join(process.cwd(), 'data', 'improved-initiative.json'),
+  ]
+  for (const filePath of candidates) {
+    if (existsSync(filePath)) {
+      const raw = readFileSync(filePath, 'utf-8')
+      return JSON.parse(raw)
+    }
+  }
+  throw new Error(
+    `Could not find improved-initiative.json. Tried: ${candidates.join(', ')}. ` +
+    `cwd=${process.cwd()}`
+  )
 }
 
 // ── Auth check for write operations ─────────────────────────────────────────
@@ -105,6 +118,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   } catch (err) {
     console.error(`[api/creatures] ${req.method} failed:`, err.message)
-    return res.status(500).json({ error: 'Internal server error' })
+    return res.status(500).json({ error: err.message })
   }
 }
