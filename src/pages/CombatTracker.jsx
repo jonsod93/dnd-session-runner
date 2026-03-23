@@ -71,8 +71,10 @@ export default function CombatTracker() {
       if (e.key === 'n' || e.key === 'N') { e.preventDefault(); combat.nextTurn() }
       if (e.key === 't' || e.key === 'T') {
         e.preventDefault()
-        const active = combat.combatants.find((c) => c.id === combat.activeTurnId)
-        if (active?.hp) setDamageTargetId(active.id)
+        // Target the selected (clicked) combatant, fall back to active turn
+        const targetId = selectedId || combat.activeTurnId
+        const target = combat.combatants.find((c) => c.id === targetId)
+        if (target?.hp) setDamageTargetId(target.id)
       }
       if (e.key === 'Delete' && selectedId) {
         e.preventDefault()
