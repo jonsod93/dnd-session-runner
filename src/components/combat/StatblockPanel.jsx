@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { abilityMod, formatMod, getDamageTypeColor, d20 } from '../../utils/combatUtils'
 import { parseRichText, evalDiceExpr } from '../../utils/diceUtils'
 import { SPELL_REGEX } from '../../data/srdSpellNames'
@@ -220,8 +220,8 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName, enable
             <button
               key={i}
               className={color
-                ? "font-mono underline decoration-dotted underline-offset-2 cursor-pointer transition-opacity hover:opacity-80"
-                : "font-mono text-[#e6e6e6] hover:text-white underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
+                ? "font-mono font-semibold underline decoration-dotted underline-offset-2 cursor-pointer transition-opacity hover:opacity-80"
+                : "font-mono font-semibold text-[#e6e6e6] hover:text-white underline decoration-dotted underline-offset-2 cursor-pointer transition-colors"
               }
               style={color ? { color } : undefined}
               onClick={(e) => {
@@ -268,7 +268,7 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName, enable
             return (
               <span key={i}>
                 <HighlightedText text={m[1]} />
-                <span style={{ color: nextColor }} className="font-medium">{m[2]}</span>
+                <span style={{ color: nextColor }} className="font-semibold">{m[2]}</span>
                 {m[3]}
               </span>
             )
@@ -309,7 +309,7 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
     || (/\bspells?\b/i.test(item.Name ?? '') && /can cast|spellcasting ability|spell save/i.test(nameOrContent))
   return (
     <div className="mb-3.5">
-      <div className="flex items-start flex-wrap gap-x-1.5 gap-y-0.5">
+      <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5">
         <span className="text-sm font-semibold text-[#e6e6e6] leading-relaxed">
           {item.Name}
         </span>
@@ -469,11 +469,59 @@ function AddCustomLairAction({ onAdd }) {
 }
 
 // ── Main panel ────────────────────────────────────────────────────────────────
+const MIN_WIDTH = 280
+const MAX_WIDTH = 700
+const DEFAULT_WIDTH = 320
+
 export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, onRoll, onSpellClick, customLairActions, onAddCustomLairAction, onRemoveCustomLairAction }) {
   const isLair = combatant?.type === 'lair'
+  const [width, setWidth] = useState(() => {
+    const saved = localStorage.getItem('statblock-panel-width')
+    return saved ? Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, parseInt(saved))) : DEFAULT_WIDTH
+  })
+  const dragging = useRef(false)
+  const startX = useRef(0)
+  const startW = useRef(0)
+
+  const onMouseDown = useCallback((e) => {
+    e.preventDefault()
+    dragging.current = true
+    startX.current = e.clientX
+    startW.current = width
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }, [width])
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!dragging.current) return
+      // Dragging the left edge: moving mouse left = wider panel
+      const delta = startX.current - e.clientX
+      const newW = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startW.current + delta))
+      setWidth(newW)
+    }
+    const onMouseUp = () => {
+      if (!dragging.current) return
+      dragging.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      setWidth((w) => { localStorage.setItem('statblock-panel-width', String(w)); return w })
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [])
 
   return (
-    <div className="w-80 shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col">
+    <div className="shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col relative" style={{ width }}>
+      {/* Resize handle */}
+      <div
+        onMouseDown={onMouseDown}
+        className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-gold-400/30 active:bg-gold-400/50 transition-colors"
+      />
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0 min-h-[48px]">
         {combatant ? (
