@@ -43,11 +43,11 @@ async function devSaveCreature(statblock, oldKey) {
   return data
 }
 
-async function devDeleteCreature(name) {
+async function devDeleteCreature(name, key) {
   const res = await fetch('/api/library/creature', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, key }),
   })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'Failed to delete creature')
@@ -67,11 +67,11 @@ async function prodSaveCreature(statblock, oldKey) {
   return data
 }
 
-async function prodDeleteCreature(name) {
+async function prodDeleteCreature(name, key) {
   const res = await fetch('/api/creatures', {
     method: 'DELETE',
     headers: authHeaders(),
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, key }),
   })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'Failed to delete creature')
@@ -221,20 +221,21 @@ export function useLibrary() {
 
   // ── Add or update a creature ──────────────────────────────────────────────
 
-  const saveCreature = useCallback(async (statblock, originalName) => {
-    const oldKey = originalName ? creatureKey(originalName) : null
+  const saveCreature = useCallback(async (statblock, originalKey) => {
+    // originalKey is the actual map key (e.g. "Creatures.00dpnnui"), not name-derived
+    const newKey = creatureKey(statblock.Name)
 
     // Optimistic local update
     setMonsterMap((prev) => {
       const next = new Map(prev)
-      if (oldKey && oldKey !== creatureKey(statblock.Name)) {
-        next.delete(oldKey)
+      // Remove old key (always - handles both renames and id-based keys)
+      if (originalKey && originalKey !== newKey) {
+        next.delete(originalKey)
       }
-      const key = creatureKey(statblock.Name)
-      next.set(key, {
+      next.set(newKey, {
         ...statblock,
         _libType: 'monster',
-        _key: key,
+        _key: newKey,
         ChallengeRating: statblock.ChallengeRating ?? statblock.Challenge ?? null,
       })
       return next
@@ -245,16 +246,17 @@ export function useLibrary() {
 
     // Persist
     if (IS_DEV) {
-      await devSaveCreature(clean, oldKey)
+      await devSaveCreature(clean, originalKey)
     } else {
-      await prodSaveCreature(clean, oldKey)
+      await prodSaveCreature(clean, originalKey)
     }
   }, [])
 
   // ── Delete a creature ─────────────────────────────────────────────────────
 
-  const deleteCreature = useCallback(async (name) => {
-    const key = creatureKey(name)
+  const deleteCreature = useCallback(async (name, actualKey) => {
+    // actualKey is the real map key (e.g. "Creatures.00dpnnui")
+    const key = actualKey || creatureKey(name)
 
     // Optimistic local update
     setMonsterMap((prev) => {
@@ -263,18 +265,18 @@ export function useLibrary() {
       return next
     })
 
-    // Persist
+    // Persist - server needs the key to find the right entry
     if (IS_DEV) {
-      await devDeleteCreature(name)
+      await devDeleteCreature(name, key)
     } else {
-      await prodDeleteCreature(name)
+      await prodDeleteCreature(name, key)
     }
   }, [])
 
   // ── Lookup helper ─────────────────────────────────────────────────────────
 
   const hasCreature = useCallback(
-    (name) => monsterMap.has(creatureKey(name)),
+    (name) => [...monsterMap.values()].some((m) => m.Name === name),
     [monsterMap]
   )
 

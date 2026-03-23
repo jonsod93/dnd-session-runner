@@ -98,16 +98,24 @@ export default async function handler(req, res) {
 
     // ── DELETE: remove a creature ────────────────────────────────────────
     if (req.method === 'DELETE') {
-      const { name } = req.body || {}
-      if (!name) {
-        return res.status(400).json({ error: 'name is required' })
+      const { name, key: providedKey } = req.body || {}
+      if (!name && !providedKey) {
+        return res.status(400).json({ error: 'name or key is required' })
       }
 
       const data = (await readBlob()) || readBundledJson()
-      const key = `Creatures.${name}`
+
+      // Use the provided key if available, otherwise fall back to name-based key
+      let key = providedKey
+      if (!key) {
+        // Search by name across all creature keys
+        key = Object.keys(data).find(
+          (k) => k.startsWith('Creatures.') && data[k]?.Name === name
+        ) || `Creatures.${name}`
+      }
 
       if (!(key in data)) {
-        return res.status(404).json({ error: `Creature "${name}" not found` })
+        return res.status(404).json({ error: `Creature "${name || key}" not found` })
       }
 
       delete data[key]
