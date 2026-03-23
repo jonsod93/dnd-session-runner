@@ -17,6 +17,7 @@ async function writeBlob(data) {
   await put(BLOB_PATH, JSON.stringify(data), {
     access: 'public',
     addRandomSuffix: false,
+    allowOverwrite: true,
   })
 }
 
