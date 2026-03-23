@@ -91,7 +91,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       <div className="w-10 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col items-center pt-3">
         <button
           onClick={onToggleCollapse}
-          className="text-[#787774] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-white/[0.06]"
+          className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-white/[0.06]"
           title="Show library"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -114,10 +114,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           <button
             key={key}
             className={[
-              'flex-1 py-3 text-xs border-b-2 transition-colors',
+              'flex-1 py-3 text-sm border-b-2 transition-colors',
               tab === key
                 ? 'border-gold-400 text-[#e6e6e6]'
-                : 'border-transparent text-[#787774] hover:text-[#e6e6e6]',
+                : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
             ].join(' ')}
             onClick={() => setTab(key)}
           >
@@ -126,7 +126,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         ))}
         <button
           onClick={onToggleCollapse}
-          className="px-2 text-[#787774] hover:text-[#e6e6e6] transition-colors shrink-0"
+          className="px-2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors shrink-0"
           title="Collapse library"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -148,7 +148,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             />
             <button
               onClick={() => onNewStatblock?.()}
-              className="shrink-0 text-[10px] text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-1.5 py-0.5 transition-colors"
+              className="shrink-0 text-xs text-[#9a9894] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-1.5 py-0.5 transition-colors"
               title="Add new statblock from JSON"
             >
               + New
@@ -156,7 +156,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           </div>
           <div className="flex-1 overflow-y-auto">
             {filteredNPCs.length === 0 && (
-              <p className="text-[#787774] text-sm text-center py-6">No results</p>
+              <p className="text-[#b8b5b0] text-sm text-center py-6">No results</p>
             )}
             {filteredNPCs.map((entry) => (
               <div
@@ -169,28 +169,28 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                   {entry.Type && (
-                    <div className="text-[11px] text-[#787774] truncate mt-0.5">{entry.Type}</div>
+                    <div className="text-xs text-[#9a9894] truncate mt-0.5">{entry.Type}</div>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   {entry.ChallengeRating && (
-                    <span className="text-[11px] text-[#787774]">CR {entry.ChallengeRating}</span>
+                    <span className="text-xs text-[#9a9894]">CR {entry.ChallengeRating}</span>
                   )}
                   <button
-                    className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-red-400 text-[10px] transition-all"
+                    className="text-[#9a9894] opacity-0 group-hover:opacity-100 hover:text-red-400 text-xs transition-all"
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc', key: entry._key }) }}
                     title="Delete statblock"
                   >
                     ✕
                   </button>
                   <button
-                    className="text-[#787774] opacity-0 group-hover:opacity-100 hover:text-gold-400 text-[10px] transition-all"
+                    className="text-[#9a9894] opacity-0 group-hover:opacity-100 hover:text-gold-400 text-xs transition-all"
                     onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
                     title="Edit statblock"
                   >
                     ✎
                   </button>
-                  <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
+                  <span className="text-[#9a9894] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </div>
             ))}
@@ -212,7 +212,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           </div>
           <div className="flex-1 overflow-y-auto">
             {filteredPCs.length === 0 && (
-              <p className="text-[#787774] text-sm text-center py-6">No results</p>
+              <p className="text-[#b8b5b0] text-sm text-center py-6">No results</p>
             )}
             {filteredPCs.map((entry) => (
               <button
@@ -226,7 +226,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[#787774] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
+                  <span className="text-[#9a9894] group-hover:text-[#e6e6e6] text-sm transition-colors">+</span>
                 </div>
               </button>
             ))}
@@ -260,10 +260,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     type="button"
                     onClick={() => setQaType(val)}
                     className={[
-                      'flex-1 text-xs rounded px-2 py-1.5 border transition-colors',
+                      'flex-1 text-sm rounded px-2 py-1.5 border transition-colors',
                       qaType === val
                         ? 'border-gold-400/60 bg-gold-400/10 text-gold-400'
-                        : 'border-white/[0.1] text-[#787774] hover:text-[#e6e6e6] hover:border-white/[0.2]',
+                        : 'border-white/[0.1] text-[#9a9894] hover:text-[#e6e6e6] hover:border-white/[0.2]',
                     ].join(' ')}
                   >
                     {label}
@@ -279,7 +279,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               Add to Tracker
             </button>
           </form>
-          <p className="mt-6 text-[#787774] text-[11px] leading-relaxed border-t border-white/[0.04] pt-4">
+          <p className="mt-6 text-[#b8b5b0] text-xs leading-relaxed border-t border-white/[0.04] pt-4">
             Quick add creates a combatant with no statblock — useful for improvised NPCs and summoned creatures.
           </p>
         </div>
@@ -298,13 +298,13 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete Statblock</h3>
-            <p className="text-xs text-[#787774] mb-4">
+            <p className="text-sm text-[#b8b5b0] mb-4">
               Are you sure you want to delete <span className="text-[#e6e6e6] font-medium">{deleteConfirm.name}</span>? This action cannot be undone.
             </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="text-xs text-[#787774] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-3 py-1.5 transition-colors"
+                className="text-sm text-[#9a9894] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-3 py-1.5 transition-colors"
               >
                 Cancel
               </button>
@@ -313,7 +313,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type, deleteConfirm.key)
                   setDeleteConfirm(null)
                 }}
-                className="text-xs bg-red-500/80 hover:bg-red-500 text-white font-medium rounded px-3 py-1.5 transition-colors"
+                className="text-sm bg-red-500/80 hover:bg-red-500 text-white font-medium rounded px-3 py-1.5 transition-colors"
               >
                 Delete
               </button>
@@ -366,7 +366,7 @@ function LibraryPreview({ entry, top, onMouseEnter, onMouseLeave }) {
       <div className="shrink-0 px-4 py-2.5 border-b border-white/[0.06]">
         <p className="text-sm font-medium text-[#e6e6e6] truncate">{entry.Name}</p>
         {entry.Type && (
-          <p className="text-[11px] text-[#787774] italic truncate mt-0.5">{entry.Type}</p>
+          <p className="text-xs text-[#9a9894] italic truncate mt-0.5">{entry.Type}</p>
         )}
       </div>
       {/* Statblock body */}

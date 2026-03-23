@@ -28,16 +28,16 @@ function ToastItem({ roll, onExpire }) {
       {hasContext && (
         <div className="flex items-baseline gap-2 mb-1.5">
           {roll.context && (
-            <span className="text-xs font-semibold text-[#e6e6e6] capitalize">{roll.context}</span>
+            <span className="text-sm font-semibold text-[#e6e6e6] capitalize">{roll.context}</span>
           )}
           {roll.combatantName && (
-            <span className="text-[10px] text-[#787774]/60 truncate">{roll.combatantName}</span>
+            <span className="text-xs text-[#787774]/60 truncate">{roll.combatantName}</span>
           )}
         </div>
       )}
       {/* Roll result row */}
       <div className="flex items-center gap-4">
-        <span className="text-[11px] text-[#787774] font-mono shrink-0">{roll.label}</span>
+        <span className="text-xs text-[#9a9894] font-mono shrink-0">{roll.label}</span>
         <span
           className={`text-xl font-bold font-mono shrink-0 ${!totalColor ? 'text-gold-400' : ''}`}
           style={totalColor ? { color: totalColor } : undefined}
@@ -45,10 +45,10 @@ function ToastItem({ roll, onExpire }) {
           {roll.total}
         </span>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-[10px] text-[#787774]/70 font-mono truncate">{roll.detail}</span>
+          <span className="text-xs text-[#787774]/70 font-mono truncate">{roll.detail}</span>
           {roll.damageType && (
             <span
-              className="text-[10px] font-medium capitalize"
+              className="text-xs font-medium capitalize"
               style={roll.damageTypeColor ? { color: roll.damageTypeColor } : undefined}
             >
               {roll.damageType} damage

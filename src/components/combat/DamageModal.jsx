@@ -33,7 +33,7 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-0.5">Apply Damage / Healing</h3>
-        <p className="text-[11px] text-[#787774] mb-4">
+        <p className="text-xs text-[#9a9894] mb-4">
           {combatant.name} —{' '}
           <span className="font-mono text-[#e6e6e6]">
             {combatant.hp?.current}/{combatant.hp?.max} HP
@@ -49,7 +49,7 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
             className="w-full bg-transparent border-b border-white/[0.12] py-2 text-sm font-mono text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
           />
           {value !== '' && !isNaN(parsed) && (
-            <p className={`text-[11px] mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#787774]'}`}>
+            <p className={`text-xs mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#9a9894]'}`}>
               {isDmg ? `−${parsed} HP (damage)` : isHeal ? `+${-parsed} HP (healing)` : 'no change'}
             </p>
           )}
@@ -63,7 +63,7 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 text-sm text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.06] rounded px-4 py-2 transition-colors border border-white/[0.1]"
+              className="flex-1 text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] rounded px-4 py-2 transition-colors border border-white/[0.1]"
             >
               Cancel
             </button>

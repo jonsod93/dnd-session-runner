@@ -111,9 +111,9 @@ export default function MapPage() {
 
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
       <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
-        <div className="bg-[#252525]/90 text-[#787774] text-[10px] px-3 py-1.5 rounded-lg border border-white/[0.1] shadow-lg">
+        <div className="bg-[#252525]/90 text-[#9a9894] text-xs px-3 py-1.5 rounded-lg border border-white/[0.1] shadow-lg">
           {pois.length} point{pois.length !== 1 ? 's' : ''} of interest
-          <span className="block text-[9px] mt-0.5 text-[#787774]/60">Right-click map to add</span>
+          <span className="block text-[10px] mt-0.5 text-[#9a9894]/60">Right-click map to add</span>
         </div>
       </div>
 

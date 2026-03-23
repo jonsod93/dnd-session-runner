@@ -95,17 +95,17 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
             <h2 className="text-sm font-medium text-[#e6e6e6]">Roll Initiative</h2>
-            <p className="text-[11px] text-[#787774] mt-0.5">Edit any value before confirming</p>
+            <p className="text-xs text-[#9a9894] mt-0.5">Edit any value before confirming</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setValues(buildRolls())}
-              className="text-xs text-[#787774] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-2.5 py-1 transition-colors"
+              className="text-sm text-[#9a9894] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-2.5 py-1 transition-colors"
             >
               Reroll All
             </button>
             <button
-              className="text-[#787774] hover:text-[#e6e6e6] text-base leading-none transition-colors"
+              className="text-[#9a9894] hover:text-[#e6e6e6] text-base leading-none transition-colors"
               onClick={onClose}
             >
               ✕
@@ -123,23 +123,23 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                     {c._minionGroup ? getMinionBaseName(c.name) : c.name}
                   </span>
                   {c.type === 'pc' && (
-                    <span className="text-[10px] text-green-400/80 border border-green-400/30 px-1.5 rounded">
+                    <span className="text-xs text-green-400/80 border border-green-400/30 px-1.5 rounded">
                       PC
                     </span>
                   )}
                   {c.type === 'quick' && (
-                    <span className="text-[10px] text-[#787774] border border-white/[0.1] px-1.5 rounded">
+                    <span className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 rounded">
                       NPC
                     </span>
                   )}
                   {c._minionCount > 1 && (
-                    <span className="text-[10px] text-teal-400/80 border border-teal-400/30 px-1.5 rounded">
+                    <span className="text-xs text-teal-400/80 border border-teal-400/30 px-1.5 rounded">
                       ×{c._minionCount}
                     </span>
                   )}
                 </div>
                 {c.type === 'monster' && c.statblock && (
-                  <span className="text-[11px] text-[#787774]">
+                  <span className="text-xs text-[#9a9894]">
                     {c.statblock.InitiativeModifier !== undefined
                       ? `Init ${c.statblock.InitiativeModifier >= 0 ? '+' : ''}${c.statblock.InitiativeModifier}`
                       : `Dex ${c.statblock.Abilities?.Dex ?? '?'}`}
@@ -157,7 +157,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
             </div>
           ))}
           {displayRows.length === 0 && (
-            <p className="text-[#787774] text-sm text-center py-6">No combatants to roll for.</p>
+            <p className="text-[#b8b5b0] text-sm text-center py-6">No combatants to roll for.</p>
           )}
         </div>
 

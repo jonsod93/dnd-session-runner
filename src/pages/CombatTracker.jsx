@@ -175,38 +175,38 @@ export default function CombatTracker() {
         <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.06] flex items-center gap-3 min-h-[48px]">
           <button
             onClick={() => setShowInitModal(true)}
-            className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-xs px-3 py-1.5 rounded transition-colors"
+            className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm px-3 py-1.5 rounded transition-colors"
           >
             Roll Initiative
           </button>
 
           <button
             onClick={combat.nextTurn}
-            className="text-sm text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
+            className="text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
             title="Next turn (N)"
           >
             Next Turn
-            <span className="font-mono text-[10px] ml-1.5 text-[#787774]/60">[N]</span>
+            <span className="font-mono text-xs ml-1.5 text-[#9a9894]/60">[N]</span>
           </button>
 
           <div className="flex-1" />
 
-          <span className="text-[11px] text-[#787774] font-mono">
+          <span className="text-xs text-[#9a9894] font-mono">
             {combat.combatants.filter((c) => c.type !== 'lair').length} combatants
           </span>
 
           {showClearConfirm ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-[#787774]">Clear all?</span>
+              <span className="text-sm text-[#9a9894]">Clear all?</span>
               <button
                 onClick={() => { combat.clear(); setShowClearConfirm(false); setSelectedId(null) }}
-                className="text-xs text-red-400/80 hover:text-red-400 transition-colors"
+                className="text-sm text-red-400/80 hover:text-red-400 transition-colors"
               >
                 Confirm
               </button>
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className="text-xs text-[#787774] hover:text-[#e6e6e6] transition-colors"
+                className="text-sm text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
               >
                 Cancel
               </button>
@@ -214,7 +214,7 @@ export default function CombatTracker() {
           ) : (
             <button
               onClick={() => setShowClearConfirm(true)}
-              className="text-xs text-[#787774]/50 hover:text-[#787774] transition-colors"
+              className="text-sm text-[#9a9894]/50 hover:text-[#9a9894] transition-colors"
             >
               Clear all
             </button>
@@ -223,7 +223,7 @@ export default function CombatTracker() {
 
         {/* Header row */}
         {combat.combatants.length > 0 && (
-          <div className="shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-[10px] text-[#787774] uppercase tracking-wider font-medium">
+          <div className="shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-xs text-[#9a9894] uppercase tracking-wider font-medium">
             {/* Drag handle spacer */}
             <div className="w-[10px] shrink-0" />
             {/* Active arrow spacer */}
@@ -258,8 +258,8 @@ export default function CombatTracker() {
         <div className="flex-1 overflow-y-auto">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
-              <p className="text-[#787774] text-sm mb-1">No combatants</p>
-              <p className="text-[#787774]/50 text-xs">
+              <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
+              <p className="text-[#b8b5b0]/50 text-sm">
                 Add from the library or use Quick Add on the left.
               </p>
             </div>

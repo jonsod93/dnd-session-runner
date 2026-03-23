@@ -70,7 +70,7 @@ export function CombatantRow({
 
       {/* Initiative — ALWAYS full opacity */}
       <button
-        className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors ${isActive ? 'text-gold-400' : 'text-[#787774] hover:text-[#e6e6e6]'}`}
+        className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >
@@ -84,7 +84,7 @@ export function CombatantRow({
         <span
           className={[
             'w-36 shrink-0 text-sm font-medium truncate',
-            isLair ? 'text-[#787774] italic' : isPC ? 'text-green-400' : 'text-[#e6e6e6]',
+            isLair ? 'text-[#9a9894] italic' : isPC ? 'text-green-400' : 'text-[#e6e6e6]',
             isDead ? 'line-through' : '',
           ].join(' ')}
           title={combatant.name}
@@ -98,7 +98,7 @@ export function CombatantRow({
           <div className="w-14 shrink-0 flex justify-center">
             {combatant.ac != null && (
               <span className="text-sm">
-                <span className="text-[#787774] text-xs">AC </span>
+                <span className="text-[#9a9894] text-sm">AC </span>
                 <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
               </span>
             )}
@@ -114,7 +114,7 @@ export function CombatantRow({
                   {combatant.hp.current}/{combatant.hp.max}
                 </span>
                 <button
-                  className="text-[10px] font-mono text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-1.5 py-0.5 rounded transition-colors"
+                  className="text-xs font-mono text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-1.5 py-0.5 rounded transition-colors"
                   onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                   title="Apply damage/healing (T)"
                 >
@@ -133,7 +133,7 @@ export function CombatantRow({
             {combatant.conditions.map((cond) => (
               <span
                 key={cond.id}
-                className={`inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded ${cond.color}`}
+                className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded ${cond.color}`}
                 title={cond.info || CONDITIONS.find((c) => c.name === cond.name)?.info || ''}
               >
                 {cond.name}
@@ -153,7 +153,7 @@ export function CombatantRow({
       {/* ── Conditions button — right-aligned, always full opacity ─────── */}
       {!isLair && (
         <button
-          className="shrink-0 text-[11px] text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors"
+          className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors"
           onClick={(e) => {
             e.stopPropagation()
             setCondAnchor(condAnchor ? null : e.currentTarget.getBoundingClientRect())
@@ -166,7 +166,7 @@ export function CombatantRow({
 
       {/* Remove — always full opacity */}
       <button
-        className="shrink-0 text-[#787774] hover:text-red-400 transition-colors leading-none text-sm ml-0.5"
+        className="shrink-0 text-[#9a9894] hover:text-red-400 transition-colors leading-none text-sm ml-0.5"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >
@@ -244,7 +244,7 @@ function ConditionMenu({ anchor, onAdd, onClose }) {
             onChange={(e) => setCustom(e.target.value)}
             placeholder="Custom condition…"
             autoFocus
-            className="w-full bg-transparent border-b border-white/[0.1] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+            className="w-full bg-transparent border-b border-white/[0.1] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#9a9894] transition-colors"
           />
         </form>
       </div>
