@@ -129,8 +129,8 @@ const KEY_TERM_RE = new RegExp(
     // "DC equals X" or "DC equals 10 + ..." patterns
     'DC\\s+equals\\s+[\\d+\\s+\\w\'\u2019]+' +
     '|' +
-    // "spell save DC"
-    '\\bspell\\s+save\\s+DC\\b' +
+    // "spell save DC [N]"
+    '\\bspell\\s+save\\s+DC(?:\\s+\\d+)?' +
     '|' +
     // AC followed by a number
     '\\bAC\\s+\\d+' +
