@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -12,7 +12,9 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   const [qaType, setQaType] = useState('quick')
   const [deleteConfirm,      setDeleteConfirm]      = useState(null) // { name, type, key }
   const [mobileLibraryMenu,  setMobileLibraryMenu]  = useState(null) // { entry }
-  const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null)
+  const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null) // mobile modal
+  const [hoverPreviewEntry,   setHoverPreviewEntry]   = useState(null) // { entry, rect } desktop hover
+  const hoverTimerRef = useRef(null)
 
   const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -149,7 +151,16 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     {(entry.HP || entry.AC || entry.Abilities) && (
                       <button
                         className="text-[#9a9894] hover:text-gold-400 text-xs"
-                        onClick={(e) => { e.stopPropagation(); setLibraryPreviewEntry(entry) }}
+                        onClick={(e) => { e.stopPropagation(); if (isMobile) setLibraryPreviewEntry(entry) }}
+                        onMouseEnter={(e) => {
+                          if (isMobile) return
+                          if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
+                          setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
+                        }}
+                        onMouseLeave={() => {
+                          if (isMobile) return
+                          hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
+                        }}
                         title="View statblock"
                       >
                         ⊙
@@ -206,7 +217,16 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-all">
                     <button
                       className="text-[#9a9894] hover:text-gold-400 text-xs"
-                      onClick={(e) => { e.stopPropagation(); setLibraryPreviewEntry(entry) }}
+                      onClick={(e) => { e.stopPropagation(); if (isMobile) setLibraryPreviewEntry(entry) }}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return
+                        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
+                        setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
+                      }}
+                      onMouseLeave={() => {
+                        if (isMobile) return
+                        hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
+                      }}
                       title="View statblock"
                     >
                       ⊙
@@ -385,16 +405,43 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         document.body
       )}
 
-      {/* ── Statblock preview modal ──────────────────────────────────────── */}
-      {libraryPreviewEntry && createPortal(
+      {/* ── Desktop: statblock hover preview (no modal, no backdrop) ───── */}
+      {!isMobile && hoverPreviewEntry && createPortal(
         <div
-          className="fixed inset-0 z-[2000] flex items-center justify-center p-4 max-lg:p-0"
+          className="fixed z-[2000] bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden"
+          style={{
+            left: hoverPreviewEntry.rect.right + 8,
+            top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
+            width: 320,
+            maxHeight: 'calc(100vh - 64px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+          }}
+          onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
+          onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
+        >
+          <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+            <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{hoverPreviewEntry.entry.Name}</p>
+            <button
+              onClick={() => setHoverPreviewEntry(null)}
+              className="shrink-0 text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          <StatblockBody sb={hoverPreviewEntry.entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
+        </div>,
+        document.body
+      )}
+
+      {/* ── Mobile: statblock preview modal ─────────────────────────────── */}
+      {isMobile && libraryPreviewEntry && createPortal(
+        <div
+          className="fixed inset-0 z-[2000] flex items-end justify-center"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setLibraryPreviewEntry(null)}
         >
           <div
-            className="bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden w-full max-w-md max-lg:max-w-full max-lg:h-full max-lg:rounded-none"
-            style={{ maxHeight: '80vh', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+            className="bg-[#1e1e1e] border border-white/[0.1] w-full h-full flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">

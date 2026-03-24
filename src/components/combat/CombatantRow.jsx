@@ -78,11 +78,11 @@ export function CombatantRow({
         isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
+      {...(!isMobile && !isLair ? { ...attributes, ...listeners } : {})}
       onClick={() => onSelect(combatant)}
     >
-      {/* Drag handle — desktop only */}
+      {/* Drag handle — desktop only, visual affordance; drag listeners are on the row */}
       <button
-        {...(!isMobile && !isLair ? { ...attributes, ...listeners } : {})}
         className={`shrink-0 text-white/20 max-lg:hidden ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
@@ -117,9 +117,9 @@ export function CombatantRow({
             {combatant.name}
           </span>
           <div className="flex items-center shrink-0 ml-[25px] gap-4">
-            <div className="w-16 shrink-0 flex justify-center">
+            <div className="w-20 shrink-0 flex justify-center">
               {combatant.hp != null && (
-                <span className="text-sm">
+                <span className="text-sm whitespace-nowrap">
                   <span className="text-[#9a9894]">HP </span>
                   <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
                 </span>
@@ -136,7 +136,7 @@ export function CombatantRow({
           </div>
           {combatant.hp != null && (
             <button
-              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12]"
+              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12] ml-2"
               onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
               title="Apply damage/healing (T)"
             >
@@ -392,7 +392,6 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [] }) {
             value={custom}
             onChange={(e) => setCustom(e.target.value)}
             placeholder="Custom condition…"
-            autoFocus
             className="w-full bg-transparent border-b border-white/[0.1] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#9a9894] transition-colors"
           />
         </form>
