@@ -320,56 +320,66 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Entry name header */}
-            <div className="px-4 py-3 border-b border-white/[0.06]">
+            {/* Header — centered name/type, ✕ in top-right corner */}
+            <div className="relative px-10 py-3 border-b border-white/[0.06] text-center">
               <p className="text-sm font-medium text-[#e6e6e6]">{mobileLibraryMenu.entry.Name}</p>
               {mobileLibraryMenu.entry.Type && (
                 <p className="text-xs text-[#9a9894] mt-0.5">{mobileLibraryMenu.entry.Type}</p>
               )}
-            </div>
-            {/* Add to combat */}
-            <button
-              className="w-full text-left px-4 py-3.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
-              onClick={() => { handleLibraryAdd(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
-            >
-              Add combatant to combat
-            </button>
-            {/* View statblock */}
-            {(mobileLibraryMenu.entry.HP || mobileLibraryMenu.entry.AC || mobileLibraryMenu.entry.Abilities) && (
               <button
-                className="w-full text-left px-4 py-3.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
-                onClick={() => { setLibraryPreviewEntry(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
+                onClick={() => setMobileLibraryMenu(null)}
               >
-                View statblock
+                ✕
               </button>
-            )}
-            {/* Edit / Delete — NPC only */}
-            {mobileLibraryMenu.entry._libType !== 'pc' && (
-              <>
+            </div>
+
+            {/* Action buttons — outlined, centered text, with gaps */}
+            <div className="p-3 flex flex-col gap-2">
+              <button
+                className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                onClick={() => { handleLibraryAdd(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+              >
+                Add combatant to combat
+              </button>
+              {(mobileLibraryMenu.entry.HP || mobileLibraryMenu.entry.AC || mobileLibraryMenu.entry.Abilities) && (
                 <button
-                  className="w-full text-left px-4 py-3.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
-                  onClick={() => { onEditStatblock?.(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+                  className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                  onClick={() => { setLibraryPreviewEntry(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
                 >
-                  Edit statblock
+                  View statblock
                 </button>
-                <button
-                  className="w-full text-left px-4 py-3.5 text-sm text-red-400 hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
-                  onClick={() => {
-                    setDeleteConfirm({ name: mobileLibraryMenu.entry.Name, type: 'npc', key: mobileLibraryMenu.entry._key })
-                    setMobileLibraryMenu(null)
-                  }}
-                >
-                  Delete statblock
-                </button>
-              </>
-            )}
-            {/* Cancel */}
-            <button
-              className="w-full text-center px-4 py-3.5 text-sm text-[#9a9894] hover:bg-white/[0.06] transition-colors"
-              onClick={() => setMobileLibraryMenu(null)}
-            >
-              Cancel
-            </button>
+              )}
+              {mobileLibraryMenu.entry._libType !== 'pc' && (
+                <>
+                  <button
+                    className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                    onClick={() => { onEditStatblock?.(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+                  >
+                    Edit statblock
+                  </button>
+                  <button
+                    className="w-full text-center px-4 py-3 text-sm text-red-400 hover:bg-white/[0.06] border border-red-400/[0.25] rounded-lg transition-colors"
+                    onClick={() => {
+                      setDeleteConfirm({ name: mobileLibraryMenu.entry.Name, type: 'npc', key: mobileLibraryMenu.entry._key })
+                      setMobileLibraryMenu(null)
+                    }}
+                  >
+                    Delete statblock
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Cancel — plain text, no outline */}
+            <div className="border-t border-white/[0.06] px-4 py-3">
+              <button
+                className="w-full text-center text-sm text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
+                onClick={() => setMobileLibraryMenu(null)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>,
         document.body
