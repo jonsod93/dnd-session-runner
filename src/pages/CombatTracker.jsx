@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   DndContext,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   KeyboardSensor,
   closestCenter,
   useSensor,
@@ -16,6 +17,8 @@ import {
 
 import { useCombatState } from '../hooks/useCombatState'
 import { useLibrary }      from '../hooks/useLibrary'
+import { useIsMobile }     from '../hooks/useIsMobile'
+import { useSpotify }      from '../hooks/useSpotify'
 import { LeftPanel }       from '../components/combat/LeftPanel'
 import { CombatantRow }    from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
@@ -32,6 +35,11 @@ export default function CombatTracker() {
   const library = useLibrary()
   const notifications = useNotifications()
 
+  const isMobile = useIsMobile()
+  const spotify  = useSpotify()
+  const [mobileTab,           setMobileTab]           = useState('tracker') // 'tracker' | 'library'
+  const [mobileStatblockId,   setMobileStatblockId]   = useState(null)
+
   const [selectedId,        setSelectedId]        = useState(null)
   const [showInitModal,     setShowInitModal]     = useState(false)
   const [damageTargetId,    setDamageTargetId]    = useState(null)
@@ -40,6 +48,22 @@ export default function CombatTracker() {
   const [activeSpell,       setActiveSpell]       = useState(null)
   const [leftCollapsed,     setLeftCollapsed]     = useState(false)
   const [customLairActions, setCustomLairActions] = useState([])
+
+  const mobileStatblockCombatant = combat.combatants.find((c) => c.id === mobileStatblockId) ?? null
+
+  const listRef = useRef(null)
+
+  // Auto-scroll the active combatant to the top of the list when the turn advances
+  useEffect(() => {
+    if (!combat.activeTurnId || !listRef.current) return
+    const el = listRef.current.querySelector(`[data-combatant-id="${combat.activeTurnId}"]`)
+    if (el) {
+      const containerRect = listRef.current.getBoundingClientRect()
+      const elRect = el.getBoundingClientRect()
+      const newScrollTop = listRef.current.scrollTop + (elRect.top - containerRect.top)
+      listRef.current.scrollTo({ top: newScrollTop, behavior: 'smooth' })
+    }
+  }, [combat.activeTurnId])
 
   // Editor state: { mode: 'new' } | { mode: 'edit', entry, customIndex }
   const [editor, setEditor] = useState(null)
@@ -88,7 +112,10 @@ export default function CombatTracker() {
 
   // ── Drag & drop ──────────────────────────────────────────────────────────
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    // Mouse: activate after 5px movement
+    useSensor(MouseSensor,    { activationConstraint: { distance: 5 } }),
+    // Touch: activate after 250ms hold — avoids competing with page scroll
+    useSensor(TouchSensor,    { activationConstraint: { delay: 250, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
@@ -123,28 +150,29 @@ export default function CombatTracker() {
     <div className="flex bg-[#1a1a1a]" style={{ height: 'calc(100vh - 48px)' }}>
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
-      <LeftPanel
-        monsters={library.monsters}
-        pcs={library.pcs}
-        onAdd={(entry) => {
-          if (entry.type === 'lair' && hasLair) return
-          combat.add(entry)
-        }}
-        collapsed={leftCollapsed}
-        onToggleCollapse={() => setLeftCollapsed((v) => !v)}
-        onEditStatblock={(entry) => {
-          setEditor({ mode: 'edit', entry })
-        }}
-        onNewStatblock={() => setEditor({ mode: 'new' })}
-        onDeleteStatblock={async (name, _type, actualKey) => {
-          try {
-            await library.deleteCreature(name, actualKey)
-            notifications.notify(`Deleted "${name}"`, 'success')
-          } catch (err) {
-            notifications.notify(`Failed to delete: ${err.message}`, 'error')
-          }
-        }}
-      />
+      <div className={isMobile && mobileTab === 'tracker' ? 'hidden' : 'contents'}>
+        <LeftPanel
+          monsters={library.monsters}
+          pcs={library.pcs}
+          onAdd={(entry) => {
+            if (entry.type === 'lair' && hasLair) return
+            combat.add(entry)
+          }}
+          collapsed={!isMobile && leftCollapsed}
+          onToggleCollapse={() => setLeftCollapsed((v) => !v)}
+          onEditStatblock={(entry) => {
+            setEditor({ mode: 'edit', entry })
+          }}
+          onNewStatblock={() => setEditor({ mode: 'new' })}
+          onDeleteStatblock={async (name, _type, actualKey) => {
+            try {
+              await library.deleteCreature(name, actualKey)
+              notifications.notify(`Deleted "${name}"`, 'success')
+            } catch (err) {
+              notifications.notify(`Failed to delete: ${err.message}`, 'error')
+            }
+          }}
+        />      </div>
 
       {/* ── Centre: editor OR tracker ────────────────────────────────────── */}
       {editor ? (
@@ -169,24 +197,22 @@ export default function CombatTracker() {
           onCancel={() => setEditor(null)}
         />
       ) : (
-      <div className="flex-1 flex flex-col min-w-0 bg-[#1a1a1a]">
+      <div className={`flex-1 flex flex-col min-w-0 bg-[#1a1a1a] ${isMobile && mobileTab === 'library' ? 'hidden' : ''}`}>
 
         {/* Toolbar */}
         <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.06] flex items-center gap-3 min-h-[48px]">
           <button
-            onClick={() => setShowInitModal(true)}
+            onClick={() => {
+              // Play sound effect — silent if file missing or autoplay blocked
+              try { new Audio('/audio/roll-initiative.mp3').play() } catch { /* ignore */ }
+              // Start Spotify playlist after 2s so the mp3 can play first
+              const uri = import.meta.env.VITE_SPOTIFY_PLAYLIST_URI
+              if (uri) setTimeout(() => spotify.play(uri), 2000)
+              setShowInitModal(true)
+            }}
             className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm px-3 py-1.5 rounded transition-colors"
           >
             Roll Initiative
-          </button>
-
-          <button
-            onClick={combat.nextTurn}
-            className="text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
-            title="Next turn (N)"
-          >
-            Next Turn
-            <span className="font-mono text-xs ml-1.5 text-[#9a9894]/60">[N]</span>
           </button>
 
           <div className="flex-1" />
@@ -194,6 +220,27 @@ export default function CombatTracker() {
           <span className="text-xs text-[#9a9894] font-mono">
             {combat.combatants.filter((c) => c.type !== 'lair').length} combatants
           </span>
+
+          {/* Spotify indicator — only shown when the feature is configured */}
+          {spotify.enabled && (
+            spotify.isConnected ? (
+              <button
+                onClick={spotify.disconnect}
+                className="text-xs text-[#9a9894]/50 hover:text-[#9a9894] transition-colors"
+                title="Spotify connected — click to disconnect"
+              >
+                ♫
+              </button>
+            ) : (
+              <button
+                onClick={spotify.connect}
+                className="text-xs text-[#9a9894]/40 hover:text-[#9a9894] transition-colors"
+                title="Connect Spotify"
+              >
+                Connect Spotify
+              </button>
+            )
+          )}
 
           {showClearConfirm ? (
             <div className="flex items-center gap-2">
@@ -221,9 +268,9 @@ export default function CombatTracker() {
           )}
         </div>
 
-        {/* Header row */}
+        {/* Header row — desktop only, not needed for mobile 2-line layout */}
         {combat.combatants.length > 0 && (
-          <div className="shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-xs text-[#9a9894] uppercase tracking-wider font-medium">
+          <div className="max-lg:hidden shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-xs text-[#9a9894] uppercase tracking-wider font-medium">
             {/* Drag handle spacer */}
             <div className="w-[10px] shrink-0" />
             {/* Active arrow spacer */}
@@ -232,16 +279,16 @@ export default function CombatTracker() {
             <div className="w-8 shrink-0 text-center">#</div>
             {/* Name */}
             <div className="w-36 shrink-0">Name</div>
-            {/* AC + HP group */}
+            {/* HP + AC group (HP first) */}
             <div className="flex items-center gap-4 shrink-0" style={{ marginLeft: 25 }}>
+              <div className="w-20 flex justify-center" title="Hit Points">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </div>
               <div className="w-14 flex justify-center" title="Armor Class">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              </div>
-              <div className="w-16 flex justify-center" title="Hit Points">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </div>
             </div>
@@ -257,7 +304,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-44">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
@@ -290,9 +337,12 @@ export default function CombatTracker() {
                   onDamage={setDamageTargetId}
                   onAddCondition={combat.addCondition}
                   onRemoveCondition={combat.removeCondition}
-                  onSelect={(combatant) =>
-                    setSelectedId(selectedId === combatant.id ? null : combatant.id)
-                  }
+                  onSelect={(combatant) => {
+                    if (!isMobile && selectedId === combatant.id) return
+                    const newId = selectedId === combatant.id ? null : combatant.id
+                    setSelectedId(newId)
+                    if (isMobile && combatant.statblock) setMobileStatblockId(combatant.id)
+                  }}
                 />
               ))}
             </SortableContext>
@@ -301,20 +351,73 @@ export default function CombatTracker() {
       </div>
       )}
 
-      {/* ── Right: statblock panel ───────────────────────────────────────── */}
-      <StatblockPanel
-        combatant={selectedCombatant}
-        combatants={combat.combatants}
-        onClear={() => setSelectedId(null)}
-        onUsageChange={(key, value) => {
-          if (selectedId) combat.updateUsage(selectedId, key, value)
-        }}
-        onRoll={handleRoll}
-        onSpellClick={setActiveSpell}
-        customLairActions={customLairActions}
-        onAddCustomLairAction={(text) => setCustomLairActions((prev) => [...prev, text])}
-        onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
-      />
+      {/* ── Right: statblock panel (desktop only) ───────────────────────── */}
+      {!isMobile && (
+        <StatblockPanel
+          combatant={selectedCombatant}
+          combatants={combat.combatants}
+          onClear={() => setSelectedId(null)}
+          onUsageChange={(key, value) => {
+            if (selectedId) combat.updateUsage(selectedId, key, value)
+          }}
+          onRoll={handleRoll}
+          onSpellClick={setActiveSpell}
+          customLairActions={customLairActions}
+          onAddCustomLairAction={(text) => setCustomLairActions((prev) => [...prev, text])}
+          onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
+        />
+      )}
+
+      {/* ── Mobile: statblock overlay ────────────────────────────────────── */}
+      {isMobile && mobileStatblockCombatant && (
+        <StatblockPanel
+          combatant={mobileStatblockCombatant}
+          combatants={combat.combatants}
+          onClear={() => setMobileStatblockId(null)}
+          onUsageChange={(key, value) => combat.updateUsage(mobileStatblockId, key, value)}
+          onRoll={handleRoll}
+          onSpellClick={setActiveSpell}
+          customLairActions={customLairActions}
+          onAddCustomLairAction={(text) => setCustomLairActions((prev) => [...prev, text])}
+          onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
+          mobileOverlay
+        />
+      )}
+
+      {/* ── Mobile: Next Turn button (fixed above tab bar) ───────────────── */}
+      {isMobile && mobileTab === 'tracker' && (
+        <div className="fixed bottom-14 left-0 right-0 z-40 px-3 py-2 pointer-events-none">
+          <button
+            onClick={combat.nextTurn}
+            className="pointer-events-auto w-full py-3.5 bg-[#2a2a2a] hover:bg-[#323232] active:bg-[#3a3a3a] border border-white/[0.12] text-[#e6e6e6] font-semibold text-base rounded-xl transition-colors"
+          >
+            Next Turn
+          </button>
+        </div>
+      )}
+
+      {/* ── Mobile: bottom tab bar ───────────────────────────────────────── */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-[#1e1e1e] border-t border-white/[0.06]">
+          {[
+            { key: 'tracker', label: 'Tracker' },
+            { key: 'library', label: 'Library' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              className={[
+                'flex-1 text-sm font-medium border-t-2 transition-colors',
+                mobileTab === key
+                  ? 'border-gold-400 text-[#e6e6e6]'
+                  : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
+              ].join(' ')}
+              onClick={() => setMobileTab(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Modals ───────────────────────────────────────────────────────── */}
       {showInitModal && (

@@ -1,47 +1,20 @@
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
-
-const GRACE_MS = 350
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, monsters, pcs }) {
+  const isMobile = useIsMobile()
   const [tab,   setTab]   = useState('npc')
   const [query, setQuery] = useState('')
   const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
-  const [deleteConfirm, setDeleteConfirm] = useState(null) // { name, type: 'npc'|'pc' }
-
-  // ── Hover preview state ───────────────────────────────────────────────────
-  const [preview,       setPreview]       = useState(null) // { entry, anchor }
-  const graceTimer                        = useRef(null)
-
-  const clearGrace = useCallback(() => clearTimeout(graceTimer.current), [])
-
-  const startGrace = useCallback(() => {
-    graceTimer.current = setTimeout(() => setPreview(null), GRACE_MS)
-  }, [])
-
-  const handleEntryMouseEnter = useCallback((entry, e) => {
-    if (!entry.HP && !entry.AC && !entry.Abilities) return // skip entries with no statblock data
-    clearGrace()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setPreview({ entry, top: rect.top })
-  }, [clearGrace])
-
-  const handleEntryMouseLeave = useCallback(() => {
-    startGrace()
-  }, [startGrace])
-
-  const handlePreviewMouseEnter = useCallback(() => {
-    clearGrace()
-  }, [clearGrace])
-
-  const handlePreviewMouseLeave = useCallback(() => {
-    startGrace()
-  }, [startGrace])
-
-  // ──────────────────────────────────────────────────────────────────────────
+  const [deleteConfirm,      setDeleteConfirm]      = useState(null) // { name, type, key }
+  const [mobileLibraryMenu,  setMobileLibraryMenu]  = useState(null) // { entry }
+  const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null) // mobile modal
+  const [hoverPreviewEntry,   setHoverPreviewEntry]   = useState(null) // { entry, rect } desktop hover
+  const hoverTimerRef = useRef(null)
 
   const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -103,7 +76,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   }
 
   return (
-    <div className="w-64 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col">
+    <div className={`${isMobile ? 'w-full flex-1' : 'w-64 shrink-0'} bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col`}>
       {/* Tabs + collapse button */}
       <div className="flex border-b border-white/[0.06] shrink-0">
         {[
@@ -126,7 +99,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         ))}
         <button
           onClick={onToggleCollapse}
-          className="px-2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors shrink-0"
+          className="max-lg:hidden px-2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors shrink-0"
           title="Collapse library"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -162,9 +135,16 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               <div
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
-                onClick={() => handleLibraryAdd(entry)}
-                onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
-                onMouseLeave={handleEntryMouseLeave}
+                onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
+                onMouseEnter={(e) => {
+                  if (isMobile || !(entry.HP || entry.AC || entry.Abilities)) return
+                  if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
+                  setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
+                }}
+                onMouseLeave={() => {
+                  if (isMobile) return
+                  hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
+                }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
@@ -216,17 +196,24 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               <p className="text-[#b8b5b0] text-sm text-center py-6">No results</p>
             )}
             {filteredPCs.map((entry) => (
-              <button
+              <div
                 key={entry.Id ?? entry.Name}
-                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
-                onClick={() => handleLibraryAdd(entry)}
-                onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
-                onMouseLeave={handleEntryMouseLeave}
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
+                onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
+                onMouseEnter={(e) => {
+                  if (isMobile || !(entry.HP || entry.AC || entry.Abilities)) return
+                  if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
+                  setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
+                }}
+                onMouseLeave={() => {
+                  if (isMobile) return
+                  hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
+                }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </>
@@ -321,51 +308,136 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         document.body
       )}
 
-      {/* ── Hover preview portal ─────────────────────────────────────────── */}
-      {preview && createPortal(
-        <LibraryPreview
-          entry={preview.entry}
-          top={preview.top}
-          onMouseEnter={handlePreviewMouseEnter}
-          onMouseLeave={handlePreviewMouseLeave}
-        />,
+      {/* ── Mobile library entry popup ───────────────────────────────────── */}
+      {mobileLibraryMenu && createPortal(
+        <div
+          className="fixed inset-0 z-[2000] flex items-end justify-center p-4 pb-20"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setMobileLibraryMenu(null)}
+        >
+          <div
+            className="bg-[#252525] border border-white/[0.1] rounded-xl w-full max-w-sm overflow-hidden"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header — centered name/type, ✕ in top-right corner */}
+            <div className="relative px-10 py-3 border-b border-white/[0.06] text-center">
+              <p className="text-sm font-medium text-[#e6e6e6]">{mobileLibraryMenu.entry.Name}</p>
+              {mobileLibraryMenu.entry.Type && (
+                <p className="text-xs text-[#9a9894] mt-0.5">{mobileLibraryMenu.entry.Type}</p>
+              )}
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
+                onClick={() => setMobileLibraryMenu(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Action buttons — outlined, centered text, with gaps */}
+            <div className="p-3 flex flex-col gap-2">
+              <button
+                className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                onClick={() => { handleLibraryAdd(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+              >
+                Add combatant to combat
+              </button>
+              {(mobileLibraryMenu.entry.HP || mobileLibraryMenu.entry.AC || mobileLibraryMenu.entry.Abilities) && (
+                <button
+                  className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                  onClick={() => { setLibraryPreviewEntry(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+                >
+                  View statblock
+                </button>
+              )}
+              {mobileLibraryMenu.entry._libType !== 'pc' && (
+                <>
+                  <button
+                    className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                    onClick={() => { onEditStatblock?.(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+                  >
+                    Edit statblock
+                  </button>
+                  <button
+                    className="w-full text-center px-4 py-3 text-sm text-red-400 hover:bg-white/[0.06] border border-red-400/[0.25] rounded-lg transition-colors"
+                    onClick={() => {
+                      setDeleteConfirm({ name: mobileLibraryMenu.entry.Name, type: 'npc', key: mobileLibraryMenu.entry._key })
+                      setMobileLibraryMenu(null)
+                    }}
+                  >
+                    Delete statblock
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Cancel — plain text, no outline */}
+            <div className="border-t border-white/[0.06] px-4 py-3">
+              <button
+                className="w-full text-center text-sm text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
+                onClick={() => setMobileLibraryMenu(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>,
         document.body
       )}
-    </div>
-  )
-}
 
-// ── Library statblock preview ─────────────────────────────────────────────────
-function LibraryPreview({ entry, top, onMouseEnter, onMouseLeave }) {
-  const PANEL_W   = 288
-  const PANEL_H   = 480
-  const LEFT      = 256 + 8 // left panel width + gap
+      {/* ── Desktop: statblock hover preview (no modal, no backdrop) ───── */}
+      {!isMobile && hoverPreviewEntry && createPortal(
+        <div
+          className="fixed z-[2000] bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden"
+          style={{
+            left: hoverPreviewEntry.rect.right + 8,
+            top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
+            width: 320,
+            maxHeight: 'calc(100vh - 64px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+          }}
+          onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
+          onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
+        >
+          <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+            <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{hoverPreviewEntry.entry.Name}</p>
+            <button
+              onClick={() => setHoverPreviewEntry(null)}
+              className="shrink-0 text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          <StatblockBody sb={hoverPreviewEntry.entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
+        </div>,
+        document.body
+      )}
 
-  // Clamp vertically so preview doesn't go off-screen
-  const clampedTop = Math.min(
-    Math.max(top, 48 + 8),           // below nav
-    window.innerHeight - PANEL_H - 8  // above bottom
-  )
-
-  return (
-    <div
-      className="fixed z-30 bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden"
-      style={{
-        left:   LEFT,
-        top:    clampedTop,
-        width:  PANEL_W,
-        height: PANEL_H,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      {/* Preview header — only name is sticky */}
-      <div className="shrink-0 px-4 py-2.5 border-b border-white/[0.06]">
-        <p className="text-sm font-medium text-[#e6e6e6] truncate">{entry.Name}</p>
-      </div>
-      {/* Statblock body — no sticky stats header in preview */}
-      <StatblockBody sb={entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
+      {/* ── Mobile: statblock preview modal ─────────────────────────────── */}
+      {isMobile && libraryPreviewEntry && createPortal(
+        <div
+          className="fixed inset-0 z-[2000] flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setLibraryPreviewEntry(null)}
+        >
+          <div
+            className="bg-[#1e1e1e] border border-white/[0.1] w-full h-full flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+              <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{libraryPreviewEntry.Name}</p>
+              <button
+                onClick={() => setLibraryPreviewEntry(null)}
+                className="shrink-0 text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <StatblockBody sb={libraryPreviewEntry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
