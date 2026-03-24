@@ -137,7 +137,6 @@ export default function CombatTracker() {
           onAdd={(entry) => {
             if (entry.type === 'lair' && hasLair) return
             combat.add(entry)
-            if (isMobile) setMobileTab('tracker')
           }}
           collapsed={!isMobile && leftCollapsed}
           onToggleCollapse={() => setLeftCollapsed((v) => !v)}
@@ -153,8 +152,7 @@ export default function CombatTracker() {
               notifications.notify(`Failed to delete: ${err.message}`, 'error')
             }
           }}
-        />
-      </div>
+        />      </div>
 
       {/* ── Centre: editor OR tracker ────────────────────────────────────── */}
       {editor ? (
@@ -231,9 +229,9 @@ export default function CombatTracker() {
           )}
         </div>
 
-        {/* Header row */}
+        {/* Header row — desktop only, not needed for mobile 2-line layout */}
         {combat.combatants.length > 0 && (
-          <div className="shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-xs text-[#9a9894] uppercase tracking-wider font-medium">
+          <div className="max-lg:hidden shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-xs text-[#9a9894] uppercase tracking-wider font-medium">
             {/* Drag handle spacer */}
             <div className="w-[10px] shrink-0" />
             {/* Active arrow spacer */}

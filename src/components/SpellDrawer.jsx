@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { spellNameToSlug } from '../data/srdSpellNames'
 import { HighlightedText, RichContent } from './combat/StatblockPanel'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const CACHE_PREFIX = 'mythranos-spell-v2-'
 
 export function SpellDrawer({ spellName, onClose, onRoll }) {
+  const isMobile = useIsMobile()
   const [spell,   setSpell]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
@@ -70,11 +72,15 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
     return () => window.removeEventListener('keydown', h)
   }, [onClose])
 
+  const drawerClass = isMobile
+    ? 'fixed inset-x-0 bottom-0 z-[60] bg-[#1e1e1e] border-t border-white/[0.1] rounded-t-xl flex flex-col'
+    : 'fixed left-1/2 -translate-x-1/2 z-[60] bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col'
+  const drawerStyle = isMobile
+    ? { maxHeight: '55vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }
+    : { bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }
+
   return (
-    <div
-      className="fixed left-1/2 -translate-x-1/2 z-40 bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col"
-      style={{ bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }}
-    >
+    <div className={drawerClass} style={drawerStyle}>
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
