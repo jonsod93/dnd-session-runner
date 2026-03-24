@@ -71,7 +71,7 @@ export function CombatantRow({
         'flex items-center max-lg:items-start gap-2 px-4 py-3 border-b border-white/[0.04] border-l-2 transition-colors min-h-[52px] cursor-default',
         isActive
           ? 'border-l-gold-400 bg-white/[0.05]'
-          : 'border-l-transparent hover:bg-white/[0.03]',
+          : 'border-l-transparent max-lg:hover:bg-transparent hover:bg-white/[0.03]',
         isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
@@ -113,18 +113,19 @@ export function CombatantRow({
             {combatant.name}
           </span>
           <div className="flex items-center shrink-0 ml-[25px] gap-4">
+            <div className="w-16 shrink-0 flex justify-center">
+              {combatant.hp != null && (
+                <span className="text-sm">
+                  <span className="text-[#9a9894]">HP </span>
+                  <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
+                </span>
+              )}
+            </div>
             <div className="w-14 shrink-0 flex justify-center">
               {combatant.ac != null && (
                 <span className="text-sm">
                   <span className="text-[#9a9894]">AC </span>
                   <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-                </span>
-              )}
-            </div>
-            <div className="w-16 shrink-0 flex justify-center">
-              {combatant.hp != null && (
-                <span className={`text-sm font-mono font-medium ${hpColor}`}>
-                  {combatant.hp.current}/{combatant.hp.max}
                 </span>
               )}
             </div>
@@ -176,18 +177,19 @@ export function CombatantRow({
                   Conditions
                 </button>
 
-                {/* Row 2 col 1: AC + HP (only rendered when at least one exists) */}
+                {/* Row 2 col 1: HP + AC (only rendered when at least one exists) */}
                 {(combatant.ac != null || combatant.hp != null) && (
                   <div className="flex items-center gap-2">
+                    {combatant.hp != null && (
+                      <span className="text-sm">
+                        <span className="text-[#9a9894]">HP </span>
+                        <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
+                      </span>
+                    )}
                     {combatant.ac != null && (
                       <span className="text-sm">
                         <span className="text-[#9a9894]">AC </span>
                         <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-                      </span>
-                    )}
-                    {combatant.hp != null && (
-                      <span className={`text-sm font-mono font-medium ${hpColor}`}>
-                        {combatant.hp.current}/{combatant.hp.max}
                       </span>
                     )}
                   </div>
