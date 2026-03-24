@@ -1,9 +1,7 @@
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
 import { useIsMobile } from '../../hooks/useIsMobile'
-
-const GRACE_MS = 350
 
 export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, monsters, pcs }) {
   const isMobile = useIsMobile()
@@ -12,39 +10,9 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
-  const [deleteConfirm, setDeleteConfirm] = useState(null) // { name, type: 'npc'|'pc' }
-  const [mobileLibraryMenu, setMobileLibraryMenu] = useState(null) // { entry }
-
-  // ── Hover preview state ───────────────────────────────────────────────────
-  const [preview,       setPreview]       = useState(null) // { entry, anchor }
-  const graceTimer                        = useRef(null)
-
-  const clearGrace = useCallback(() => clearTimeout(graceTimer.current), [])
-
-  const startGrace = useCallback(() => {
-    graceTimer.current = setTimeout(() => setPreview(null), GRACE_MS)
-  }, [])
-
-  const handleEntryMouseEnter = useCallback((entry, e) => {
-    if (!entry.HP && !entry.AC && !entry.Abilities) return // skip entries with no statblock data
-    clearGrace()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setPreview({ entry, top: rect.top })
-  }, [clearGrace])
-
-  const handleEntryMouseLeave = useCallback(() => {
-    startGrace()
-  }, [startGrace])
-
-  const handlePreviewMouseEnter = useCallback(() => {
-    clearGrace()
-  }, [clearGrace])
-
-  const handlePreviewMouseLeave = useCallback(() => {
-    startGrace()
-  }, [startGrace])
-
-  // ──────────────────────────────────────────────────────────────────────────
+  const [deleteConfirm,      setDeleteConfirm]      = useState(null) // { name, type, key }
+  const [mobileLibraryMenu,  setMobileLibraryMenu]  = useState(null) // { entry }
+  const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null)
 
   const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -166,8 +134,6 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
-                onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
-                onMouseLeave={handleEntryMouseLeave}
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
@@ -180,6 +146,15 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     <span className="text-xs text-[#9a9894]">CR {entry.ChallengeRating}</span>
                   )}
                   <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                    {(entry.HP || entry.AC || entry.Abilities) && (
+                      <button
+                        className="text-[#9a9894] hover:text-gold-400 text-xs"
+                        onClick={(e) => { e.stopPropagation(); setLibraryPreviewEntry(entry) }}
+                        title="View statblock"
+                      >
+                        ⊙
+                      </button>
+                    )}
                     <button
                       className="text-[#9a9894] hover:text-gold-400 text-xs"
                       onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
@@ -219,17 +194,26 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               <p className="text-[#b8b5b0] text-sm text-center py-6">No results</p>
             )}
             {filteredPCs.map((entry) => (
-              <button
+              <div
                 key={entry.Id ?? entry.Name}
-                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
-                onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
-                onMouseLeave={handleEntryMouseLeave}
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                 </div>
-              </button>
+                {(entry.HP || entry.AC || entry.Abilities) && (
+                  <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      className="text-[#9a9894] hover:text-gold-400 text-xs"
+                      onClick={(e) => { e.stopPropagation(); setLibraryPreviewEntry(entry) }}
+                      title="View statblock"
+                    >
+                      ⊙
+                    </button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </>
@@ -350,6 +334,15 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             >
               Add combatant to combat
             </button>
+            {/* View statblock */}
+            {(mobileLibraryMenu.entry.HP || mobileLibraryMenu.entry.AC || mobileLibraryMenu.entry.Abilities) && (
+              <button
+                className="w-full text-left px-4 py-3.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
+                onClick={() => { setLibraryPreviewEntry(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+              >
+                View statblock
+              </button>
+            )}
             {/* Edit / Delete — NPC only */}
             {mobileLibraryMenu.entry._libType !== 'pc' && (
               <>
@@ -382,51 +375,32 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         document.body
       )}
 
-      {/* ── Hover preview portal ─────────────────────────────────────────── */}
-      {preview && createPortal(
-        <LibraryPreview
-          entry={preview.entry}
-          top={preview.top}
-          onMouseEnter={handlePreviewMouseEnter}
-          onMouseLeave={handlePreviewMouseLeave}
-        />,
+      {/* ── Statblock preview modal ──────────────────────────────────────── */}
+      {libraryPreviewEntry && createPortal(
+        <div
+          className="fixed inset-0 z-[2000] flex items-center justify-center p-4 max-lg:p-0"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setLibraryPreviewEntry(null)}
+        >
+          <div
+            className="bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden w-full max-w-md max-lg:max-w-full max-lg:h-full max-lg:rounded-none"
+            style={{ maxHeight: '80vh', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+              <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{libraryPreviewEntry.Name}</p>
+              <button
+                onClick={() => setLibraryPreviewEntry(null)}
+                className="shrink-0 text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <StatblockBody sb={libraryPreviewEntry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
+          </div>
+        </div>,
         document.body
       )}
-    </div>
-  )
-}
-
-// ── Library statblock preview ─────────────────────────────────────────────────
-function LibraryPreview({ entry, top, onMouseEnter, onMouseLeave }) {
-  const PANEL_W   = 288
-  const PANEL_H   = 480
-  const LEFT      = 256 + 8 // left panel width + gap
-
-  // Clamp vertically so preview doesn't go off-screen
-  const clampedTop = Math.min(
-    Math.max(top, 48 + 8),           // below nav
-    window.innerHeight - PANEL_H - 8  // above bottom
-  )
-
-  return (
-    <div
-      className="fixed z-30 bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden"
-      style={{
-        left:   LEFT,
-        top:    clampedTop,
-        width:  PANEL_W,
-        height: PANEL_H,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      {/* Preview header — only name is sticky */}
-      <div className="shrink-0 px-4 py-2.5 border-b border-white/[0.06]">
-        <p className="text-sm font-medium text-[#e6e6e6] truncate">{entry.Name}</p>
-      </div>
-      {/* Statblock body — no sticky stats header in preview */}
-      <StatblockBody sb={entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
     </div>
   )
 }

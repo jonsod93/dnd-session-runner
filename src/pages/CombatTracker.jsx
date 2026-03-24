@@ -298,10 +298,11 @@ export default function CombatTracker() {
                   onDamage={setDamageTargetId}
                   onAddCondition={combat.addCondition}
                   onRemoveCondition={combat.removeCondition}
-                  onSelect={(combatant) =>
-                    setSelectedId(selectedId === combatant.id ? null : combatant.id)
-                  }
-                  onDetails={isMobile ? (id) => setMobileStatblockId(id) : undefined}
+                  onSelect={(combatant) => {
+                    const newId = selectedId === combatant.id ? null : combatant.id
+                    setSelectedId(newId)
+                    if (isMobile && combatant.statblock) setMobileStatblockId(combatant.id)
+                  }}
                 />
               ))}
             </SortableContext>
