@@ -50,7 +50,7 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
           />
           {value !== '' && !isNaN(parsed) && (
             <p className={`text-xs mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#9a9894]'}`}>
-              {isDmg ? `−${parsed} HP (damage)` : isHeal ? `+${-parsed} HP (healing)` : 'no change'}
+              {isDmg ? `${parsed} damage` : isHeal ? `${-parsed} healing` : 'no change'}
             </p>
           )}
           <div className="flex gap-2 mt-5">
