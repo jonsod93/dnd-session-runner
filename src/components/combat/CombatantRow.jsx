@@ -76,7 +76,7 @@ export function CombatantRow({
       ].join(' ')}
       onClick={() => onSelect(combatant)}
     >
-      {/* Drag handle — self-center keeps it vertically centred when the row grows on mobile */}
+      {/* Drag handle */}
       <button
         {...(isLair ? {} : { ...attributes, ...listeners })}
         className={`shrink-0 text-white/20 max-lg:self-center ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
@@ -86,12 +86,12 @@ export function CombatantRow({
         <GripIcon />
       </button>
 
-      {/* Active arrow — vertically centred on mobile */}
+      {/* Active arrow */}
       <span className={`shrink-0 w-3 text-gold-400 text-xs leading-none max-lg:self-center ${isActive ? 'opacity-100' : 'opacity-0'}`}>
         ▶
       </span>
 
-      {/* Initiative — vertically centred on mobile */}
+      {/* Initiative */}
       <button
         className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors max-lg:self-center ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
@@ -100,26 +100,22 @@ export function CombatantRow({
         {combatant.initiative ?? '—'}
       </button>
 
-      {/* ── Faded content column ──────────────────────────────────────────── */}
+      {/* ── Content column ────────────────────────────────────────────────── */}
       <div className={`flex-1 min-w-0 max-lg:pr-2 ${isDead ? 'opacity-40' : ''}`}>
 
-        {/* ── Row 1: Name | AC + HP (desktop only) | deal-dmg (desktop) | conditions (desktop) */}
-        <div className="flex items-center min-w-0">
-
-          {/* Name — desktop: fixed width; mobile: fills remaining space */}
+        {/* ── Desktop layout (hidden on mobile) ─────────────────────────── */}
+        <div className="max-lg:hidden flex items-center min-w-0">
           <span
-            className={['shrink-0 text-sm font-medium truncate', 'w-36 max-lg:flex-1 max-lg:w-auto', nameColor, isDead ? 'line-through' : ''].join(' ')}
+            className={`w-36 shrink-0 text-sm font-medium truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
             title={combatant.name}
           >
             {combatant.name}
           </span>
-
-          {/* AC + HP — desktop only; shown in mobile Row 2 instead */}
-          <div className="max-lg:hidden flex items-center shrink-0 ml-[25px] gap-4">
+          <div className="flex items-center shrink-0 ml-[25px] gap-4">
             <div className="w-14 shrink-0 flex justify-center">
               {combatant.ac != null && (
                 <span className="text-sm">
-                  <span className="text-[#9a9894] text-sm">AC </span>
+                  <span className="text-[#9a9894]">AC </span>
                   <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
                 </span>
               )}
@@ -132,74 +128,93 @@ export function CombatantRow({
               )}
             </div>
           </div>
-
-          {/* Deal damage — desktop only */}
           {combatant.hp != null && (
             <button
-              className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12]"
+              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12]"
               onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
               title="Apply damage/healing (T)"
             >
               Deal damage
             </button>
           )}
-
-          {/* Conditions flex-1 spacer — desktop only */}
           {!isLair && (
-            <div className="max-lg:hidden flex-1 flex flex-wrap gap-1 items-center justify-end min-w-0 px-2">
+            <div className="flex-1 flex flex-wrap gap-1 items-center justify-end min-w-0 px-2">
               {conditionTags}
             </div>
           )}
-          {isLair && <div className="max-lg:hidden flex-1" />}
+          {isLair && <div className="flex-1" />}
         </div>
 
-        {/* ── Row 2: mobile only — Conditions (left) | AC | HP | Deal damage (right) */}
-        {!isLair && (
-          <div className="lg:hidden flex items-center mt-1.5 gap-2">
-            {/* Conditions — left-aligned with the name above */}
-            <button
-              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
-              onClick={openConditions}
-            >
-              Conditions
-            </button>
+        {/* ── Mobile layout (hidden on desktop) ─────────────────────────── */}
+        <div className="lg:hidden">
+          {isLair ? (
+            <span className={`text-sm font-medium ${nameColor}`}>{combatant.name}</span>
+          ) : (
+            <>
+              {/*
+                CSS grid with 2 columns: [1fr  auto]
+                  Col 1 (1fr):  Name (row 1) and AC+HP (row 2) — left-aligned
+                  Col 2 (auto): Conditions button (row 1) and Deal damage button (row 2)
+                The "auto" column sizes to the widest child, so both buttons get equal width.
+                "w-full" on each button fills that column width.
+              */}
+              <div className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1.5">
+                {/* Row 1 col 1: Name */}
+                <span
+                  className={`text-sm font-medium truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
+                  title={combatant.name}
+                >
+                  {combatant.name}
+                </span>
 
-            <div className="flex-1" />
+                {/* Row 1 col 2: Conditions button */}
+                <button
+                  className="w-full text-center text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
+                  onClick={openConditions}
+                >
+                  Conditions
+                </button>
 
-            {/* AC + HP — right side, aligned with Deal damage */}
-            {combatant.ac != null && (
-              <span className="text-sm shrink-0">
-                <span className="text-[#9a9894]">AC </span>
-                <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-              </span>
-            )}
-            {combatant.hp != null && (
-              <span className={`text-sm font-mono font-medium shrink-0 ${hpColor}`}>
-                {combatant.hp.current}/{combatant.hp.max}
-              </span>
-            )}
+                {/* Row 2 col 1: AC + HP (only rendered when at least one exists) */}
+                {(combatant.ac != null || combatant.hp != null) && (
+                  <div className="flex items-center gap-2">
+                    {combatant.ac != null && (
+                      <span className="text-sm">
+                        <span className="text-[#9a9894]">AC </span>
+                        <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
+                      </span>
+                    )}
+                    {combatant.hp != null && (
+                      <span className={`text-sm font-mono font-medium ${hpColor}`}>
+                        {combatant.hp.current}/{combatant.hp.max}
+                      </span>
+                    )}
+                  </div>
+                )}
 
-            {/* Deal damage — right-aligned, grouped with AC/HP */}
-            {combatant.hp != null && (
-              <button
-                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
-                onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-              >
-                Deal damage
-              </button>
-            )}
-          </div>
-        )}
+                {/* Row 2 col 2: Deal damage button */}
+                {combatant.hp != null && (
+                  <button
+                    className="w-full text-center text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
+                    onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+                  >
+                    Deal damage
+                  </button>
+                )}
+              </div>
 
-        {/* ── Row 3: mobile only — condition tags, wrapping */}
-        {!isLair && conditionTags.length > 0 && (
-          <div className="lg:hidden flex flex-wrap gap-1 mt-1.5">
-            {conditionTags}
-          </div>
-        )}
+              {/* Condition tags — full width, below the grid */}
+              {conditionTags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {conditionTags}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
-      {/* ── Conditions button — desktop only, right-aligned */}
+      {/* ── Conditions button — desktop only, right-aligned ─────────────── */}
       {!isLair && (
         <button
           className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12]"
@@ -210,7 +225,7 @@ export function CombatantRow({
         </button>
       )}
 
-      {/* Remove — vertically centred on mobile */}
+      {/* Remove */}
       <button
         className="shrink-0 text-[#9a9894] hover:text-red-400 transition-colors leading-none text-sm ml-0.5 max-lg:self-center"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
@@ -258,8 +273,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [] }) {
     ? { top: anchor.bottom + 4,                     left, maxHeight: Math.min(MENU_MAX_H, spaceBelow - 8) }
     : { bottom: window.innerHeight - anchor.top + 4, left, maxHeight: Math.min(MENU_MAX_H, spaceAbove - 8) }
 
-  // Filter out conditions already applied to this combatant
-  const appliedNames       = new Set(currentConditions.map((c) => c.name))
+  const appliedNames        = new Set(currentConditions.map((c) => c.name))
   const availableConditions = CONDITIONS.filter((c) => !appliedNames.has(c.name))
 
   return (
