@@ -58,7 +58,10 @@ export default function CombatTracker() {
     if (!combat.activeTurnId || !listRef.current) return
     const el = listRef.current.querySelector(`[data-combatant-id="${combat.activeTurnId}"]`)
     if (el) {
-      listRef.current.scrollTo({ top: el.offsetTop, behavior: 'smooth' })
+      const containerRect = listRef.current.getBoundingClientRect()
+      const elRect = el.getBoundingClientRect()
+      const newScrollTop = listRef.current.scrollTop + (elRect.top - containerRect.top)
+      listRef.current.scrollTo({ top: newScrollTop, behavior: 'smooth' })
     }
   }, [combat.activeTurnId])
 
