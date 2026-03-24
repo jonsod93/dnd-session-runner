@@ -199,7 +199,7 @@ export default function CombatTracker() {
 
           <button
             onClick={combat.nextTurn}
-            className="text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
+            className="max-lg:hidden text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
             title="Next turn (N)"
           >
             Next Turn
@@ -295,7 +295,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div className="flex-1 overflow-y-auto max-lg:pb-14">
+        <div className="flex-1 overflow-y-auto max-lg:pb-32">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
@@ -372,6 +372,18 @@ export default function CombatTracker() {
           onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
           mobileOverlay
         />
+      )}
+
+      {/* ── Mobile: Next Turn button (fixed above tab bar) ───────────────── */}
+      {isMobile && (
+        <div className="fixed bottom-14 left-0 right-0 z-40 px-3 py-2 pointer-events-none">
+          <button
+            onClick={combat.nextTurn}
+            className="pointer-events-auto w-full py-3.5 bg-[#2a2a2a] hover:bg-[#323232] active:bg-[#3a3a3a] border border-white/[0.12] text-[#e6e6e6] font-semibold text-base rounded-xl transition-colors"
+          >
+            Next Turn
+          </button>
+        </div>
       )}
 
       {/* ── Mobile: bottom tab bar ───────────────────────────────────────── */}

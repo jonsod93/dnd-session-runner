@@ -76,24 +76,24 @@ export function CombatantRow({
       ].join(' ')}
       onClick={() => onSelect(combatant)}
     >
-      {/* Drag handle */}
+      {/* Drag handle — self-center keeps it vertically centred when the row grows on mobile */}
       <button
         {...(isLair ? {} : { ...attributes, ...listeners })}
-        className={`shrink-0 text-white/20 max-lg:mt-0.5 ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
+        className={`shrink-0 text-white/20 max-lg:self-center ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <GripIcon />
       </button>
 
-      {/* Active arrow — ALWAYS full opacity, never faded */}
-      <span className={`shrink-0 w-3 text-gold-400 text-xs leading-none max-lg:mt-0.5 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Active arrow — vertically centred on mobile */}
+      <span className={`shrink-0 w-3 text-gold-400 text-xs leading-none max-lg:self-center ${isActive ? 'opacity-100' : 'opacity-0'}`}>
         ▶
       </span>
 
-      {/* Initiative — ALWAYS full opacity */}
+      {/* Initiative — vertically centred on mobile */}
       <button
-        className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors max-lg:mt-px ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
+        className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors max-lg:self-center ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >
@@ -101,9 +101,9 @@ export function CombatantRow({
       </button>
 
       {/* ── Faded content column ──────────────────────────────────────────── */}
-      <div className={`flex-1 min-w-0 ${isDead ? 'opacity-40' : ''}`}>
+      <div className={`flex-1 min-w-0 max-lg:pr-2 ${isDead ? 'opacity-40' : ''}`}>
 
-        {/* ── Row 1: Name | AC | HP (+ desktop deal-dmg + desktop conditions) */}
+        {/* ── Row 1: Name | AC + HP (desktop only) | deal-dmg (desktop) | conditions (desktop) */}
         <div className="flex items-center min-w-0">
 
           {/* Name — desktop: fixed width; mobile: fills remaining space */}
@@ -114,9 +114,9 @@ export function CombatantRow({
             {combatant.name}
           </span>
 
-          {/* AC + HP — always visible, compact on mobile */}
-          <div className="flex items-center shrink-0 ml-[25px] max-lg:ml-2 gap-4 max-lg:gap-2">
-            <div className="w-14 max-lg:w-auto shrink-0 flex justify-center">
+          {/* AC + HP — desktop only; shown in mobile Row 2 instead */}
+          <div className="max-lg:hidden flex items-center shrink-0 ml-[25px] gap-4">
+            <div className="w-14 shrink-0 flex justify-center">
               {combatant.ac != null && (
                 <span className="text-sm">
                   <span className="text-[#9a9894] text-sm">AC </span>
@@ -124,7 +124,7 @@ export function CombatantRow({
                 </span>
               )}
             </div>
-            <div className="w-16 max-lg:w-auto shrink-0 flex justify-center">
+            <div className="w-16 shrink-0 flex justify-center">
               {combatant.hp != null && (
                 <span className={`text-sm font-mono font-medium ${hpColor}`}>
                   {combatant.hp.current}/{combatant.hp.max}
@@ -133,10 +133,10 @@ export function CombatantRow({
             </div>
           </div>
 
-          {/* Deal damage — desktop only (mobile: row 2) */}
+          {/* Deal damage — desktop only */}
           {combatant.hp != null && (
             <button
-              className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
+              className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12]"
               onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
               title="Apply damage/healing (T)"
             >
@@ -153,19 +153,36 @@ export function CombatantRow({
           {isLair && <div className="max-lg:hidden flex-1" />}
         </div>
 
-        {/* ── Row 2: mobile only — Conditions btn (left) + Deal damage (right) */}
+        {/* ── Row 2: mobile only — Conditions (left) | AC | HP | Deal damage (right) */}
         {!isLair && (
           <div className="lg:hidden flex items-center mt-1.5 gap-2">
+            {/* Conditions — left-aligned with the name above */}
             <button
-              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors"
+              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
               onClick={openConditions}
             >
               Conditions
             </button>
+
             <div className="flex-1" />
+
+            {/* AC + HP — right side, aligned with Deal damage */}
+            {combatant.ac != null && (
+              <span className="text-sm shrink-0">
+                <span className="text-[#9a9894]">AC </span>
+                <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
+              </span>
+            )}
+            {combatant.hp != null && (
+              <span className={`text-sm font-mono font-medium shrink-0 ${hpColor}`}>
+                {combatant.hp.current}/{combatant.hp.max}
+              </span>
+            )}
+
+            {/* Deal damage — right-aligned, grouped with AC/HP */}
             {combatant.hp != null && (
               <button
-                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
+                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
                 onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
               >
                 Deal damage
@@ -174,7 +191,7 @@ export function CombatantRow({
           </div>
         )}
 
-        {/* ── Row 3+: mobile only — condition tags, wrapping */}
+        {/* ── Row 3: mobile only — condition tags, wrapping */}
         {!isLair && conditionTags.length > 0 && (
           <div className="lg:hidden flex flex-wrap gap-1 mt-1.5">
             {conditionTags}
@@ -182,10 +199,10 @@ export function CombatantRow({
         )}
       </div>
 
-      {/* ── Conditions button — desktop only, right-aligned, always full opacity */}
+      {/* ── Conditions button — desktop only, right-aligned */}
       {!isLair && (
         <button
-          className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors"
+          className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12]"
           onClick={openConditions}
           title="Add/manage conditions"
         >
@@ -193,9 +210,9 @@ export function CombatantRow({
         </button>
       )}
 
-      {/* Remove — always full opacity */}
+      {/* Remove — vertically centred on mobile */}
       <button
-        className="shrink-0 text-[#9a9894] hover:text-red-400 transition-colors leading-none text-sm ml-0.5 max-lg:mt-0.5"
+        className="shrink-0 text-[#9a9894] hover:text-red-400 transition-colors leading-none text-sm ml-0.5 max-lg:self-center"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >
@@ -206,6 +223,7 @@ export function CombatantRow({
       {condAnchor && createPortal(
         <ConditionMenu
           anchor={condAnchor}
+          currentConditions={combatant.conditions}
           onAdd={(cond) => {
             onAddCondition(combatant.id, { id: uid(), ...cond })
             setCondAnchor(null)
@@ -219,7 +237,7 @@ export function CombatantRow({
 }
 
 // ── Condition menu portal ─────────────────────────────────────────────────────
-function ConditionMenu({ anchor, onAdd, onClose }) {
+function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [] }) {
   const [custom, setCustom] = useState('')
   const menuRef = useRef(null)
 
@@ -229,7 +247,7 @@ function ConditionMenu({ anchor, onAdd, onClose }) {
     return () => document.removeEventListener('mousedown', h)
   }, [onClose])
 
-  const MENU_W    = 188
+  const MENU_W     = 188
   const MENU_MAX_H = 272
 
   const left       = Math.min(anchor.right - MENU_W, window.innerWidth - MENU_W - 8)
@@ -237,8 +255,12 @@ function ConditionMenu({ anchor, onAdd, onClose }) {
   const spaceAbove = anchor.top
 
   const posStyle = spaceBelow >= 160 || spaceBelow >= spaceAbove
-    ? { top: anchor.bottom + 4,                    left, maxHeight: Math.min(MENU_MAX_H, spaceBelow - 8) }
+    ? { top: anchor.bottom + 4,                     left, maxHeight: Math.min(MENU_MAX_H, spaceBelow - 8) }
     : { bottom: window.innerHeight - anchor.top + 4, left, maxHeight: Math.min(MENU_MAX_H, spaceAbove - 8) }
+
+  // Filter out conditions already applied to this combatant
+  const appliedNames       = new Set(currentConditions.map((c) => c.name))
+  const availableConditions = CONDITIONS.filter((c) => !appliedNames.has(c.name))
 
   return (
     <div
@@ -248,16 +270,20 @@ function ConditionMenu({ anchor, onAdd, onClose }) {
       onClick={(e) => e.stopPropagation()}
     >
       <div className="py-1">
-        {CONDITIONS.map((c) => (
-          <button
-            key={c.name}
-            className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] transition-colors"
-            onClick={() => onAdd({ name: c.name, color: c.color, info: c.info || '' })}
-            title={c.info || ''}
-          >
-            {c.name}
-          </button>
-        ))}
+        {availableConditions.length === 0 ? (
+          <p className="px-3 py-2 text-sm text-[#9a9894] italic">All conditions applied</p>
+        ) : (
+          availableConditions.map((c) => (
+            <button
+              key={c.name}
+              className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] transition-colors"
+              onClick={() => onAdd({ name: c.name, color: c.color, info: c.info || '' })}
+              title={c.info || ''}
+            >
+              {c.name}
+            </button>
+          ))
+        )}
       </div>
       <div className="border-t border-white/[0.06] px-2 py-2">
         <form
