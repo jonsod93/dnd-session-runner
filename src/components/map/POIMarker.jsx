@@ -177,7 +177,12 @@ export function POIMarker({ poi, onEdit, onRemove }) {
                   {preview.content}
                 </p>
               )}
-              {!loading && !preview && !poi.notionPageId && (
+              {!loading && !preview && !poi.notionPageId && poi.customText && (
+                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">
+                  {poi.customText}
+                </p>
+              )}
+              {!loading && !preview && !poi.notionPageId && !poi.customText && (
                 <p className="text-xs text-[#9a9894] italic">No linked page</p>
               )}
             </div>

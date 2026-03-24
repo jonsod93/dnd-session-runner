@@ -573,7 +573,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   )
 }
 
-export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }) {
+export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, compact }) {
   const legendaryPerRound = sb.LegendaryActions?.length ? (sb.LegendaryActionsCount ?? 3) : null
 
   const sectionProps = { usage, onUsageChange, onRoll, onSpellClick }
@@ -592,68 +592,73 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick }
     })
   }
 
-  return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* ── Sticky header: type, stats, ability scores ──────────────── */}
-      <div className="shrink-0 px-4 py-3 bg-[#1e1e1e] border-b border-white/[0.06]">
-        {/* Type & CR */}
-        <div className="flex items-baseline justify-between gap-2 mb-0.5">
-          <p className="text-sm text-[#9a9894] italic">{sb.Type}</p>
-          {sb.ChallengeRating && (
-            <span className="text-sm text-[#9a9894] font-medium shrink-0">CR {sb.ChallengeRating}</span>
-          )}
-        </div>
-        {sb.Source && (
-          <p className="text-xs text-[#787774]/60 mb-3">Source: {sb.Source}</p>
+  const statsHeader = (
+    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[#1e1e1e] border-b border-white/[0.06]'}>
+      {/* Type & CR */}
+      <div className="flex items-baseline justify-between gap-2 mb-0.5">
+        <p className="text-sm text-[#9a9894] italic">{sb.Type}</p>
+        {sb.ChallengeRating && (
+          <span className="text-sm text-[#9a9894] font-medium shrink-0">CR {sb.ChallengeRating}</span>
         )}
+      </div>
+      {sb.Source && (
+        <p className="text-xs text-[#787774]/60 mb-3">Source: {sb.Source}</p>
+      )}
 
-        {/* Core stats */}
-        <div className="flex flex-wrap gap-x-4 gap-y-0.5 mb-2">
-          {sb.AC?.Value != null && (
-            <span className="text-sm">
-              <span className="text-[#9a9894]">AC </span>
-              <span className="font-medium text-[#e6e6e6]">{sb.AC.Value}</span>
-              {sb.AC.Notes ? <span className="text-[#b8b5b0]"> ({sb.AC.Notes})</span> : null}
-            </span>
-          )}
-          {sb.HP?.Value != null && (
-            <span className="text-sm">
-              <span className="text-[#9a9894]">HP </span>
-              <span className="font-medium text-[#e6e6e6]">{sb.HP.Value}</span>
-              {sb.HP.Notes ? <span className="text-[#b8b5b0]"> ({sb.HP.Notes})</span> : null}
-            </span>
-          )}
-          {sb.Speed && (
-            <span className="text-sm">
-              <span className="text-[#9a9894]">Speed </span>
-              <span className="text-[#e6e6e6]">{sb.Speed}</span>
-            </span>
-          )}
-        </div>
-
-        {/* Ability scores */}
-        {sb.Abilities && (
-          <>
-            <hr className="border-white/[0.06] my-3" />
-            <div className="grid grid-cols-6 gap-1 text-center">
-              {ABILITIES.map((a) => (
-                <div key={a}>
-                  <div className="label-section mb-0.5">{a}</div>
-                  <div className="text-[#e6e6e6] font-medium font-mono text-sm">
-                    {sb.Abilities[a]}
-                  </div>
-                  <div className="text-[#9a9894] text-xs">
-                    ({formatMod(abilityMod(sb.Abilities[a]))})
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
+      {/* Core stats */}
+      <div className="flex flex-wrap gap-x-4 gap-y-0.5 mb-2">
+        {sb.AC?.Value != null && (
+          <span className="text-sm">
+            <span className="text-[#9a9894]">AC </span>
+            <span className="font-medium text-[#e6e6e6]">{sb.AC.Value}</span>
+            {sb.AC.Notes ? <span className="text-[#b8b5b0]"> ({sb.AC.Notes})</span> : null}
+          </span>
+        )}
+        {sb.HP?.Value != null && (
+          <span className="text-sm">
+            <span className="text-[#9a9894]">HP </span>
+            <span className="font-medium text-[#e6e6e6]">{sb.HP.Value}</span>
+            {sb.HP.Notes ? <span className="text-[#b8b5b0]"> ({sb.HP.Notes})</span> : null}
+          </span>
+        )}
+        {sb.Speed && (
+          <span className="text-sm">
+            <span className="text-[#9a9894]">Speed </span>
+            <span className="text-[#e6e6e6]">{sb.Speed}</span>
+          </span>
         )}
       </div>
 
+      {/* Ability scores */}
+      {sb.Abilities && (
+        <>
+          <hr className="border-white/[0.06] my-3" />
+          <div className="grid grid-cols-6 gap-1 text-center">
+            {ABILITIES.map((a) => (
+              <div key={a}>
+                <div className="label-section mb-0.5">{a}</div>
+                <div className="text-[#e6e6e6] font-medium font-mono text-sm">
+                  {sb.Abilities[a]}
+                </div>
+                <div className="text-[#9a9894] text-xs">
+                  ({formatMod(abilityMod(sb.Abilities[a]))})
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* In compact mode (preview), everything scrolls together */}
+      {!compact && statsHeader}
+
       {/* ── Scrollable content: properties, traits, actions, etc. ─── */}
       <div className="flex-1 overflow-y-auto px-4 py-3">
+      {compact && <div className="-mx-4 -mt-3">{statsHeader}</div>}
 
       {/* Properties */}
       <div className="space-y-1 mb-2">
