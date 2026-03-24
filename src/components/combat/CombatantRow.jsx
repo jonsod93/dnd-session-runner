@@ -14,6 +14,7 @@ export function CombatantRow({
   onAddCondition,
   onRemoveCondition,
   onSelect,
+  onDetails,
 }) {
   const [condAnchor, setCondAnchor] = useState(null)
 
@@ -122,6 +123,16 @@ export function CombatantRow({
             title="Apply damage/healing (T)"
           >
             Deal damage
+          </button>
+        )}
+
+        {/* Details button — mobile only, shows statblock overlay */}
+        {onDetails && combatant.statblock && !isLair && (
+          <button
+            className="lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
+            onClick={(e) => { e.stopPropagation(); onDetails(combatant.id) }}
+          >
+            Details
           </button>
         )}
 

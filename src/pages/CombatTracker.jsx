@@ -16,6 +16,7 @@ import {
 
 import { useCombatState } from '../hooks/useCombatState'
 import { useLibrary }      from '../hooks/useLibrary'
+import { useIsMobile }     from '../hooks/useIsMobile'
 import { LeftPanel }       from '../components/combat/LeftPanel'
 import { CombatantRow }    from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
@@ -32,6 +33,10 @@ export default function CombatTracker() {
   const library = useLibrary()
   const notifications = useNotifications()
 
+  const isMobile = useIsMobile()
+  const [mobileTab,           setMobileTab]           = useState('tracker') // 'tracker' | 'library'
+  const [mobileStatblockId,   setMobileStatblockId]   = useState(null)
+
   const [selectedId,        setSelectedId]        = useState(null)
   const [showInitModal,     setShowInitModal]     = useState(false)
   const [damageTargetId,    setDamageTargetId]    = useState(null)
@@ -40,6 +45,8 @@ export default function CombatTracker() {
   const [activeSpell,       setActiveSpell]       = useState(null)
   const [leftCollapsed,     setLeftCollapsed]     = useState(false)
   const [customLairActions, setCustomLairActions] = useState([])
+
+  const mobileStatblockCombatant = combat.combatants.find((c) => c.id === mobileStatblockId) ?? null
 
   // Editor state: { mode: 'new' } | { mode: 'edit', entry, customIndex }
   const [editor, setEditor] = useState(null)
@@ -123,28 +130,31 @@ export default function CombatTracker() {
     <div className="flex bg-[#1a1a1a]" style={{ height: 'calc(100vh - 48px)' }}>
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
-      <LeftPanel
-        monsters={library.monsters}
-        pcs={library.pcs}
-        onAdd={(entry) => {
-          if (entry.type === 'lair' && hasLair) return
-          combat.add(entry)
-        }}
-        collapsed={leftCollapsed}
-        onToggleCollapse={() => setLeftCollapsed((v) => !v)}
-        onEditStatblock={(entry) => {
-          setEditor({ mode: 'edit', entry })
-        }}
-        onNewStatblock={() => setEditor({ mode: 'new' })}
-        onDeleteStatblock={async (name, _type, actualKey) => {
-          try {
-            await library.deleteCreature(name, actualKey)
-            notifications.notify(`Deleted "${name}"`, 'success')
-          } catch (err) {
-            notifications.notify(`Failed to delete: ${err.message}`, 'error')
-          }
-        }}
-      />
+      <div className={isMobile && mobileTab === 'tracker' ? 'hidden' : 'contents'}>
+        <LeftPanel
+          monsters={library.monsters}
+          pcs={library.pcs}
+          onAdd={(entry) => {
+            if (entry.type === 'lair' && hasLair) return
+            combat.add(entry)
+            if (isMobile) setMobileTab('tracker')
+          }}
+          collapsed={!isMobile && leftCollapsed}
+          onToggleCollapse={() => setLeftCollapsed((v) => !v)}
+          onEditStatblock={(entry) => {
+            setEditor({ mode: 'edit', entry })
+          }}
+          onNewStatblock={() => setEditor({ mode: 'new' })}
+          onDeleteStatblock={async (name, _type, actualKey) => {
+            try {
+              await library.deleteCreature(name, actualKey)
+              notifications.notify(`Deleted "${name}"`, 'success')
+            } catch (err) {
+              notifications.notify(`Failed to delete: ${err.message}`, 'error')
+            }
+          }}
+        />
+      </div>
 
       {/* ── Centre: editor OR tracker ────────────────────────────────────── */}
       {editor ? (
@@ -169,7 +179,7 @@ export default function CombatTracker() {
           onCancel={() => setEditor(null)}
         />
       ) : (
-      <div className="flex-1 flex flex-col min-w-0 bg-[#1a1a1a]">
+      <div className={`flex-1 flex flex-col min-w-0 bg-[#1a1a1a] ${isMobile && mobileTab === 'library' ? 'hidden' : ''}`}>
 
         {/* Toolbar */}
         <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.06] flex items-center gap-3 min-h-[48px]">
@@ -257,7 +267,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto max-lg:pb-14">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
@@ -293,6 +303,7 @@ export default function CombatTracker() {
                   onSelect={(combatant) =>
                     setSelectedId(selectedId === combatant.id ? null : combatant.id)
                   }
+                  onDetails={isMobile ? (id) => setMobileStatblockId(id) : undefined}
                 />
               ))}
             </SortableContext>
@@ -301,20 +312,61 @@ export default function CombatTracker() {
       </div>
       )}
 
-      {/* ── Right: statblock panel ───────────────────────────────────────── */}
-      <StatblockPanel
-        combatant={selectedCombatant}
-        combatants={combat.combatants}
-        onClear={() => setSelectedId(null)}
-        onUsageChange={(key, value) => {
-          if (selectedId) combat.updateUsage(selectedId, key, value)
-        }}
-        onRoll={handleRoll}
-        onSpellClick={setActiveSpell}
-        customLairActions={customLairActions}
-        onAddCustomLairAction={(text) => setCustomLairActions((prev) => [...prev, text])}
-        onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
-      />
+      {/* ── Right: statblock panel (desktop only) ───────────────────────── */}
+      {!isMobile && (
+        <StatblockPanel
+          combatant={selectedCombatant}
+          combatants={combat.combatants}
+          onClear={() => setSelectedId(null)}
+          onUsageChange={(key, value) => {
+            if (selectedId) combat.updateUsage(selectedId, key, value)
+          }}
+          onRoll={handleRoll}
+          onSpellClick={setActiveSpell}
+          customLairActions={customLairActions}
+          onAddCustomLairAction={(text) => setCustomLairActions((prev) => [...prev, text])}
+          onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
+        />
+      )}
+
+      {/* ── Mobile: statblock overlay ────────────────────────────────────── */}
+      {isMobile && mobileStatblockCombatant && (
+        <StatblockPanel
+          combatant={mobileStatblockCombatant}
+          combatants={combat.combatants}
+          onClear={() => setMobileStatblockId(null)}
+          onUsageChange={(key, value) => combat.updateUsage(mobileStatblockId, key, value)}
+          onRoll={handleRoll}
+          onSpellClick={setActiveSpell}
+          customLairActions={customLairActions}
+          onAddCustomLairAction={(text) => setCustomLairActions((prev) => [...prev, text])}
+          onRemoveCustomLairAction={(idx) => setCustomLairActions((prev) => prev.filter((_, i) => i !== idx))}
+          mobileOverlay
+        />
+      )}
+
+      {/* ── Mobile: bottom tab bar ───────────────────────────────────────── */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-[#1e1e1e] border-t border-white/[0.06]">
+          {[
+            { key: 'tracker', label: 'Tracker' },
+            { key: 'library', label: 'Library' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              className={[
+                'flex-1 text-sm font-medium border-t-2 transition-colors',
+                mobileTab === key
+                  ? 'border-gold-400 text-[#e6e6e6]'
+                  : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
+              ].join(' ')}
+              onClick={() => setMobileTab(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Modals ───────────────────────────────────────────────────────── */}
       {showInitModal && (

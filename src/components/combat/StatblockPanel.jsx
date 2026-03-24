@@ -473,7 +473,7 @@ const MIN_WIDTH = 280
 const MAX_WIDTH = 700
 const DEFAULT_WIDTH = 320
 
-export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, onRoll, onSpellClick, customLairActions, onAddCustomLairAction, onRemoveCustomLairAction }) {
+export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, onRoll, onSpellClick, customLairActions, onAddCustomLairAction, onRemoveCustomLairAction, mobileOverlay = false }) {
   const isLair = combatant?.type === 'lair'
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem('statblock-panel-width')
@@ -514,6 +514,47 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
       window.removeEventListener('mouseup', onMouseUp)
     }
   }, [])
+
+  if (mobileOverlay) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-[#1a1a1a]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0 min-h-[48px]">
+          <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
+            {combatant?.name}
+          </h3>
+          <button
+            onClick={onClear}
+            className="text-[#9a9894] hover:text-[#e6e6e6] shrink-0 text-sm leading-none transition-colors"
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+        {/* Body */}
+        {isLair ? (
+          <LairActionBody
+            combatants={combatants ?? []}
+            customLairActions={customLairActions ?? []}
+            onAddCustomLairAction={onAddCustomLairAction}
+            onRemoveCustomLairAction={onRemoveCustomLairAction}
+          />
+        ) : !combatant?.statblock ? (
+          <div className="flex-1 flex items-center justify-center px-6 text-center">
+            <p className="text-[#b8b5b0] text-sm">No statblock available.</p>
+          </div>
+        ) : (
+          <StatblockBody
+            sb={combatant.statblock}
+            usage={combatant.usage ?? {}}
+            onUsageChange={onUsageChange}
+            onRoll={onRoll ? (result) => onRoll({ ...result, combatantName: combatant.name }) : null}
+            onSpellClick={onSpellClick}
+          />
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col relative" style={{ width }}>
