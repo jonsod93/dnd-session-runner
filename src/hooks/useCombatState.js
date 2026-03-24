@@ -7,10 +7,7 @@ const init = { combatants: [], activeTurnId: null }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 export function sortByInitiative(list) {
-  const lair = list.filter((c) => c.type === 'lair')
-  const rest = list.filter((c) => c.type !== 'lair')
-  rest.sort((a, b) => (b.initiative ?? -1) - (a.initiative ?? -1))
-  return [...lair, ...rest]
+  return [...list].sort((a, b) => (b.initiative ?? -1) - (a.initiative ?? -1))
 }
 
 // ── Reducer ───────────────────────────────────────────────────────────────────
@@ -91,11 +88,8 @@ function reducer(state, action) {
             : c
         ),
       }
-    case 'REORDER': {
-      const lair = action.list.filter((c) => c.type === 'lair')
-      const rest = action.list.filter((c) => c.type !== 'lair')
-      return { ...state, combatants: [...lair, ...rest] }
-    }
+    case 'REORDER':
+      return { ...state, combatants: action.list }
     case 'UPDATE_USAGE':
       return {
         ...state,

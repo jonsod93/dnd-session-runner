@@ -84,7 +84,7 @@ export function CombatantRow({
         <span
           className={[
             'w-36 shrink-0 text-sm font-medium truncate',
-            isLair ? 'text-[#9a9894] italic' : isPC ? 'text-green-400' : 'text-[#e6e6e6]',
+            isLair ? 'text-red-400' : isPC ? 'text-green-400' : 'text-[#e6e6e6]',
             isDead ? 'line-through' : '',
           ].join(' ')}
           title={combatant.name}
@@ -104,26 +104,26 @@ export function CombatantRow({
             )}
           </div>
 
-          {/* HP + T — fixed width */}
-          <div
-            className="w-[100px] shrink-0 flex items-center gap-1.5"
-          >
+          {/* HP — fixed width */}
+          <div className="w-16 shrink-0 flex justify-center">
             {combatant.hp != null && (
-              <>
-                <span className={`text-sm font-mono font-medium ${hpColor}`}>
-                  {combatant.hp.current}/{combatant.hp.max}
-                </span>
-                <button
-                  className="text-xs font-mono text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-1.5 py-0.5 rounded transition-colors"
-                  onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-                  title="Apply damage/healing (T)"
-                >
-                  T
-                </button>
-              </>
+              <span className={`text-sm font-mono font-medium ${hpColor}`}>
+                {combatant.hp.current}/{combatant.hp.max}
+              </span>
             )}
           </div>
         </div>
+
+        {/* Deal damage button — takes space from conditions area */}
+        {combatant.hp != null && (
+          <button
+            className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
+            onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+            title="Apply damage/healing (T)"
+          >
+            Deal damage
+          </button>
+        )}
 
         {/* Conditions — flex-1 spacer, shows tags when present */}
         {!isLair && (

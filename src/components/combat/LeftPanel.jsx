@@ -172,24 +172,26 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     <div className="text-xs text-[#9a9894] truncate mt-0.5">{entry.Type}</div>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex flex-col items-end shrink-0 gap-0.5">
                   {entry.ChallengeRating && (
                     <span className="text-xs text-[#9a9894]">CR {entry.ChallengeRating}</span>
                   )}
-                  <button
-                    className="text-[#9a9894] opacity-0 group-hover:opacity-100 hover:text-red-400 text-xs transition-all"
-                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc', key: entry._key }) }}
-                    title="Delete statblock"
-                  >
-                    ✕
-                  </button>
-                  <button
-                    className="text-[#9a9894] opacity-0 group-hover:opacity-100 hover:text-gold-400 text-xs transition-all"
-                    onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
-                    title="Edit statblock"
-                  >
-                    ✎
-                  </button>
+                  <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      className="text-[#9a9894] hover:text-gold-400 text-xs"
+                      onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
+                      title="Edit statblock"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="text-[#9a9894] hover:text-red-400 text-xs"
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc', key: entry._key }) }}
+                      title="Delete statblock"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -358,15 +360,12 @@ function LibraryPreview({ entry, top, onMouseEnter, onMouseLeave }) {
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Preview header */}
+      {/* Preview header — only name is sticky */}
       <div className="shrink-0 px-4 py-2.5 border-b border-white/[0.06]">
         <p className="text-sm font-medium text-[#e6e6e6] truncate">{entry.Name}</p>
-        {entry.Type && (
-          <p className="text-xs text-[#9a9894] italic truncate mt-0.5">{entry.Type}</p>
-        )}
       </div>
-      {/* Statblock body */}
-      <StatblockBody sb={entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} />
+      {/* Statblock body — no sticky stats header in preview */}
+      <StatblockBody sb={entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
     </div>
   )
 }

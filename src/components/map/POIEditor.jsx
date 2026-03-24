@@ -22,6 +22,7 @@ export function POIEditor({ poi, position, onSave, onCancel }) {
   const [color, setColor] = useState(poi?.color ?? '#facc15')
   const [notionPageId, setNotionPageId] = useState(poi?.notionPageId ?? '')
   const [notionPageTitle, setNotionPageTitle] = useState(poi?.notionPageTitle ?? '')
+  const [customText, setCustomText] = useState(poi?.customText ?? '')
 
   // Notion search
   const [searchQuery, setSearchQuery] = useState('')
@@ -64,6 +65,7 @@ export function POIEditor({ poi, position, onSave, onCancel }) {
       color,
       notionPageId: notionPageId || null,
       notionPageTitle: notionPageTitle || null,
+      customText: customText.trim() || null,
     })
   }
 
@@ -224,6 +226,20 @@ export function POIEditor({ poi, position, onSave, onCancel }) {
               </>
             )}
           </div>
+
+          {/* Custom text — shown when no Notion page is linked */}
+          {!notionPageId && (
+            <div>
+              <label className="block text-sm text-[#9a9894] mb-1.5">Description</label>
+              <textarea
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                placeholder="Custom description shown on hover..."
+                rows={3}
+                className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/40 placeholder:text-[#787774] transition-colors resize-y"
+              />
+            </div>
+          )}
 
           {/* Coordinates (read-only) */}
           <div>
