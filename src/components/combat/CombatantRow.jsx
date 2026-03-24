@@ -78,7 +78,7 @@ export function CombatantRow({
         isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
-      {...(!isMobile && !isLair ? { ...attributes, ...listeners } : {})}
+      {...(!isLair ? { ...attributes, ...listeners } : {})}
       onClick={() => onSelect(combatant)}
     >
       {/* Drag handle — desktop only, visual affordance; drag listeners are on the row */}
@@ -95,12 +95,11 @@ export function CombatantRow({
         ▶
       </span>
 
-      {/* Initiative — desktop: click to set active; mobile: drag handle + click to set active */}
+      {/* Initiative */}
       <button
-        {...(isMobile && !isLair ? { ...attributes, ...listeners } : {})}
-        className={`shrink-0 text-center font-mono font-medium transition-colors w-8 text-sm max-lg:w-16 max-lg:text-6xl max-lg:self-stretch max-lg:flex max-lg:items-center max-lg:justify-center ${isMobile && !isLair ? 'max-lg:cursor-grab max-lg:active:cursor-grabbing' : ''} ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
+        className={`shrink-0 text-center font-mono font-medium transition-colors w-8 text-sm max-lg:w-10 max-lg:text-xl max-lg:mr-2 ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
-        title={isMobile && !isLair ? 'Drag to reorder / tap to set active' : 'Set as active turn'}
+        title="Set as active turn"
       >
         {combatant.initiative ?? '—'}
       </button>
