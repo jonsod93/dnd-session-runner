@@ -205,9 +205,9 @@ export default function CombatTracker() {
             onClick={() => {
               // Play sound effect — silent if file missing or autoplay blocked
               try { new Audio('/audio/roll-initiative.mp3').play() } catch { /* ignore */ }
-              // Start Spotify playlist — silent no-op if not connected
+              // Start Spotify playlist after 2s so the mp3 can play first
               const uri = import.meta.env.VITE_SPOTIFY_PLAYLIST_URI
-              if (uri) spotify.play(uri)
+              if (uri) setTimeout(() => spotify.play(uri), 2000)
               setShowInitModal(true)
             }}
             className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm px-3 py-1.5 rounded transition-colors"
