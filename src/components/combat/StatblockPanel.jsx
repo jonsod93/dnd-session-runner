@@ -358,17 +358,19 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
   if (!items?.length) return null
   return (
     <div className="mb-1">
-      <hr className="border-white/[0.06] my-3" />
-      <div className="flex items-center gap-2 mb-2">
-        <p className="label-section leading-none">{title}</p>
-        {legendaryPerRound != null && (
-          <UsageBoxes
-            trackKey={`__${title}`}
-            count={legendaryPerRound}
-            usage={usage}
-            onUsageChange={onUsageChange}
-          />
-        )}
+      <div className="sticky -top-3 z-10 bg-[#1e1e1e] -mx-4 px-4">
+        <hr className="border-white/[0.06] my-3" />
+        <div className="flex items-center gap-2 mb-2">
+          <p className="label-section leading-none">{title}</p>
+          {legendaryPerRound != null && (
+            <UsageBoxes
+              trackKey={`__${title}`}
+              count={legendaryPerRound}
+              usage={usage}
+              onUsageChange={onUsageChange}
+            />
+          )}
+        </div>
       </div>
       {items.map((item, i) => (
         <AbilityEntry
