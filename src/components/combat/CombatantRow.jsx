@@ -88,14 +88,9 @@ export function CombatantRow({
         <GripIcon />
       </button>
 
-      {/* Active arrow */}
-      <span className={`shrink-0 w-3 text-gold-400 text-xs leading-none max-lg:self-center ${isActive ? 'opacity-100' : 'opacity-0'}`}>
-        ▶
-      </span>
-
       {/* Initiative */}
       <button
-        className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors max-lg:self-center ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
+        className={`w-10 shrink-0 text-center font-mono text-3xl font-medium transition-colors max-lg:self-stretch max-lg:flex max-lg:items-center max-lg:justify-center ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >

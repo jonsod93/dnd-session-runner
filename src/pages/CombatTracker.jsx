@@ -282,10 +282,8 @@ export default function CombatTracker() {
           <div className="max-lg:hidden shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-xs text-[#9a9894] uppercase tracking-wider font-medium">
             {/* Drag handle spacer */}
             <div className="w-[10px] shrink-0" />
-            {/* Active arrow spacer */}
-            <div className="w-3 shrink-0" />
             {/* Initiative */}
-            <div className="w-8 shrink-0 text-center">#</div>
+            <div className="w-10 shrink-0 text-center">#</div>
             {/* Name */}
             <div className="w-36 shrink-0">Name</div>
             {/* HP + AC group (HP first) */}
