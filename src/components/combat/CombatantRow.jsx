@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { CONDITIONS, uid } from '../../utils/combatUtils'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 export function CombatantRow({
   combatant,
@@ -71,7 +72,7 @@ export function CombatantRow({
         isActive
           ? 'border-l-gold-400 bg-white/[0.05]'
           : 'border-l-transparent hover:bg-white/[0.03]',
-        isSelected && !isActive ? 'bg-white/[0.05]' : '',
+        isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
       onClick={() => onSelect(combatant)}
@@ -253,15 +254,97 @@ export function CombatantRow({
 
 // ── Condition menu portal ─────────────────────────────────────────────────────
 function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [] }) {
-  const [custom, setCustom] = useState('')
-  const menuRef = useRef(null)
+  const [custom, setCustom]     = useState('')
+  const menuRef                 = useRef(null)
+  const isMobile                = useIsMobile()
 
+  const appliedNames        = new Set(currentConditions.map((c) => c.name))
+  const availableConditions = CONDITIONS.filter((c) => !appliedNames.has(c.name))
+
+  const handleCustomSubmit = (e) => {
+    e.preventDefault()
+    const t = custom.trim()
+    if (t) onAdd({ name: t, color: 'bg-white/[0.08] text-[#e6e6e6]' })
+    setCustom('')
+  }
+
+  // Desktop-only: close when clicking outside (hoisted above early return to satisfy Rules of Hooks)
   useEffect(() => {
+    if (isMobile) return
     const h = (e) => { if (!menuRef.current?.contains(e.target)) onClose() }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
-  }, [onClose])
+  }, [isMobile, onClose])
 
+  // ── Mobile: full bottom-sheet modal ────────────────────────────────────────
+  if (isMobile) {
+    return createPortal(
+      <div
+        className="fixed inset-0 z-[70] flex items-end justify-center"
+        style={{ background: 'rgba(0,0,0,0.5)' }}
+        onClick={onClose}
+      >
+        <div
+          className="bg-[#252525] border border-white/[0.1] rounded-t-xl w-full overflow-hidden flex flex-col"
+          style={{ maxHeight: '80vh', boxShadow: '0 -4px 32px rgba(0,0,0,0.4)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="relative shrink-0 px-10 py-3 border-b border-white/[0.06] text-center">
+            <p className="text-sm font-medium text-[#e6e6e6]">Add Condition</p>
+            <button
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
+              onClick={onClose}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Condition grid — scrollable */}
+          <div className="overflow-y-auto p-3 flex-1">
+            {availableConditions.length === 0 ? (
+              <p className="text-center text-sm text-[#9a9894] py-4 italic">All conditions applied</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {availableConditions.map((c) => (
+                  <button
+                    key={c.name}
+                    className="text-center px-3 py-2.5 text-sm text-[#e6e6e6] hover:bg-white/[0.08] border border-white/[0.12] rounded-lg transition-colors"
+                    onClick={() => onAdd({ name: c.name, color: c.color, info: c.info || '' })}
+                    title={c.info || ''}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Custom condition — no autoFocus so the keyboard doesn't jump up */}
+          <div className="shrink-0 border-t border-white/[0.06] px-3 py-3">
+            <form onSubmit={handleCustomSubmit} className="flex gap-2">
+              <input
+                type="text"
+                value={custom}
+                onChange={(e) => setCustom(e.target.value)}
+                placeholder="Custom condition…"
+                className="flex-1 bg-transparent border border-white/[0.12] rounded-lg px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#9a9894] transition-colors"
+              />
+              <button
+                type="submit"
+                className="shrink-0 px-3 py-2 text-sm bg-gold-400/10 hover:bg-gold-400/20 text-gold-400 border border-gold-400/30 rounded-lg transition-colors"
+              >
+                Add
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )
+  }
+
+  // ── Desktop: small anchored popup ──────────────────────────────────────────
   const MENU_W     = 188
   const MENU_MAX_H = 272
 
@@ -272,9 +355,6 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [] }) {
   const posStyle = spaceBelow >= 160 || spaceBelow >= spaceAbove
     ? { top: anchor.bottom + 4,                     left, maxHeight: Math.min(MENU_MAX_H, spaceBelow - 8) }
     : { bottom: window.innerHeight - anchor.top + 4, left, maxHeight: Math.min(MENU_MAX_H, spaceAbove - 8) }
-
-  const appliedNames        = new Set(currentConditions.map((c) => c.name))
-  const availableConditions = CONDITIONS.filter((c) => !appliedNames.has(c.name))
 
   return (
     <div
@@ -300,14 +380,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [] }) {
         )}
       </div>
       <div className="border-t border-white/[0.06] px-2 py-2">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            const t = custom.trim()
-            if (t) onAdd({ name: t, color: 'bg-white/[0.08] text-[#e6e6e6]' })
-            setCustom('')
-          }}
-        >
+        <form onSubmit={handleCustomSubmit}>
           <input
             type="text"
             value={custom}
