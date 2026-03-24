@@ -71,7 +71,7 @@ export function CombatantRow({
         'flex items-center max-lg:items-start gap-2 px-4 py-3 border-b border-white/[0.04] border-l-2 transition-colors min-h-[52px] cursor-default',
         isActive
           ? 'border-l-gold-400 bg-white/[0.05]'
-          : 'border-l-transparent hover:bg-white/[0.03]',
+          : 'border-l-transparent max-lg:hover:bg-transparent hover:bg-white/[0.03]',
         isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}

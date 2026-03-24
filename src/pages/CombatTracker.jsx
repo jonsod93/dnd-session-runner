@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   DndContext,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   KeyboardSensor,
   closestCenter,
   useSensor,
@@ -97,7 +98,10 @@ export default function CombatTracker() {
 
   // ── Drag & drop ──────────────────────────────────────────────────────────
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    // Mouse: activate after 5px movement
+    useSensor(MouseSensor,    { activationConstraint: { distance: 5 } }),
+    // Touch: activate after 250ms hold — avoids competing with page scroll
+    useSensor(TouchSensor,    { activationConstraint: { delay: 250, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
