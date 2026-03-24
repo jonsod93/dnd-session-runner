@@ -313,7 +313,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-40">
+        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-52">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
