@@ -375,7 +375,7 @@ export default function CombatTracker() {
       )}
 
       {/* ── Mobile: Next Turn button (fixed above tab bar) ───────────────── */}
-      {isMobile && (
+      {isMobile && mobileTab === 'tracker' && (
         <div className="fixed bottom-14 left-0 right-0 z-40 px-3 py-2 pointer-events-none">
           <button
             onClick={combat.nextTurn}
