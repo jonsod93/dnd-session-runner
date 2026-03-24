@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   DndContext,
   MouseSensor,
@@ -50,6 +50,17 @@ export default function CombatTracker() {
   const [customLairActions, setCustomLairActions] = useState([])
 
   const mobileStatblockCombatant = combat.combatants.find((c) => c.id === mobileStatblockId) ?? null
+
+  const listRef = useRef(null)
+
+  // Auto-scroll the active combatant to the top of the list when the turn advances
+  useEffect(() => {
+    if (!combat.activeTurnId || !listRef.current) return
+    const el = listRef.current.querySelector(`[data-combatant-id="${combat.activeTurnId}"]`)
+    if (el) {
+      listRef.current.scrollTo({ top: el.offsetTop, behavior: 'smooth' })
+    }
+  }, [combat.activeTurnId])
 
   // Editor state: { mode: 'new' } | { mode: 'edit', entry, customIndex }
   const [editor, setEditor] = useState(null)
@@ -299,7 +310,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div className="flex-1 overflow-y-auto max-lg:pb-32">
+        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-40">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>

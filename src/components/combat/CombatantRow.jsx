@@ -67,6 +67,7 @@ export function CombatantRow({
     <div
       ref={setNodeRef}
       style={style}
+      data-combatant-id={combatant.id}
       className={[
         'flex items-center max-lg:items-start gap-2 px-4 py-3 border-b border-white/[0.04] border-l-2 transition-colors min-h-[52px] cursor-default',
         isActive
