@@ -40,12 +40,20 @@ export function CombatantRow({
     hpPercent <= 0.5   ? 'text-amber-400'  :
                          'text-[#e6e6e6]'
 
+  const nameClasses = [
+    'shrink-0 text-sm font-medium truncate',
+    // Desktop: fixed width to align with header; mobile: fill remaining space
+    'w-36 max-lg:w-auto max-lg:flex-1',
+    isLair ? 'text-red-400' : isPC ? 'text-green-400' : 'text-[#e6e6e6]',
+    isDead ? 'line-through' : '',
+  ].join(' ')
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={[
-        'flex items-center gap-2 px-4 py-3 border-b border-white/[0.04] border-l-2 transition-colors min-h-[52px] cursor-default',
+        'flex items-center max-lg:items-start gap-2 px-4 py-3 border-b border-white/[0.04] border-l-2 transition-colors min-h-[52px] cursor-default',
         isActive
           ? 'border-l-gold-400 bg-white/[0.05]'
           : 'border-l-transparent hover:bg-white/[0.03]',
@@ -57,7 +65,7 @@ export function CombatantRow({
       {/* Drag handle */}
       <button
         {...(isLair ? {} : { ...attributes, ...listeners })}
-        className={`shrink-0 text-white/20 ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
+        className={`shrink-0 text-white/20 max-lg:mt-0.5 ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
@@ -65,100 +73,126 @@ export function CombatantRow({
       </button>
 
       {/* Active arrow — ALWAYS full opacity, never faded */}
-      <span className={`shrink-0 w-3 text-gold-400 text-xs leading-none ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+      <span className={`shrink-0 w-3 text-gold-400 text-xs leading-none max-lg:mt-0.5 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
         ▶
       </span>
 
       {/* Initiative — ALWAYS full opacity */}
       <button
-        className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
+        className={`w-8 shrink-0 text-center font-mono text-sm font-medium transition-colors max-lg:mt-px ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >
         {combatant.initiative ?? '—'}
       </button>
 
-      {/* ── Faded content block ──────────────────────────────────────── */}
-      <div className={`flex flex-1 items-center min-w-0 ${isDead ? 'opacity-40' : ''}`}>
+      {/* ── Content column — 1 line desktop, 2 lines mobile ─────────────── */}
+      <div className={`flex-1 min-w-0 ${isDead ? 'opacity-40' : ''}`}>
 
-        {/* Name — fixed width */}
-        <span
-          className={[
-            'w-36 shrink-0 text-sm font-medium truncate',
-            isLair ? 'text-red-400' : isPC ? 'text-green-400' : 'text-[#e6e6e6]',
-            isDead ? 'line-through' : '',
-          ].join(' ')}
-          title={combatant.name}
-        >
-          {combatant.name}
-        </span>
+        {/* Line 1: Name + desktop stats/buttons */}
+        <div className="flex items-center min-w-0">
+          <span className={nameClasses} title={combatant.name}>
+            {combatant.name}
+          </span>
 
-        {/* AC + HP group — centered with wider gap */}
-        <div className="flex items-center gap-4 shrink-0" style={{ marginLeft: 25 }}>
-          {/* AC column — fixed width */}
-          <div className="w-14 shrink-0 flex justify-center">
-            {combatant.ac != null && (
-              <span className="text-sm">
-                <span className="text-[#9a9894] text-sm">AC </span>
-                <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-              </span>
-            )}
+          {/* AC + HP group — desktop only */}
+          <div className="max-lg:hidden flex items-center gap-4 shrink-0" style={{ marginLeft: 25 }}>
+            <div className="w-14 shrink-0 flex justify-center">
+              {combatant.ac != null && (
+                <span className="text-sm">
+                  <span className="text-[#9a9894] text-sm">AC </span>
+                  <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
+                </span>
+              )}
+            </div>
+            <div className="w-16 shrink-0 flex justify-center">
+              {combatant.hp != null && (
+                <span className={`text-sm font-mono font-medium ${hpColor}`}>
+                  {combatant.hp.current}/{combatant.hp.max}
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* HP — fixed width */}
-          <div className="w-16 shrink-0 flex justify-center">
-            {combatant.hp != null && (
-              <span className={`text-sm font-mono font-medium ${hpColor}`}>
-                {combatant.hp.current}/{combatant.hp.max}
-              </span>
-            )}
-          </div>
+          {/* Deal damage — desktop only */}
+          {combatant.hp != null && (
+            <button
+              className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
+              onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+              title="Apply damage/healing (T)"
+            >
+              Deal damage
+            </button>
+          )}
+
+          {/* Conditions area — desktop flex-1 spacer with tags */}
+          {!isLair && (
+            <div className="max-lg:hidden flex-1 flex flex-wrap gap-1 items-center justify-end min-w-0 px-2">
+              {combatant.conditions.map((cond) => (
+                <span
+                  key={cond.id}
+                  className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded ${cond.color}`}
+                  title={cond.info || CONDITIONS.find((c) => c.name === cond.name)?.info || ''}
+                >
+                  {cond.name}
+                  <button
+                    className="opacity-50 hover:opacity-100 leading-none ml-0.5"
+                    onClick={(e) => { e.stopPropagation(); onRemoveCondition(combatant.id, cond.id) }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          {isLair && <div className="max-lg:hidden flex-1" />}
         </div>
 
-        {/* Deal damage button — takes space from conditions area */}
-        {combatant.hp != null && (
-          <button
-            className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
-            onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-            title="Apply damage/healing (T)"
-          >
-            Deal damage
-          </button>
-        )}
-
-        {/* Details button — mobile only, shows statblock overlay */}
-        {onDetails && combatant.statblock && !isLair && (
-          <button
-            className="lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
-            onClick={(e) => { e.stopPropagation(); onDetails(combatant.id) }}
-          >
-            Details
-          </button>
-        )}
-
-        {/* Conditions — flex-1 spacer, shows tags when present */}
-        {!isLair && (
-          <div
-            className="flex-1 flex flex-wrap gap-1 items-center justify-end min-w-0 px-2"
-          >
-            {combatant.conditions.map((cond) => (
-              <span
-                key={cond.id}
-                className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded ${cond.color}`}
-                title={cond.info || CONDITIONS.find((c) => c.name === cond.name)?.info || ''}
+        {/* Line 2: mobile only — AC, HP, action buttons, condition tags */}
+        <div className="lg:hidden flex items-center flex-wrap gap-1.5 mt-1.5">
+          {combatant.ac != null && (
+            <span className="text-sm">
+              <span className="text-[#9a9894]">AC </span>
+              <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
+            </span>
+          )}
+          {combatant.hp != null && (
+            <span className={`text-sm font-mono font-medium ${hpColor}`}>
+              {combatant.hp.current}/{combatant.hp.max}
+            </span>
+          )}
+          {combatant.hp != null && (
+            <button
+              className="text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
+              onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+            >
+              Deal damage
+            </button>
+          )}
+          {onDetails && combatant.statblock && !isLair && (
+            <button
+              className="text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors"
+              onClick={(e) => { e.stopPropagation(); onDetails(combatant.id) }}
+            >
+              Details
+            </button>
+          )}
+          {!isLair && combatant.conditions.map((cond) => (
+            <span
+              key={cond.id}
+              className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded ${cond.color}`}
+              title={cond.info || CONDITIONS.find((c) => c.name === cond.name)?.info || ''}
+            >
+              {cond.name}
+              <button
+                className="opacity-50 hover:opacity-100 leading-none ml-0.5"
+                onClick={(e) => { e.stopPropagation(); onRemoveCondition(combatant.id, cond.id) }}
               >
-                {cond.name}
-                <button
-                  className="opacity-50 hover:opacity-100 leading-none ml-0.5"
-                  onClick={(e) => { e.stopPropagation(); onRemoveCondition(combatant.id, cond.id) }}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-        {isLair && <div className="flex-1" />}
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* ── Conditions button — right-aligned, always full opacity ─────── */}
