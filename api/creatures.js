@@ -57,6 +57,24 @@ export default async function handler(req, res) {
   try {
     // ── GET: return full library ──────────────────────────────────────────
     if (req.method === 'GET') {
+      // ?reseed=true merges bundled JSON into blob (adds missing creatures)
+      if (req.query.reseed === 'true') {
+        if (!checkAuth(req)) {
+          return res.status(401).json({ error: 'Unauthorized' })
+        }
+        console.log('[api/creatures] Reseed requested, merging bundled JSON into blob...')
+        const bundled = readBundledJson()
+        const existing = (await readBlob()) || {}
+        // Merge: bundled entries fill in missing keys, existing entries are kept
+        const merged = { ...bundled, ...existing }
+        await writeBlob(merged)
+        const bundledCount = Object.keys(bundled).filter(k => k.startsWith('Creatures.')).length
+        const existingCount = Object.keys(existing).filter(k => k.startsWith('Creatures.')).length
+        const mergedCount = Object.keys(merged).filter(k => k.startsWith('Creatures.')).length
+        console.log(`[api/creatures] Reseed complete: bundled=${bundledCount}, existing=${existingCount}, merged=${mergedCount}`)
+        return res.status(200).json({ ok: true, bundled: bundledCount, existing: existingCount, merged: mergedCount })
+      }
+
       let data = await readBlob()
 
       // Lazy migration: first request seeds the blob from the bundled JSON
