@@ -71,7 +71,7 @@ export function CombatantRow({
       style={style}
       data-combatant-id={combatant.id}
       className={[
-        'flex items-center max-lg:items-center gap-2 px-4 py-3 border-b border-white/[0.08] border-l-2 transition-colors min-h-[52px] cursor-default',
+        'flex max-lg:items-center gap-2 px-4 py-3 border-b border-white/[0.08] border-l-2 transition-colors min-h-[52px] cursor-default',
         isActive
           ? 'border-l-gold-400 bg-white/[0.05]'
           : 'border-l-transparent max-lg:hover:bg-transparent hover:bg-white/[0.03]',
@@ -83,7 +83,7 @@ export function CombatantRow({
     >
       {/* Drag handle — desktop only, visual affordance; drag listeners are on the row */}
       <button
-        className={`shrink-0 text-white/20 max-lg:hidden ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
+        className={`shrink-0 self-center text-white/20 max-lg:hidden ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
@@ -91,13 +91,13 @@ export function CombatantRow({
       </button>
 
       {/* Active arrow — desktop only */}
-      <span className={`max-lg:hidden shrink-0 w-3 text-gold-400 text-xs leading-none ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+      <span className={`max-lg:hidden shrink-0 self-center w-3 text-gold-400 text-xs leading-none ${isActive ? 'opacity-100' : 'opacity-0'}`}>
         ▶
       </span>
 
       {/* Initiative */}
       <button
-        className={`shrink-0 text-center font-mono font-medium transition-colors w-8 text-sm max-lg:w-10 max-lg:text-xl max-lg:mr-2 ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
+        className={`shrink-0 self-center text-center font-mono font-medium transition-colors w-8 text-sm max-lg:w-10 max-lg:text-xl max-lg:mr-2 ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >
@@ -108,46 +108,56 @@ export function CombatantRow({
       <div className={`flex-1 min-w-0 max-lg:pr-2 ${isDead ? 'opacity-40' : ''}`}>
 
         {/* ── Desktop layout (hidden on mobile) ─────────────────────────── */}
-        <div className="max-lg:hidden flex items-center min-w-0">
-          <span
-            className={`w-36 shrink-0 text-sm font-medium truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
-            title={combatant.name}
-          >
-            {combatant.name}
-          </span>
-          <div className="flex items-center shrink-0 ml-[25px] gap-4">
-            <div className="w-20 shrink-0 flex justify-center">
-              {combatant.hp != null && (
-                <span className="text-sm whitespace-nowrap">
-                  <span className="text-[#9a9894]">HP </span>
-                  <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
-                </span>
-              )}
-            </div>
-            <div className="w-14 shrink-0 flex justify-center">
-              {combatant.ac != null && (
-                <span className="text-sm">
-                  <span className="text-[#9a9894]">AC </span>
-                  <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-                </span>
-              )}
-            </div>
-          </div>
-          {combatant.hp != null && (
-            <button
-              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12] ml-2"
-              onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-              title="Apply damage/healing (T)"
+        <div className="max-lg:hidden">
+          <div className="flex items-center min-w-0">
+            <span
+              className={`w-36 shrink-0 text-sm font-medium truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
+              title={combatant.name}
             >
-              Deal damage
-            </button>
-          )}
-          {!isLair && (
-            <div className="flex-1 flex flex-wrap gap-1 items-center justify-end min-w-0 px-2">
+              {combatant.name}
+            </span>
+            <div className="flex items-center shrink-0 ml-[25px] gap-4">
+              <div className="w-20 shrink-0 flex justify-center">
+                {combatant.hp != null && (
+                  <span className="text-sm whitespace-nowrap">
+                    <span className="text-[#9a9894]">HP </span>
+                    <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
+                  </span>
+                )}
+              </div>
+              <div className="w-14 shrink-0 flex justify-center">
+                {combatant.ac != null && (
+                  <span className="text-sm">
+                    <span className="text-[#9a9894]">AC </span>
+                    <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+            {combatant.hp != null && (
+              <button
+                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12] ml-2"
+                onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+                title="Apply damage/healing (T)"
+              >
+                Deal damage
+              </button>
+            )}
+            {!isLair && (
+              <button
+                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12] ml-2"
+                onClick={openConditions}
+                title="Add/manage conditions"
+              >
+                Conditions
+              </button>
+            )}
+          </div>
+          {!isLair && conditionTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
               {conditionTags}
             </div>
           )}
-          {isLair && <div className="flex-1" />}
         </div>
 
         {/* ── Mobile layout (hidden on desktop) ─────────────────────────── */}
@@ -220,25 +230,15 @@ export function CombatantRow({
         </div>
       </div>
 
-      {/* ── Conditions button — desktop only, right-aligned ─────────────── */}
-      {!isLair && (
-        <button
-          className="max-lg:hidden shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12]"
-          onClick={openConditions}
-          title="Add/manage conditions"
-        >
-          Conditions
-        </button>
-      )}
-
       {/* Remove */}
       <button
-        className="shrink-0 text-[#9a9894] hover:text-red-400 transition-colors leading-none text-sm ml-0.5 max-lg:self-center"
+        className="shrink-0 self-center text-[#9a9894] hover:text-red-400 transition-colors leading-none text-sm ml-0.5"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >
         ✕
       </button>
+
 
       {/* Condition dropdown portal */}
       {condAnchor && createPortal(
