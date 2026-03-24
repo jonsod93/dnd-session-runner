@@ -215,15 +215,6 @@ export default function CombatTracker() {
             Roll Initiative
           </button>
 
-          <button
-            onClick={combat.nextTurn}
-            className="max-lg:hidden text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
-            title="Next turn (N)"
-          >
-            Next Turn
-            <span className="font-mono text-xs ml-1.5 text-[#9a9894]/60">[N]</span>
-          </button>
-
           <div className="flex-1" />
 
           <span className="text-xs text-[#9a9894] font-mono">

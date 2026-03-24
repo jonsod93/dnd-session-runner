@@ -136,6 +136,15 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
+                onMouseEnter={(e) => {
+                  if (isMobile || !(entry.HP || entry.AC || entry.Abilities)) return
+                  if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
+                  setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
+                }}
+                onMouseLeave={() => {
+                  if (isMobile) return
+                  hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
+                }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
@@ -148,24 +157,6 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     <span className="text-xs text-[#9a9894]">CR {entry.ChallengeRating}</span>
                   )}
                   <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
-                    {(entry.HP || entry.AC || entry.Abilities) && (
-                      <button
-                        className="text-[#9a9894] hover:text-gold-400 text-xs"
-                        onClick={(e) => { e.stopPropagation(); if (isMobile) setLibraryPreviewEntry(entry) }}
-                        onMouseEnter={(e) => {
-                          if (isMobile) return
-                          if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
-                          setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
-                        }}
-                        onMouseLeave={() => {
-                          if (isMobile) return
-                          hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
-                        }}
-                        title="View statblock"
-                      >
-                        ⊙
-                      </button>
-                    )}
                     <button
                       className="text-[#9a9894] hover:text-gold-400 text-xs"
                       onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
@@ -209,30 +200,19 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
+                onMouseEnter={(e) => {
+                  if (isMobile || !(entry.HP || entry.AC || entry.Abilities)) return
+                  if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
+                  setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
+                }}
+                onMouseLeave={() => {
+                  if (isMobile) return
+                  hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
+                }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                 </div>
-                {(entry.HP || entry.AC || entry.Abilities) && (
-                  <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-all">
-                    <button
-                      className="text-[#9a9894] hover:text-gold-400 text-xs"
-                      onClick={(e) => { e.stopPropagation(); if (isMobile) setLibraryPreviewEntry(entry) }}
-                      onMouseEnter={(e) => {
-                        if (isMobile) return
-                        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
-                        setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
-                      }}
-                      onMouseLeave={() => {
-                        if (isMobile) return
-                        hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
-                      }}
-                      title="View statblock"
-                    >
-                      ⊙
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
