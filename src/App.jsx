@@ -3,6 +3,7 @@ import Navigation from './components/Navigation.jsx'
 import CombatTracker from './pages/CombatTracker.jsx'
 import MapPage from './pages/MapPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import SpotifyCallback from './pages/SpotifyCallback.jsx'
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
 
 function AuthGate({ children }) {
@@ -21,6 +22,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<CombatTracker />} />
               <Route path="/map" element={<MapPage />} />
+              <Route path="/spotify-callback" element={<SpotifyCallback />} />
             </Routes>
           </main>
         </div>
