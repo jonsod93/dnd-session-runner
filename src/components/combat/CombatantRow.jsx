@@ -71,7 +71,7 @@ export function CombatantRow({
         isActive
           ? 'border-l-gold-400 bg-white/[0.05]'
           : 'border-l-transparent hover:bg-white/[0.03]',
-        isSelected && !isActive ? 'bg-white/[0.05]' : '',
+        isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
       onClick={() => onSelect(combatant)}
