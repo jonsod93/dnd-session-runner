@@ -215,15 +215,6 @@ export default function CombatTracker() {
             Roll Initiative
           </button>
 
-          <button
-            onClick={combat.nextTurn}
-            className="max-lg:hidden text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-3 py-1.5 rounded transition-colors"
-            title="Next turn (N)"
-          >
-            Next Turn
-            <span className="font-mono text-xs ml-1.5 text-[#9a9894]/60">[N]</span>
-          </button>
-
           <div className="flex-1" />
 
           <span className="text-xs text-[#9a9894] font-mono">
@@ -290,7 +281,7 @@ export default function CombatTracker() {
             <div className="w-36 shrink-0">Name</div>
             {/* HP + AC group (HP first) */}
             <div className="flex items-center gap-4 shrink-0" style={{ marginLeft: 25 }}>
-              <div className="w-16 flex justify-center" title="Hit Points">
+              <div className="w-20 flex justify-center" title="Hit Points">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
@@ -347,6 +338,7 @@ export default function CombatTracker() {
                   onAddCondition={combat.addCondition}
                   onRemoveCondition={combat.removeCondition}
                   onSelect={(combatant) => {
+                    if (!isMobile && selectedId === combatant.id) return
                     const newId = selectedId === combatant.id ? null : combatant.id
                     setSelectedId(newId)
                     if (isMobile && combatant.statblock) setMobileStatblockId(combatant.id)

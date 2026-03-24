@@ -22,6 +22,8 @@ export function CombatantRow({
   const isPC   = combatant.type === 'pc'
   const isDead = combatant.hp?.current === 0
 
+  const isMobile = useIsMobile()
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: combatant.id,
     disabled: isLair,
@@ -69,19 +71,19 @@ export function CombatantRow({
       style={style}
       data-combatant-id={combatant.id}
       className={[
-        'flex items-center max-lg:items-start gap-2 px-4 py-3 border-b border-white/[0.04] border-l-2 transition-colors min-h-[52px] cursor-default',
+        'flex items-center max-lg:items-center gap-2 px-4 py-3 border-b border-white/[0.08] border-l-2 transition-colors min-h-[52px] cursor-default',
         isActive
           ? 'border-l-gold-400 bg-white/[0.05]'
           : 'border-l-transparent max-lg:hover:bg-transparent hover:bg-white/[0.03]',
         isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
+      {...(!isMobile && !isLair ? { ...attributes, ...listeners } : {})}
       onClick={() => onSelect(combatant)}
     >
-      {/* Drag handle */}
+      {/* Drag handle — desktop only, visual affordance; drag listeners are on the row */}
       <button
-        {...(isLair ? {} : { ...attributes, ...listeners })}
-        className={`shrink-0 text-white/20 max-lg:self-center ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
+        className={`shrink-0 text-white/20 max-lg:hidden ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
@@ -93,11 +95,12 @@ export function CombatantRow({
         ▶
       </span>
 
-      {/* Initiative */}
+      {/* Initiative — desktop: click to set active; mobile: drag handle + click to set active */}
       <button
-        className={`shrink-0 text-center font-mono font-medium transition-colors w-8 text-sm max-lg:w-10 max-lg:text-3xl max-lg:self-stretch max-lg:flex max-lg:items-center max-lg:justify-center ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
+        {...(isMobile && !isLair ? { ...attributes, ...listeners } : {})}
+        className={`shrink-0 text-center font-mono font-medium transition-colors w-8 text-sm max-lg:w-16 max-lg:text-6xl max-lg:self-stretch max-lg:flex max-lg:items-center max-lg:justify-center ${isMobile && !isLair ? 'max-lg:cursor-grab max-lg:active:cursor-grabbing' : ''} ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
-        title="Set as active turn"
+        title={isMobile && !isLair ? 'Drag to reorder / tap to set active' : 'Set as active turn'}
       >
         {combatant.initiative ?? '—'}
       </button>
@@ -114,9 +117,9 @@ export function CombatantRow({
             {combatant.name}
           </span>
           <div className="flex items-center shrink-0 ml-[25px] gap-4">
-            <div className="w-16 shrink-0 flex justify-center">
+            <div className="w-20 shrink-0 flex justify-center">
               {combatant.hp != null && (
-                <span className="text-sm">
+                <span className="text-sm whitespace-nowrap">
                   <span className="text-[#9a9894]">HP </span>
                   <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
                 </span>
@@ -133,7 +136,7 @@ export function CombatantRow({
           </div>
           {combatant.hp != null && (
             <button
-              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12]"
+              className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-0.5 rounded transition-colors border border-white/[0.12] ml-2"
               onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
               title="Apply damage/healing (T)"
             >
@@ -389,7 +392,6 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [] }) {
             value={custom}
             onChange={(e) => setCustom(e.target.value)}
             placeholder="Custom condition…"
-            autoFocus
             className="w-full bg-transparent border-b border-white/[0.1] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#9a9894] transition-colors"
           />
         </form>
