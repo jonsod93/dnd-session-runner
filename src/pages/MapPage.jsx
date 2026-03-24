@@ -25,9 +25,9 @@ const MAP_CONFIG = {
     [12960, 23040],
   ],
   center: [6480, 11520],
-  zoom: -4,
-  minZoom: -4,
-  maxZoom: 1,
+  zoom: -3,
+  minZoom: -3,
+  maxZoom: 0,
 }
 
 // ─── Right-click handler component ──────────────────────────────────────────
@@ -116,6 +116,8 @@ export default function MapPage() {
         zoom={MAP_CONFIG.zoom}
         minZoom={MAP_CONFIG.minZoom}
         maxZoom={MAP_CONFIG.maxZoom}
+        maxBounds={MAP_CONFIG.bounds}
+        maxBoundsViscosity={1.0}
         style={{ height: '100%', width: '100%' }}
         zoomControl
         attributionControl={false}
