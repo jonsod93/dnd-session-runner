@@ -17,6 +17,7 @@ import {
 import { useCombatState } from '../hooks/useCombatState'
 import { useLibrary }      from '../hooks/useLibrary'
 import { useIsMobile }     from '../hooks/useIsMobile'
+import { useSpotify }      from '../hooks/useSpotify'
 import { LeftPanel }       from '../components/combat/LeftPanel'
 import { CombatantRow }    from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
@@ -34,6 +35,7 @@ export default function CombatTracker() {
   const notifications = useNotifications()
 
   const isMobile = useIsMobile()
+  const spotify  = useSpotify()
   const [mobileTab,           setMobileTab]           = useState('tracker') // 'tracker' | 'library'
   const [mobileStatblockId,   setMobileStatblockId]   = useState(null)
 
@@ -182,7 +184,14 @@ export default function CombatTracker() {
         {/* Toolbar */}
         <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.06] flex items-center gap-3 min-h-[48px]">
           <button
-            onClick={() => setShowInitModal(true)}
+            onClick={() => {
+              // Play sound effect — silent if file missing or autoplay blocked
+              try { new Audio('/audio/roll-initiative.mp3').play() } catch { /* ignore */ }
+              // Start Spotify playlist — silent no-op if not connected
+              const uri = import.meta.env.VITE_SPOTIFY_PLAYLIST_URI
+              if (uri) spotify.play(uri)
+              setShowInitModal(true)
+            }}
             className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm px-3 py-1.5 rounded transition-colors"
           >
             Roll Initiative
@@ -202,6 +211,27 @@ export default function CombatTracker() {
           <span className="text-xs text-[#9a9894] font-mono">
             {combat.combatants.filter((c) => c.type !== 'lair').length} combatants
           </span>
+
+          {/* Spotify indicator — only shown when the feature is configured */}
+          {spotify.enabled && (
+            spotify.isConnected ? (
+              <button
+                onClick={spotify.disconnect}
+                className="text-xs text-[#9a9894]/50 hover:text-[#9a9894] transition-colors"
+                title="Spotify connected — click to disconnect"
+              >
+                ♫
+              </button>
+            ) : (
+              <button
+                onClick={spotify.connect}
+                className="text-xs text-[#9a9894]/40 hover:text-[#9a9894] transition-colors"
+                title="Connect Spotify"
+              >
+                Connect Spotify
+              </button>
+            )
+          )}
 
           {showClearConfirm ? (
             <div className="flex items-center gap-2">
