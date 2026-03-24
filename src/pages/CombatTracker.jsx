@@ -205,9 +205,9 @@ export default function CombatTracker() {
             onClick={() => {
               // Play sound effect — silent if file missing or autoplay blocked
               try { new Audio('/audio/roll-initiative.mp3').play() } catch { /* ignore */ }
-              // Start Spotify playlist after 2s so the mp3 can play first
+              // Start Spotify playlist after 1s so the mp3 can play first
               const uri = import.meta.env.VITE_SPOTIFY_PLAYLIST_URI
-              if (uri) setTimeout(() => spotify.play(uri), 2000)
+              if (uri) setTimeout(() => spotify.play(uri), 1000)
               setShowInitModal(true)
             }}
             className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm px-3 py-1.5 rounded transition-colors"
@@ -281,7 +281,7 @@ export default function CombatTracker() {
             <div className="w-36 shrink-0">Name</div>
             {/* HP + AC group (HP first) */}
             <div className="flex items-center gap-4 shrink-0" style={{ marginLeft: 25 }}>
-              <div className="w-20 flex justify-center" title="Hit Points">
+              <div className="w-20 flex justify-center pr-2" title="Hit Points">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
