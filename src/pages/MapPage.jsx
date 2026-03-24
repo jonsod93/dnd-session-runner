@@ -25,9 +25,9 @@ const MAP_CONFIG = {
     [12960, 23040],
   ],
   center: [6480, 11520],
-  zoom: -2,
-  minZoom: -2,
-  maxZoom: 3,
+  zoom: -4,
+  minZoom: -4,
+  maxZoom: 1,
 }
 
 // ─── Right-click handler component ──────────────────────────────────────────
