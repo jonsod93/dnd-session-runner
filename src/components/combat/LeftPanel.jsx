@@ -1,16 +1,19 @@
 import { useState, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 const GRACE_MS = 350
 
 export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, monsters, pcs }) {
+  const isMobile = useIsMobile()
   const [tab,   setTab]   = useState('npc')
   const [query, setQuery] = useState('')
   const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
   const [deleteConfirm, setDeleteConfirm] = useState(null) // { name, type: 'npc'|'pc' }
+  const [mobileLibraryMenu, setMobileLibraryMenu] = useState(null) // { entry }
 
   // ── Hover preview state ───────────────────────────────────────────────────
   const [preview,       setPreview]       = useState(null) // { entry, anchor }
@@ -103,7 +106,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   }
 
   return (
-    <div className="w-64 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col">
+    <div className={`${isMobile ? 'w-full flex-1' : 'w-64 shrink-0'} bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col`}>
       {/* Tabs + collapse button */}
       <div className="flex border-b border-white/[0.06] shrink-0">
         {[
@@ -126,7 +129,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         ))}
         <button
           onClick={onToggleCollapse}
-          className="px-2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors shrink-0"
+          className="max-lg:hidden px-2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors shrink-0"
           title="Collapse library"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -162,7 +165,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               <div
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
-                onClick={() => handleLibraryAdd(entry)}
+                onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
                 onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
                 onMouseLeave={handleEntryMouseLeave}
               >
@@ -219,7 +222,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               <button
                 key={entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group"
-                onClick={() => handleLibraryAdd(entry)}
+                onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
                 onMouseEnter={(e) => handleEntryMouseEnter(entry, e)}
                 onMouseLeave={handleEntryMouseLeave}
               >
@@ -316,6 +319,64 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 Delete
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Mobile library entry popup ───────────────────────────────────── */}
+      {mobileLibraryMenu && createPortal(
+        <div
+          className="fixed inset-0 z-[2000] flex items-end justify-center p-4 pb-20"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setMobileLibraryMenu(null)}
+        >
+          <div
+            className="bg-[#252525] border border-white/[0.1] rounded-xl w-full max-w-sm overflow-hidden"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Entry name header */}
+            <div className="px-4 py-3 border-b border-white/[0.06]">
+              <p className="text-sm font-medium text-[#e6e6e6]">{mobileLibraryMenu.entry.Name}</p>
+              {mobileLibraryMenu.entry.Type && (
+                <p className="text-xs text-[#9a9894] mt-0.5">{mobileLibraryMenu.entry.Type}</p>
+              )}
+            </div>
+            {/* Add to combat */}
+            <button
+              className="w-full text-left px-4 py-3.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
+              onClick={() => { handleLibraryAdd(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+            >
+              Add combatant to combat
+            </button>
+            {/* Edit / Delete — NPC only */}
+            {mobileLibraryMenu.entry._libType !== 'pc' && (
+              <>
+                <button
+                  className="w-full text-left px-4 py-3.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
+                  onClick={() => { onEditStatblock?.(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
+                >
+                  Edit statblock
+                </button>
+                <button
+                  className="w-full text-left px-4 py-3.5 text-sm text-red-400 hover:bg-white/[0.06] border-b border-white/[0.04] transition-colors"
+                  onClick={() => {
+                    setDeleteConfirm({ name: mobileLibraryMenu.entry.Name, type: 'npc', key: mobileLibraryMenu.entry._key })
+                    setMobileLibraryMenu(null)
+                  }}
+                >
+                  Delete statblock
+                </button>
+              </>
+            )}
+            {/* Cancel */}
+            <button
+              className="w-full text-center px-4 py-3.5 text-sm text-[#9a9894] hover:bg-white/[0.06] transition-colors"
+              onClick={() => setMobileLibraryMenu(null)}
+            >
+              Cancel
+            </button>
           </div>
         </div>,
         document.body
