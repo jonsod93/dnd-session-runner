@@ -41,7 +41,14 @@ export function POIMarker({ poi, onEdit, onRemove }) {
   const map = useMap()
   const [hovered, setHovered] = useState(false)
   const [tooltipHovered, setTooltipHovered] = useState(false)
-  const [preview, setPreview] = useState(null)
+  const cachedPreview = poi.notionCache ? {
+    title: poi.notionCache.title,
+    blurb: poi.notionCache.blurb,
+    types: poi.notionCache.types,
+    tags: poi.notionCache.tags,
+    content: poi.notionCache.content,
+  } : null
+  const [preview, setPreview] = useState(cachedPreview)
   const [loading, setLoading] = useState(false)
   const [showFullInfo, setShowFullInfo] = useState(false)
   const [tooltipPos, setTooltipPos] = useState(null)
@@ -74,9 +81,9 @@ export function POIMarker({ poi, onEdit, onRemove }) {
     setTooltipPos({ x: rect.left + point.x, y: rect.top + point.y - 28 })
   }, [map, poi.position])
 
-  // Fetch Notion preview on hover
+  // Fetch Notion preview on hover (skipped if notionCache already provided instant data)
   useEffect(() => {
-    if (!isVisible || !poi.notionPageId) return
+    if (!isVisible || !poi.notionPageId || preview) return
     if (previewCache.has(poi.notionPageId)) {
       setPreview(previewCache.get(poi.notionPageId))
       return
@@ -101,7 +108,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
       })
 
     return () => { cancelled = true }
-  }, [isVisible, poi.notionPageId])
+  }, [isVisible, poi.notionPageId, preview])
 
   // Update position on map move/zoom
   useEffect(() => {
