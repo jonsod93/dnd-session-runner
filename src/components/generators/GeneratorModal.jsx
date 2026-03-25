@@ -69,7 +69,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
       // Append mention to the linked session
       await appendSessionBlock(modal.linkedSession.id, created.id)
 
-      onSaved?.(trimmedName, generator.label)
+      onSaved?.(trimmedName, generator.label, desc || '')
       onClose()
     } catch (err) {
       console.error('Save failed:', err)
@@ -162,20 +162,13 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-white/[0.06] flex gap-2">
+        <div className="px-5 py-4 border-t border-white/[0.06]">
           <button
             onClick={handleSave}
             disabled={!modal.linkedSession || !name.trim() || saving}
-            className="flex-1 bg-gold-400 hover:bg-gold-300 disabled:opacity-30 disabled:cursor-not-allowed text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2.5 transition-colors"
+            className="w-full bg-gold-400 hover:bg-gold-300 disabled:opacity-30 disabled:cursor-not-allowed text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2.5 transition-colors"
           >
             {saving ? 'Saving...' : `Save and create ${generator.label}`}
-          </button>
-          <button
-            onClick={onClose}
-            disabled={saving}
-            className="text-sm text-[#787774] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-3 py-1.5 rounded transition-colors border border-white/[0.1]"
-          >
-            Cancel
           </button>
         </div>
       </div>
