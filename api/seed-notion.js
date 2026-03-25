@@ -212,7 +212,7 @@ export default async function handler(req, res) {
 
   try {
     const pois = (await readBlob()) ?? []
-    const unseeded = pois.filter((p) => p.notionPageId && !p.notionCache)
+    const unseeded = pois.filter((p) => p.notionPageId && (!p.notionCache || !p.notionCache.fullBlocks))
     const toProcess = unseeded.slice(0, MAX_PER_CALL)
 
     if (toProcess.length === 0) {
