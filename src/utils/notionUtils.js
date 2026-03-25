@@ -1,5 +1,9 @@
-// Notion database ID for Locations
+// Notion database IDs
 export const LOCATIONS_DB_ID = '1372674d-44b5-812e-b947-ee4c1e09cfaa'
+export const SESSIONS_DB_ID = '1372674d-44b5-81e1-9e99-000bb0d81dfc'
+export const PEOPLE_DB_ID = '1372674d-44b5-8129-b618-000bfad33ed6'
+export const ORGANIZATIONS_DB_ID = '1372674d-44b5-8126-b4c5-000bdc24912f'
+export const WORLD_MASTER_ID = '1382674d44b580d788daf4515b74772f'
 
 // Extract plain text from Notion rich_text array
 export function richTextToPlain(richText) {
@@ -224,4 +228,112 @@ export async function fetchFullPage(pageId) {
   }
 
   return { ...basic, relations }
+}
+
+// ── Generators: session search, page creation, block append ──
+
+// Search the Sessions database
+export async function searchSessions(query) {
+  const res = await notionFetch(`v1/databases/${SESSIONS_DB_ID}/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      filter: query
+        ? { property: 'Name', title: { contains: query } }
+        : undefined,
+      page_size: 15,
+      sorts: [{ property: 'Session #', direction: 'descending' }],
+    }),
+  })
+  if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
+  const data = await res.json()
+  return (data.results ?? []).map((page) => {
+    const props = page.properties ?? {}
+    return {
+      id: page.id,
+      title: richTextToPlain(props.Name?.title),
+      sessionNumber: props['Session #']?.number ?? null,
+    }
+  })
+}
+
+// Create a page in any Notion database
+export async function createNotionPage(databaseId, properties) {
+  const res = await notionFetch('v1/pages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      parent: { database_id: databaseId },
+      properties,
+    }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Notion create failed (${res.status}): ${body}`)
+  }
+  return res.json()
+}
+
+// Append a mention to a session page under "Generated content this session"
+export async function appendSessionBlock(sessionPageId, mentionPageId) {
+  // Fetch existing blocks to check for the heading
+  const blocks = await fetchPageBlocks(sessionPageId)
+  const hasHeading = blocks.some(
+    (b) =>
+      b.type === 'heading_2' &&
+      richTextToPlain(b.heading_2?.rich_text) === 'Generated content this session'
+  )
+
+  const newBlocks = []
+  if (!hasHeading) {
+    newBlocks.push({
+      object: 'block',
+      type: 'heading_2',
+      heading_2: { rich_text: [{ type: 'text', text: { content: 'Generated content this session' } }] },
+    })
+  }
+  newBlocks.push({
+    object: 'block',
+    type: 'bulleted_list_item',
+    bulleted_list_item: {
+      rich_text: [{ type: 'mention', mention: { type: 'page', page: { id: mentionPageId } } }],
+    },
+  })
+
+  const res = await notionFetch(`v1/blocks/${sessionPageId}/children`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ children: newBlocks }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Notion append failed (${res.status}): ${body}`)
+  }
+}
+
+// ── Property builders for different entity types ──
+
+export function buildPersonProperties(name, blurb) {
+  return {
+    Name: { title: [{ text: { content: name } }] },
+    ...(blurb ? { Blurb: { rich_text: [{ text: { content: blurb } }] } } : {}),
+    World: { relation: [{ id: WORLD_MASTER_ID }] },
+  }
+}
+
+export function buildLocationProperties(name, type, blurb) {
+  return {
+    Name: { title: [{ text: { content: name } }] },
+    Type: { multi_select: [{ name: type }] },
+    ...(blurb ? { Blurb: { rich_text: [{ text: { content: blurb } }] } } : {}),
+    World: { relation: [{ id: WORLD_MASTER_ID }] },
+  }
+}
+
+export function buildOrgProperties(name, notes) {
+  return {
+    Name: { title: [{ text: { content: name } }] },
+    ...(notes ? { Notes: { rich_text: [{ text: { content: notes } }] } } : {}),
+    World: { relation: [{ id: WORLD_MASTER_ID }] },
+  }
 }

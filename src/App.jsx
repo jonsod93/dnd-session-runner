@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import Navigation from './components/Navigation.jsx'
 import CombatTracker from './pages/CombatTracker.jsx'
 import MapPage from './pages/MapPage.jsx'
+import GeneratorsPage from './pages/GeneratorsPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import SpotifyCallback from './pages/SpotifyCallback.jsx'
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
@@ -23,6 +24,7 @@ export default function App() {
               <Route path="/" element={<CombatTracker />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/spotify-callback" element={<SpotifyCallback />} />
+              <Route path="/generators" element={<GeneratorsPage />} />
             </Routes>
           </main>
         </div>

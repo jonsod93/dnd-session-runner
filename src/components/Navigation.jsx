@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 const tabs = [
   { label: 'Combat Tracker', to: '/' },
   { label: 'Map',            to: '/map' },
+  { label: 'Generators',     to: '/generators' },
 ]
 
 export default function Navigation() {
