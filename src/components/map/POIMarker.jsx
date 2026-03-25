@@ -134,6 +134,12 @@ export function POIMarker({ poi, onEdit, onRemove }) {
             cancelHide(); setHovered(true); updateTooltipPos()
           },
           mouseout: () => scheduleHide(),
+          click: () => {
+            // Desktop: open full info directly; mobile: handled via tooltip button
+            if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
+              setShowFullInfo(true)
+            }
+          },
           contextmenu: (e) => {
             L.DomEvent.preventDefault(e)
             onEdit?.(poi)
@@ -200,7 +206,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
                     View page
                   </a>
                   <button
-                    className="text-xs text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
+                    className="text-xs text-[#9a9894] hover:text-[#e6e6e6] transition-colors pointer-fine:hidden"
                     onClick={() => setShowFullInfo(true)}
                   >
                     Full info

@@ -31,7 +31,7 @@ export default function Navigation() {
   }, [menuOpen])
 
   return (
-    <nav className="h-12 bg-[#1a1a1a] border-b border-white/[0.06] flex items-stretch px-5 shrink-0 relative">
+    <nav className="h-12 bg-[#1a1a1a] border-b border-white/[0.06] flex items-stretch px-5 shrink-0 relative z-[1001]">
       {/* App title */}
       <div className="flex items-center mr-7">
         <span className="font-display text-sm font-semibold tracking-[0.22em] text-gold-400 uppercase select-none">
