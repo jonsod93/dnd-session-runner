@@ -41,7 +41,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
   const map = useMap()
   const [hovered, setHovered] = useState(false)
   const [tooltipHovered, setTooltipHovered] = useState(false)
-  const cachedPreview = poi.notionCache ? {
+  const cachedPreview = (poi.notionCache && !poi.notionCache.notFound) ? {
     title: poi.notionCache.title,
     blurb: poi.notionCache.blurb,
     types: poi.notionCache.types,

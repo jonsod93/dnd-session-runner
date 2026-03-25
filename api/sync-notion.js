@@ -106,7 +106,9 @@ async function fetchNotionCache(pageId) {
 
   if (!propsRes.ok) {
     const status = propsRes.status
-    if (status === 404) return null
+    if (status === 404) {
+      return { title: '', blurb: '', types: [], tags: [], content: '', lastSynced: new Date().toISOString(), notFound: true }
+    }
     throw new Error(`Notion page ${pageId} returned ${status}`)
   }
 
