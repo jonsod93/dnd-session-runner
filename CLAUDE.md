@@ -2,43 +2,58 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Development Commands
 
-This is a D&D (Dungeons & Dragons) session runner application currently in initial development phase. The project is designed to help manage and run D&D gaming sessions.
+```bash
+npm run dev      # Start Vite dev server (includes creature library API middleware)
+npm run build    # Production build to /dist
+npm run preview  # Preview production build locally
+```
 
-## Repository Status
+No test framework or linter is configured.
 
-**Current State**: Fresh repository with minimal setup
-- Only contains basic README.md
-- No build configuration or development setup yet established
-- No existing codebase architecture
+## Tech Stack
 
-## Development Setup
-
-**Note**: This project is in the early stages. When development begins, update this section with:
-- Build/compile commands
-- Test commands
-- Development server startup
-- Dependencies installation
+- **Frontend**: React 18, React Router v6, Tailwind CSS 3.4
+- **Build**: Vite 5.1
+- **Deployment**: Vercel (serverless functions + static hosting)
+- **Storage**: Vercel Blob Storage (creatures), localStorage (POIs, auth session)
+- **Maps**: Leaflet + react-leaflet
+- **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable
+- **External API**: Notion API (via proxy)
 
 ## Architecture
 
-**To be established**: As the project develops, document:
-- Chosen technology stack (web app, desktop app, mobile, etc.)
-- Framework and library decisions
-- Database/storage choices
-- Key architectural patterns
+### Project Structure
+
+- `src/pages/` - Route-level components: CombatTracker, MapPage, LoginPage
+- `src/components/combat/` - Combat UI: CombatantRow, StatblockPanel, StatblockEditor, modals (Ability, Damage, Initiative)
+- `src/components/map/` - Map UI: POIMarker, POIEditor
+- `src/hooks/` - State management: useAuth, useCombatState, useLibrary, usePOIs
+- `src/utils/` - Helpers: combatUtils, diceUtils, notionUtils
+- `src/data/` - Bundled creature library JSON and SRD spell names
+- `api/` - Vercel serverless functions (creatures CRUD, Notion proxy, health check)
+
+### Key Patterns
+
+**Combat state** uses `useReducer` in `useCombatState.js` for turn order, initiative, HP tracking, status conditions, and ability usage.
+
+**Creature library** has a dual-mode API: in dev, a Vite plugin (`vite-library-api.js`) handles POST/DELETE against the local JSON file. In production, `/api/creatures.js` uses Vercel Blob Storage with lazy migration (first request seeds blob from bundled data). The `useLibrary` hook caches to localStorage and handles legacy migration from old localStorage edits.
+
+**Notion integration** uses a catch-all proxy (`api/notion/[...path].js`) that forwards requests to the Notion API with server-side auth. In dev, Vite proxies `/notion-api` to `api.notion.com` with the API key injected.
+
+**Auth** is a simple hardcoded credential check in `useAuth.jsx` with localStorage session persistence and an AuthGate wrapper in App.jsx.
+
+### Styling
+
+Tailwind with custom config: gold color palette, Cinzel (display), DM Sans (body), IBM Plex Mono (code) fonts. Dark theme (slate-950 background).
+
+## Environment Variables
+
+- `NOTION_API_KEY` - Notion integration token
+- `VITE_API_SECRET` / `API_SECRET` - Shared secret for creature library mutation auth
 
 ## Git Workflow
 
 - Main branch: `main`
-- Claude Code branch: `claude/hardcore-mclaren` (managed via worktree)
 - Remote: https://github.com/jonsod93/dnd-session-runner.git
-
-## Notes for Future Development
-
-Since this is a fresh project, consider documenting:
-- Game data models (characters, campaigns, sessions, etc.)
-- User interface requirements
-- Integration needs (dice rolling, rule lookups, etc.)
-- Data persistence requirements
