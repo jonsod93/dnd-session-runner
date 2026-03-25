@@ -7,7 +7,7 @@ export function DiceRollToast({ rolls, onExpire, spellDrawerOpen }) {
   // On mobile, toast is always at the top regardless
   const desktopBottom = spellDrawerOpen ? 'bottom-[calc(38vh+2rem)]' : 'bottom-4'
   return (
-    <div className={`fixed ${desktopBottom} max-lg:bottom-auto max-lg:top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col-reverse max-lg:flex-col gap-2 items-center pointer-events-none transition-[bottom] duration-300`}>
+    <div className={`fixed ${desktopBottom} max-lg:bottom-auto max-lg:top-20 left-1/2 -translate-x-1/2 z-[2200] flex flex-col-reverse max-lg:flex-col gap-2 items-center pointer-events-none transition-[bottom] duration-300`}>
       {rolls.map((roll) => (
         <ToastItem key={roll.id} roll={roll} onExpire={onExpire} />
       ))}
