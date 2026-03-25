@@ -174,7 +174,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
           <div className="bg-[#1e1e1e] border border-white/[0.12] rounded-lg shadow-xl w-[300px] md:w-auto md:min-w-[220px] md:max-w-[340px] text-left mb-2">
             {/* Header */}
             <div className="px-3 py-2 border-b border-white/[0.06]">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <span className="text-sm font-medium text-[#e6e6e6]">{poi.name}</span>
                   {preview?.types?.length > 0 && (
