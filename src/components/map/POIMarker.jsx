@@ -148,8 +148,14 @@ export function POIMarker({ poi, onEdit, onRemove }) {
         icon={icon}
         eventHandlers={{
           click: () => {
-            map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
-            cancelHide(); setHovered(true); updateTooltipPos()
+            if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
+              // Desktop: open full info directly
+              setShowFullInfo(true)
+            } else {
+              // Mobile: show preview tooltip
+              map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
+              cancelHide(); setHovered(true); updateTooltipPos()
+            }
           },
           mouseover: () => {
             map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
@@ -226,7 +232,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
             <div className="px-3 py-1.5 border-t border-white/[0.06] flex items-center gap-2">
               {poi.notionPageId && (
                 <button
-                  className="text-xs text-white font-bold hover:text-gold-300 transition-colors"
+                  className="text-xs text-white font-bold hover:text-gold-300 transition-colors pointer-fine:hidden"
                   onClick={() => setShowFullInfo(true)}
                 >
                   Full info

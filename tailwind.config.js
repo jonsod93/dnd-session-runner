@@ -21,5 +21,10 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('pointer-fine', '@media (pointer: fine)')
+      addVariant('pointer-coarse', '@media (pointer: coarse)')
+    },
+  ],
 }
