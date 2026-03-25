@@ -61,7 +61,10 @@ export function blocksToStructured(blocks) {
       if (text) result.push({ type: 'quote', text })
     } else if (type === 'toggle') {
       const text = richTextToPlain(block.toggle?.rich_text)
-      if (text) result.push({ type: 'heading', text, level: 3 })
+      if (text) {
+        const children = block._children ? blocksToStructured(block._children) : []
+        result.push({ type: 'toggle', text, children })
+      }
     } else if (type === 'divider') {
       result.push({ type: 'divider' })
     }
@@ -78,7 +81,6 @@ export async function fetchBlocksRecursive(pageId, maxDepth = 3) {
 async function flattenBlocks(blocks, depthLeft) {
   const result = []
   for (const block of blocks) {
-    result.push(block)
     if (block.has_children && depthLeft > 0) {
       const type = block.type
       // Expand toggles, toggleable headings, column_lists, columns, synced_block, and any other container
@@ -88,12 +90,21 @@ async function flattenBlocks(blocks, depthLeft) {
         try {
           const children = await fetchPageBlocks(block.id)
           const nested = await flattenBlocks(children, depthLeft - 1)
-          result.push(...nested)
+          if (type === 'toggle') {
+            // Keep toggle children nested for collapsible rendering
+            block._children = nested
+          } else {
+            // Flatten other containers (columns, synced_block, etc.)
+            result.push(block)
+            result.push(...nested)
+            continue
+          }
         } catch {
           // Skip blocks we can't fetch
         }
       }
     }
+    result.push(block)
   }
   return result
 }
