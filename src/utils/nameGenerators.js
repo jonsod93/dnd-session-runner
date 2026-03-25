@@ -36,6 +36,56 @@ const TAVERN_NOUNS = [
   'Stallion','Sparrow','Helm','Shield','Fox','Pony',
 ]
 
+const MAGIC_SHOP_ADJECTIVES = [
+  'Arcane','Mystic','Enchanted','Glowing','Astral','Ethereal',
+  'Flickering','Whispering','Luminous','Spectral','Eldritch','Prismatic',
+]
+
+const MAGIC_SHOP_NOUNS = [
+  'Emporium','Sanctum','Atelier','Cauldron','Grimoire','Wand',
+  'Crystal','Orb','Tome','Scroll','Catalyst','Crucible',
+]
+
+const GENERAL_STORE_ADJECTIVES = [
+  'Honest','Old','Reliable','Fair','Friendly','Humble',
+  'Sturdy','Trusty','Thrifty','Bountiful','Hearty','Stout',
+]
+
+const GENERAL_STORE_NOUNS = [
+  'Provisions','Goods','Sundries','Supplies','Wares','Mercantile',
+  'Pantry','Stockpile','Storehouse','Emporium','Market','Depot',
+]
+
+const WAREHOUSE_ADJECTIVES = [
+  'Iron','Stone','Heavy','Grand','Vast','Deep',
+  'Broad','Sealed','Guarded','Old','Wide','Long',
+]
+
+const WAREHOUSE_NOUNS = [
+  'Warehouse','Depot','Storehouse','Holdfast','Vault','Repository',
+  'Granary','Cellar','Stockade','Cache','Loft','Stores',
+]
+
+const STABLE_ADJECTIVES = [
+  'Swift','Proud','Hardy','Gentle','Sturdy','Fine',
+  'Wild','Noble','Faithful','Strong','Nimble','Steady',
+]
+
+const STABLE_NOUNS = [
+  'Stables','Paddock','Corral','Mews','Livery','Ranch',
+  'Pasture','Bridle','Saddle','Hoof','Stirrup','Trough',
+]
+
+const DOCKS_ADJECTIVES = [
+  'Salty','Weathered','Barnacled','Creaking','Foggy','Tidal',
+  'Breezy','Sandy','Mossy','Muddy','Rusty','Damp',
+]
+
+const DOCKS_NOUNS = [
+  'Docks','Wharf','Pier','Moorings','Jetty','Quay',
+  'Landing','Berth','Harbor','Slipway','Anchorage','Marina',
+]
+
 const RUIN_ADJECTIVES = [
   'Forsaken','Sunken','Hollow','Shattered','Silent','Cursed','Fallen',
   'Blighted','Withered','Ashen','Forgotten','Desolate','Crumbling',
@@ -95,6 +145,46 @@ export function generateTavernName() {
   return `The ${pick(TAVERN_ADJECTIVES)} ${pick(TAVERN_NOUNS)}`
 }
 
+export function generateMagicShopName() {
+  const patterns = [
+    () => `The ${pick(MAGIC_SHOP_ADJECTIVES)} ${pick(MAGIC_SHOP_NOUNS)}`,
+    () => `${pick(FIRST_NAMES)}'s ${pick(MAGIC_SHOP_NOUNS)}`,
+  ]
+  return pick(patterns)()
+}
+
+export function generateGeneralStoreName() {
+  const patterns = [
+    () => `${pick(FIRST_NAMES)}'s ${pick(GENERAL_STORE_NOUNS)}`,
+    () => `The ${pick(GENERAL_STORE_ADJECTIVES)} ${pick(GENERAL_STORE_NOUNS)}`,
+  ]
+  return pick(patterns)()
+}
+
+export function generateWarehouseName() {
+  const patterns = [
+    () => `The ${pick(WAREHOUSE_ADJECTIVES)} ${pick(WAREHOUSE_NOUNS)}`,
+    () => `${pick(FIRST_NAMES)}'s ${pick(WAREHOUSE_NOUNS)}`,
+  ]
+  return pick(patterns)()
+}
+
+export function generateStableName() {
+  const patterns = [
+    () => `The ${pick(STABLE_ADJECTIVES)} ${pick(STABLE_NOUNS)}`,
+    () => `${pick(FIRST_NAMES)}'s ${pick(STABLE_NOUNS)}`,
+  ]
+  return pick(patterns)()
+}
+
+export function generateDocksName() {
+  const patterns = [
+    () => `The ${pick(DOCKS_ADJECTIVES)} ${pick(DOCKS_NOUNS)}`,
+    () => `${pick(FIRST_NAMES)}'s ${pick(DOCKS_NOUNS)}`,
+  ]
+  return pick(patterns)()
+}
+
 export function generateRuinName() {
   const patterns = [
     () => `The ${pick(RUIN_ADJECTIVES)} ${pick(RUIN_NOUNS)}`,
@@ -124,13 +214,24 @@ export function generateShipName() {
   return pick(patterns)()
 }
 
+// ── Establishment subtypes ──────────────────────────────
+
+export const ESTABLISHMENT_SUBTYPES = [
+  { key: 'tavern',        label: 'Inn / Tavern',    generate: generateTavernName },
+  { key: 'magic-shop',    label: 'Magic Shop',      generate: generateMagicShopName },
+  { key: 'general-store', label: 'General Store',   generate: generateGeneralStoreName },
+  { key: 'warehouse',     label: 'Warehouse',       generate: generateWarehouseName },
+  { key: 'stable',        label: 'Stable',          generate: generateStableName },
+  { key: 'docks',         label: 'Docks',           generate: generateDocksName },
+]
+
 // ── Generator config (used by the page) ─────────────────
 
 export const GENERATORS = [
-  { key: 'npc',          label: 'NPC',          generate: generateNPCName,        notionTarget: 'npc' },
-  { key: 'tavern',       label: 'Tavern / Inn', generate: generateTavernName,     notionTarget: 'location', locationType: 'Establishments' },
-  { key: 'ruins',        label: 'Ruins',        generate: generateRuinName,       notionTarget: 'location', locationType: 'Ruin' },
-  { key: 'organization', label: 'Organization', generate: generateOrgName,        notionTarget: 'organization' },
-  { key: 'settlement',   label: 'Settlement',   generate: generateSettlementName, notionTarget: 'location', locationType: 'Settlements' },
-  { key: 'ship',         label: 'Ship',         generate: generateShipName,       notionTarget: 'location', locationType: 'Vessel' },
+  { key: 'npc',            label: 'NPC',            generate: generateNPCName,        notionTarget: 'npc' },
+  { key: 'establishment',  label: 'Establishment',  generate: generateTavernName,     notionTarget: 'location', locationType: 'Establishments', subtypes: ESTABLISHMENT_SUBTYPES },
+  { key: 'ruins',          label: 'Ruins',          generate: generateRuinName,       notionTarget: 'location', locationType: 'Ruin' },
+  { key: 'organization',   label: 'Organization',   generate: generateOrgName,        notionTarget: 'organization' },
+  { key: 'settlement',     label: 'Settlement',     generate: generateSettlementName, notionTarget: 'location', locationType: 'Settlements' },
+  { key: 'ship',           label: 'Ship',           generate: generateShipName,       notionTarget: 'location', locationType: 'Vessel' },
 ]

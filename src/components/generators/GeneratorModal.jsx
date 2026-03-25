@@ -13,7 +13,11 @@ import {
 } from '../../utils/notionUtils'
 
 export default function GeneratorModal({ generator, initialSession, onClose, onSaved }) {
-  const [name, setName] = useState(() => generator.generate())
+  const subtypes = generator.subtypes ?? null
+  const [activeSubtype, setActiveSubtype] = useState(subtypes?.[0] ?? null)
+
+  const currentGenerate = activeSubtype?.generate ?? generator.generate
+  const [name, setName] = useState(() => currentGenerate())
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -33,7 +37,15 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
     return () => window.removeEventListener('keydown', h)
   }, [onClose, saving])
 
-  const regenerate = () => setName(generator.generate())
+  const regenerate = () => {
+    const gen = activeSubtype?.generate ?? generator.generate
+    setName(gen())
+  }
+
+  const handleSubtypeChange = (subtype) => {
+    setActiveSubtype(subtype)
+    setName(subtype.generate())
+  }
 
   const handleSave = async () => {
     if (!modal.linkedSession || !name.trim()) return
@@ -69,7 +81,8 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
       // Append mention to the linked session
       await appendSessionBlock(modal.linkedSession.id, created.id)
 
-      onSaved?.(trimmedName, generator.label, desc || '')
+      const label = activeSubtype ? activeSubtype.label : generator.label
+      onSaved?.(trimmedName, label, desc || '')
       onClose()
     } catch (err) {
       console.error('Save failed:', err)
@@ -105,6 +118,30 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          {/* Subtype badges */}
+          {subtypes && (
+            <div>
+              <label className="block text-xs text-[#787774] mb-1.5">Type</label>
+              <div className="flex flex-wrap gap-1.5">
+                {subtypes.map((st) => (
+                  <button
+                    key={st.key}
+                    type="button"
+                    onClick={() => handleSubtypeChange(st)}
+                    className={[
+                      'text-xs rounded px-2.5 py-1 border transition-colors',
+                      activeSubtype?.key === st.key
+                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400'
+                        : 'border-white/[0.1] text-[#787774] hover:text-[#e6e6e6] hover:border-white/[0.2]',
+                    ].join(' ')}
+                  >
+                    {st.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Generated name */}
           <div>
             <label className="block text-xs text-[#787774] mb-1.5">Name</label>
