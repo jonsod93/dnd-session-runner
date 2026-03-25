@@ -4,14 +4,19 @@ import SessionLinker from '../components/generators/SessionLinker'
 import GeneratorModal from '../components/generators/GeneratorModal'
 import { GENERATORS } from '../utils/nameGenerators'
 
+let notifId = 0
+
 export default function GeneratorsPage() {
   const session = useSessionLink({ persist: true })
   const [activeGenerator, setActiveGenerator] = useState(null)
-  const [toast, setToast] = useState(null)
+  const [notifications, setNotifications] = useState([])
 
-  const showToast = (name, type) => {
-    setToast(`Created ${type}: ${name}`)
-    setTimeout(() => setToast(null), 4000)
+  const addNotification = (name, type, description) => {
+    setNotifications((prev) => [...prev, { id: ++notifId, name, type, description }])
+  }
+
+  const removeNotification = (id) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id))
   }
 
   return (
@@ -60,14 +65,33 @@ export default function GeneratorsPage() {
           generator={activeGenerator}
           initialSession={session.linkedSession}
           onClose={() => setActiveGenerator(null)}
-          onSaved={showToast}
+          onSaved={addNotification}
         />
       )}
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[3000] bg-emerald-600/90 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg">
-          {toast}
+      {/* Persistent notifications */}
+      {notifications.length > 0 && (
+        <div className="fixed bottom-4 right-4 z-[3000] flex flex-col gap-2 max-w-sm">
+          {notifications.map((n) => (
+            <div
+              key={n.id}
+              className="bg-[#252525] border border-emerald-500/30 rounded-lg shadow-lg px-4 py-3 flex gap-3"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-emerald-400 mb-0.5">{n.type}</div>
+                <div className="text-sm text-[#e6e6e6] font-medium">{n.name}</div>
+                {n.description && (
+                  <div className="text-xs text-[#787774] mt-1 line-clamp-3">{n.description}</div>
+                )}
+              </div>
+              <button
+                onClick={() => removeNotification(n.id)}
+                className="text-[#787774] hover:text-[#e6e6e6] text-sm leading-none transition-colors shrink-0 self-start"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

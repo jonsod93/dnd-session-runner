@@ -274,40 +274,91 @@ export async function createNotionPage(databaseId, properties) {
   return res.json()
 }
 
-// Append a mention to a session page under "Generated content this session"
-export async function appendSessionBlock(sessionPageId, mentionPageId) {
-  // Fetch existing blocks to check for the heading
-  const blocks = await fetchPageBlocks(sessionPageId)
-  const hasHeading = blocks.some(
-    (b) =>
-      b.type === 'heading_2' &&
-      richTextToPlain(b.heading_2?.rich_text) === 'Generated content this session'
-  )
+// The purple "Generated content" heading block
+const GENERATED_HEADING_BLOCK = {
+  object: 'block',
+  type: 'heading_2',
+  heading_2: {
+    rich_text: [{
+      type: 'text',
+      text: { content: 'Generated content this session' },
+      annotations: { bold: false, italic: false, strikethrough: false, underline: false, code: false, color: 'purple_background' },
+    }],
+    color: 'purple_background',
+  },
+}
 
-  const newBlocks = []
-  if (!hasHeading) {
-    newBlocks.push({
-      object: 'block',
-      type: 'heading_2',
-      heading_2: { rich_text: [{ type: 'text', text: { content: 'Generated content this session' } }] },
-    })
-  }
-  newBlocks.push({
+// Append a mention to a session page under "Generated content this session"
+// Inserts above the "Reference" heading, with a purple styled heading matching the red Reference style.
+export async function appendSessionBlock(sessionPageId, mentionPageId) {
+  const blocks = await fetchPageBlocks(sessionPageId)
+
+  const bulletBlock = {
     object: 'block',
     type: 'bulleted_list_item',
     bulleted_list_item: {
       rich_text: [{ type: 'mention', mention: { type: 'page', page: { id: mentionPageId } } }],
     },
-  })
+  }
 
-  const res = await notionFetch(`v1/blocks/${sessionPageId}/children`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ children: newBlocks }),
-  })
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Notion append failed (${res.status}): ${body}`)
+  // Check if our heading already exists
+  const generatedIdx = blocks.findIndex(
+    (b) => b.type === 'heading_2' && richTextToPlain(b.heading_2?.rich_text) === 'Generated content this session'
+  )
+
+  if (generatedIdx !== -1) {
+    // Heading exists - find last bullet after it to append after
+    let afterBlockId = blocks[generatedIdx].id
+    for (let i = generatedIdx + 1; i < blocks.length; i++) {
+      if (blocks[i].type === 'bulleted_list_item') {
+        afterBlockId = blocks[i].id
+      } else {
+        break
+      }
+    }
+    const res = await notionFetch(`v1/blocks/${sessionPageId}/children`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ children: [bulletBlock], after: afterBlockId }),
+    })
+    if (!res.ok) {
+      const body = await res.text()
+      throw new Error(`Notion append failed (${res.status}): ${body}`)
+    }
+    return
+  }
+
+  // Heading doesn't exist - find the "Reference" heading and insert before it
+  const referenceIdx = blocks.findIndex(
+    (b) => b.type === 'heading_2' && richTextToPlain(b.heading_2?.rich_text) === 'Reference'
+  )
+
+  if (referenceIdx > 0) {
+    // Insert after the block before "Reference"
+    const beforeRefBlockId = blocks[referenceIdx - 1].id
+    const res = await notionFetch(`v1/blocks/${sessionPageId}/children`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        children: [GENERATED_HEADING_BLOCK, bulletBlock],
+        after: beforeRefBlockId,
+      }),
+    })
+    if (!res.ok) {
+      const body = await res.text()
+      throw new Error(`Notion append failed (${res.status}): ${body}`)
+    }
+  } else {
+    // No Reference heading found - append at the end
+    const res = await notionFetch(`v1/blocks/${sessionPageId}/children`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ children: [GENERATED_HEADING_BLOCK, bulletBlock] }),
+    })
+    if (!res.ok) {
+      const body = await res.text()
+      throw new Error(`Notion append failed (${res.status}): ${body}`)
+    }
   }
 }
 

@@ -1,8 +1,7 @@
 import { useState } from 'react'
 
 function sessionLabel(s) {
-  const num = s.sessionNumber != null ? `Session ${s.sessionNumber}` : 'Session'
-  return s.title ? `${num} - ${s.title}` : num
+  return s.title || 'Untitled session'
 }
 
 export default function SessionLinker({
