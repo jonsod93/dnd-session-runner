@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Marker, useMap } from 'react-leaflet'
 import L from 'leaflet'
@@ -270,7 +270,7 @@ function renderBlock(block, key) {
     return (
       <details key={key} className="group mt-2">
         <summary className="text-sm font-normal text-[#b8b5b0] cursor-pointer select-none list-none flex items-center gap-2 md:hover:text-gold-400 transition-colors">
-          <span className="text-gold-400 transition-transform group-open:rotate-90 flex-shrink-0" style={{ fontSize: '1.5rem', lineHeight: 1 }}>&#9656;</span>
+          <span className="text-gold-400 transition-transform group-open:rotate-90 flex-shrink-0" style={{ fontSize: '2.5rem', lineHeight: 1 }}>&#9656;</span>
           <span className="underline decoration-white/[0.2] underline-offset-2 md:group-hover:decoration-gold-400/40">{block.text}</span>
         </summary>
         <div className="pl-5 mt-1.5 border-l border-white/[0.06] ml-1">
@@ -431,21 +431,19 @@ function LocationInfoModal({ poi, preview, onClose }) {
           {loading && (
             <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
           )}
-          {!loading && sections.length > 0 && (
-            <div>
-              {sections.map((section, i) => {
+          {!loading && sections.length > 0 && sections.map((section, i) => {
                 const isLocations = section.heading?.text?.toLowerCase() === 'locations'
                 if (isLocations) {
                   return (
-                    <div key={i} className="mt-6">
-                      <div className="sticky top-0 z-10 bg-[#1e1e1e] -mx-6 px-6 pb-2">
-                        <hr className="border-white/[0.06] my-3" />
+                    <React.Fragment key={i}>
+                      <div className="sticky top-0 z-10 bg-[#1e1e1e] -mx-6 px-6 pb-2 pt-4">
+                        <hr className="border-white/[0.06] mb-3" />
                         <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">
                           {section.heading.text}
                         </p>
                       </div>
                       {section.content.map((block, j) => renderBlock(block, j))}
-                    </div>
+                    </React.Fragment>
                   )
                 }
                 return (
@@ -455,8 +453,6 @@ function LocationInfoModal({ poi, preview, onClose }) {
                   </div>
                 )
               })}
-            </div>
-          )}
           {!loading && sections.length === 0 && (
             <p className="text-sm text-[#b8b5b0] italic">No content available.</p>
           )}
