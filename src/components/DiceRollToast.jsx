@@ -4,7 +4,7 @@ const DURATION = 4500
 
 export function DiceRollToast({ rolls, onExpire }) {
   return (
-    <div className="fixed bottom-4 max-lg:bottom-auto max-lg:top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col-reverse max-lg:flex-col gap-2 items-center pointer-events-none">
+    <div className="fixed bottom-4 max-lg:bottom-auto max-lg:top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col-reverse max-lg:flex-col gap-2 items-center pointer-events-none">
       {rolls.map((roll) => (
         <ToastItem key={roll.id} roll={roll} onExpire={onExpire} />
       ))}
