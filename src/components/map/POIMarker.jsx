@@ -269,8 +269,8 @@ function renderBlock(block, key) {
     if (!block.children?.length) return null
     return (
       <details key={key} className="group mt-2">
-        <summary className="text-sm font-normal text-[#b8b5b0] cursor-pointer select-none list-none flex items-center gap-1.5 md:hover:text-gold-400 transition-colors">
-          <span className="text-gold-400 text-xl leading-none transition-transform group-open:rotate-90">&#9656;</span>
+        <summary className="text-sm font-normal text-[#b8b5b0] cursor-pointer select-none list-none flex items-center gap-2 md:hover:text-gold-400 transition-colors">
+          <span className="text-gold-400 transition-transform group-open:rotate-90 flex-shrink-0" style={{ fontSize: '1.5rem', lineHeight: 1 }}>&#9656;</span>
           <span className="underline decoration-white/[0.2] underline-offset-2 md:group-hover:decoration-gold-400/40">{block.text}</span>
         </summary>
         <div className="pl-5 mt-1.5 border-l border-white/[0.06] ml-1">
