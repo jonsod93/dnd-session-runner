@@ -246,6 +246,86 @@ export function POIMarker({ poi, onEdit, onRemove }) {
   )
 }
 
+// ── Block rendering helpers ──────────────────────────────────────────────────
+
+function renderBlock(block, key) {
+  if (block.type === 'toggle') {
+    // Skip toggles with no children
+    if (!block.children?.length) return null
+    return (
+      <details key={key} className="group mt-2">
+        <summary className="text-sm font-medium text-[#e6e6e6] cursor-pointer select-none list-none flex items-center gap-1.5 hover:text-gold-400 transition-colors">
+          <span className="text-[#9a9894] text-xs transition-transform group-open:rotate-90">&#9656;</span>
+          {block.text}
+        </summary>
+        <div className="pl-5 mt-1.5 border-l border-white/[0.06] ml-1">
+          {block.children.map((child, j) => renderBlock(child, j))}
+        </div>
+      </details>
+    )
+  }
+  if (block.type === 'heading') {
+    const Tag = block.level === 1 ? 'h2' : block.level === 2 ? 'h3' : 'h4'
+    const size = block.level === 1 ? 'text-base' : 'text-sm'
+    return (
+      <Tag key={key} className={`${size} font-semibold text-[#e6e6e6] mb-1.5`}>
+        {block.text}
+      </Tag>
+    )
+  }
+  if (block.type === 'list-item') {
+    return (
+      <p key={key} className="text-sm text-[#b8b5b0] leading-relaxed pl-4 mb-0.5">
+        <span className="text-[#9a9894] mr-1.5">-</span>{block.text}
+      </p>
+    )
+  }
+  if (block.type === 'quote') {
+    return (
+      <blockquote key={key} className="text-sm text-[#b8b5b0] italic leading-relaxed border-l-2 border-white/[0.12] pl-3 my-2">
+        {block.text}
+      </blockquote>
+    )
+  }
+  if (block.type === 'callout') {
+    return (
+      <div key={key} className="text-sm text-[#b8b5b0] leading-relaxed bg-white/[0.03] rounded px-3 py-2 my-2">
+        {block.text}
+      </div>
+    )
+  }
+  if (block.type === 'divider') {
+    return <hr key={key} className="border-white/[0.06] my-3" />
+  }
+  // paragraph
+  return (
+    <p key={key} className="text-sm text-[#b8b5b0] leading-relaxed mb-1.5">
+      {block.text}
+    </p>
+  )
+}
+
+// Group blocks into sections (heading + content until next heading).
+// Filters out empty sections (heading with no content blocks or toggles after it).
+function groupIntoSections(blocks) {
+  const sections = []
+  let current = null
+
+  for (const block of blocks) {
+    if (block.type === 'heading') {
+      if (current) sections.push(current)
+      current = { heading: block, content: [] }
+    } else {
+      if (!current) current = { heading: null, content: [] }
+      current.content.push(block)
+    }
+  }
+  if (current) sections.push(current)
+
+  // Filter out sections that have a heading but no content
+  return sections.filter((s) => !s.heading || s.content.length > 0)
+}
+
 // ── Full location info modal ─────────────────────────────────────────────────
 function LocationInfoModal({ poi, preview, onClose }) {
   const [contentBlocks, setContentBlocks] = useState(null)
@@ -279,6 +359,8 @@ function LocationInfoModal({ poi, preview, onClose }) {
 
     return () => { cancelled = true }
   }, [poi.notionPageId, poi.notionCache])
+
+  const sections = contentBlocks ? groupIntoSections(contentBlocks) : []
 
   return (
     <div
@@ -333,52 +415,17 @@ function LocationInfoModal({ poi, preview, onClose }) {
           {loading && (
             <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
           )}
-          {!loading && contentBlocks?.length > 0 && (
-            <div className="space-y-0">
-              {contentBlocks.map((block, i) => {
-                if (block.type === 'heading') {
-                  const Tag = block.level === 1 ? 'h2' : block.level === 2 ? 'h3' : 'h4'
-                  const size = block.level === 1 ? 'text-base' : block.level === 2 ? 'text-sm' : 'text-sm'
-                  return (
-                    <Tag key={i} className={`${size} font-semibold text-[#e6e6e6] ${i > 0 ? 'mt-5' : ''} mb-1.5`}>
-                      {block.text}
-                    </Tag>
-                  )
-                }
-                if (block.type === 'list-item') {
-                  return (
-                    <p key={i} className="text-sm text-[#b8b5b0] leading-relaxed pl-4 mb-0.5">
-                      <span className="text-[#9a9894] mr-1.5">-</span>{block.text}
-                    </p>
-                  )
-                }
-                if (block.type === 'quote') {
-                  return (
-                    <blockquote key={i} className="text-sm text-[#b8b5b0] italic leading-relaxed border-l-2 border-white/[0.12] pl-3 my-2">
-                      {block.text}
-                    </blockquote>
-                  )
-                }
-                if (block.type === 'callout') {
-                  return (
-                    <div key={i} className="text-sm text-[#b8b5b0] leading-relaxed bg-white/[0.03] rounded px-3 py-2 my-2">
-                      {block.text}
-                    </div>
-                  )
-                }
-                if (block.type === 'divider') {
-                  return <hr key={i} className="border-white/[0.06] my-3" />
-                }
-                // paragraph
-                return (
-                  <p key={i} className="text-sm text-[#b8b5b0] leading-relaxed mb-1.5">
-                    {block.text}
-                  </p>
-                )
-              })}
+          {!loading && sections.length > 0 && (
+            <div>
+              {sections.map((section, i) => (
+                <div key={i} className={i > 0 ? 'mt-6' : ''}>
+                  {section.heading && renderBlock(section.heading, `h-${i}`)}
+                  {section.content.map((block, j) => renderBlock(block, j))}
+                </div>
+              ))}
             </div>
           )}
-          {!loading && (!contentBlocks || contentBlocks.length === 0) && (
+          {!loading && sections.length === 0 && (
             <p className="text-sm text-[#b8b5b0] italic">No content available.</p>
           )}
         </div>
