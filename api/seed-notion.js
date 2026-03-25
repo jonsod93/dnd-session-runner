@@ -3,7 +3,8 @@ import { put, list } from '@vercel/blob'
 const BLOB_PATH = 'pois.json'
 const NOTION_API = 'https://api.notion.com'
 const NOTION_VERSION = '2022-06-28'
-const LOCATIONS_DB_ID = '1372674d-44b5-812e-b947-ee4c1e09cfaa'
+const BATCH_SIZE = 3
+const MAX_PER_CALL = 15
 
 // Vercel Hobby allows up to 60s with this config
 export const config = { maxDuration: 60 }
@@ -50,7 +51,7 @@ function blocksToPreview(blocks, maxLength = 400) {
   return result.length > maxLength ? result.slice(0, maxLength) + '\u2026' : result
 }
 
-// ── Blob helpers (same pattern as api/pois.js) ──
+// ── Blob helpers ──
 
 async function readBlob() {
   const { blobs } = await list({ prefix: BLOB_PATH })
@@ -73,22 +74,19 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-async function notionFetchRaw(path, options = {}) {
-  const res = await fetch(`${NOTION_API}/${path}`, {
-    ...options,
+async function notionFetchRaw(path) {
+  return fetch(`${NOTION_API}/${path}`, {
     headers: {
       Authorization: `Bearer ${process.env.NOTION_API_KEY}`,
       'Notion-Version': NOTION_VERSION,
       'Content-Type': 'application/json',
-      ...options.headers,
     },
   })
-  return res
 }
 
-async function notionFetchWithRetry(path, options = {}, retries = 2) {
+async function notionFetchWithRetry(path, retries = 2) {
   for (let attempt = 0; attempt <= retries; attempt++) {
-    const res = await notionFetchRaw(path, options)
+    const res = await notionFetchRaw(path)
     if (res.status === 429 && attempt < retries) {
       const retryAfter = parseInt(res.headers.get('retry-after') || '1', 10)
       await sleep(retryAfter * 1000)
@@ -105,9 +103,8 @@ async function fetchNotionCache(pageId) {
   ])
 
   if (!propsRes.ok) {
-    const status = propsRes.status
-    if (status === 404) return null
-    throw new Error(`Notion page ${pageId} returned ${status}`)
+    if (propsRes.status === 404) return null
+    throw new Error(`Notion page ${pageId} returned ${propsRes.status}`)
   }
 
   const props = extractPageProps(await propsRes.json())
@@ -128,12 +125,16 @@ async function fetchNotionCache(pageId) {
 
 function checkAuth(req) {
   const authHeader = req.headers['authorization'] || ''
-  if (process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`) return true
   if (process.env.API_SECRET && authHeader === `Bearer ${process.env.API_SECRET}`) return true
   return false
 }
 
-// ── Handler (incremental sync) ──
+// ── Handler ──
+// Call repeatedly to seed all POIs. Each call processes up to MAX_PER_CALL
+// un-cached POIs. Returns { remaining } so you know when it's done.
+//
+// Usage: curl -H "Authorization: Bearer $SECRET" .../api/seed-notion
+// Keep calling until remaining === 0.
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -150,54 +151,25 @@ export default async function handler(req, res) {
 
   try {
     const pois = (await readBlob()) ?? []
-    const poiByNotionId = new Map()
-    for (const poi of pois) {
-      if (poi.notionPageId) poiByNotionId.set(poi.notionPageId, poi)
+    const unseeded = pois.filter((p) => p.notionPageId && !p.notionCache)
+    const toProcess = unseeded.slice(0, MAX_PER_CALL)
+
+    if (toProcess.length === 0) {
+      return res.status(200).json({
+        message: 'All POIs are seeded',
+        remaining: 0,
+        total: pois.length,
+        cached: pois.filter((p) => p.notionCache).length,
+      })
     }
 
-    if (poiByNotionId.size === 0) {
-      return res.status(200).json({ updated: 0, message: 'No POIs with Notion pages' })
-    }
+    const results = { updated: 0, failed: 0, errors: [] }
 
-    // Find the oldest lastSynced across all cached POIs (fallback: 24h ago)
-    let sinceDate = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString()
-    for (const poi of poiByNotionId.values()) {
-      if (poi.notionCache?.lastSynced && poi.notionCache.lastSynced < sinceDate) {
-        sinceDate = poi.notionCache.lastSynced
-      }
-    }
-
-    // Query Notion Locations database for pages edited after sinceDate
-    const queryRes = await notionFetchWithRetry(`v1/databases/${LOCATIONS_DB_ID}/query`, {
-      method: 'POST',
-      body: JSON.stringify({
-        filter: {
-          timestamp: 'last_edited_time',
-          last_edited_time: { after: sinceDate },
-        },
-        page_size: 100,
-      }),
-    })
-
-    if (!queryRes.ok) {
-      throw new Error(`Notion database query failed: ${queryRes.status}`)
-    }
-
-    const queryData = await queryRes.json()
-    const changedPages = queryData.results ?? []
-
-    // Filter to only pages that match our POIs
-    const toUpdate = changedPages.filter((page) => poiByNotionId.has(page.id))
-    const results = { updated: 0, failed: 0, checked: changedPages.length, total: poiByNotionId.size, errors: [] }
-
-    // Process changed POIs in batches of 3
-    const BATCH_SIZE = 3
-    for (let i = 0; i < toUpdate.length; i += BATCH_SIZE) {
-      const batch = toUpdate.slice(i, i + BATCH_SIZE)
+    for (let i = 0; i < toProcess.length; i += BATCH_SIZE) {
+      const batch = toProcess.slice(i, i + BATCH_SIZE)
       const settled = await Promise.allSettled(
-        batch.map(async (page) => {
-          const poi = poiByNotionId.get(page.id)
-          const cached = await fetchNotionCache(page.id)
+        batch.map(async (poi) => {
+          const cached = await fetchNotionCache(poi.notionPageId)
           poi.notionCache = cached
         })
       )
@@ -205,23 +177,27 @@ export default async function handler(req, res) {
         if (result.status === 'fulfilled') {
           results.updated++
         } else {
-          const page = batch[idx]
-          const poi = poiByNotionId.get(page.id)
-          console.error(`[sync-notion] Failed "${poi.name}":`, result.reason?.message)
+          const poi = batch[idx]
+          console.error(`[seed-notion] Failed "${poi.name}":`, result.reason?.message)
           results.failed++
           results.errors.push({ name: poi.name, error: result.reason?.message })
         }
       })
     }
 
-    if (results.updated > 0) {
-      await writeBlob(pois)
-    }
+    await writeBlob(pois)
 
-    console.log(`[sync-notion] Done: ${results.checked} changed in Notion, ${results.updated} POIs updated, ${results.failed} failed`)
-    return res.status(200).json(results)
+    const remaining = unseeded.length - results.updated
+    console.log(`[seed-notion] Seeded ${results.updated}, failed ${results.failed}, remaining ${remaining}`)
+
+    return res.status(200).json({
+      ...results,
+      remaining,
+      total: pois.length,
+      cached: pois.filter((p) => p.notionCache).length,
+    })
   } catch (err) {
-    console.error('[sync-notion] Fatal error:', err.message)
+    console.error('[seed-notion] Fatal error:', err.message)
     return res.status(500).json({ error: err.message })
   }
 }
