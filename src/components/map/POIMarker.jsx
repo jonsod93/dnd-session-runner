@@ -269,8 +269,8 @@ function renderBlock(block, key) {
     if (!block.children?.length) return null
     return (
       <details key={key} className="group mt-2">
-        <summary className="text-sm font-medium text-[#e6e6e6] cursor-pointer select-none list-none flex items-center gap-1.5 md:hover:text-gold-400 transition-colors">
-          <span className="text-gold-400 text-base leading-none transition-transform group-open:rotate-90">&#9656;</span>
+        <summary className="text-sm font-normal text-[#b8b5b0] underline decoration-white/[0.2] underline-offset-2 cursor-pointer select-none list-none flex items-center gap-1.5 md:hover:text-gold-400 md:hover:decoration-gold-400/40 transition-colors">
+          <span className="text-gold-400 text-lg leading-none transition-transform group-open:rotate-90">&#9656;</span>
           {block.text}
         </summary>
         <div className="pl-5 mt-1.5 border-l border-white/[0.06] ml-1">
@@ -438,10 +438,12 @@ function LocationInfoModal({ poi, preview, onClose }) {
                 if (isLocations) {
                   return (
                     <div key={i} className="mt-6">
-                      <hr className="border-white/[0.06] my-3" />
-                      <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400 mb-3">
-                        {section.heading.text}
-                      </p>
+                      <div className="sticky top-0 z-10 bg-[#1e1e1e] -mx-6 px-6 pb-2">
+                        <hr className="border-white/[0.06] my-3" />
+                        <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">
+                          {section.heading.text}
+                        </p>
+                      </div>
                       {section.content.map((block, j) => renderBlock(block, j))}
                     </div>
                   )
