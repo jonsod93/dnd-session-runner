@@ -2,9 +2,12 @@ import { useEffect } from 'react'
 
 const DURATION = 4500
 
-export function DiceRollToast({ rolls, onExpire }) {
+export function DiceRollToast({ rolls, onExpire, spellDrawerOpen }) {
+  // When spell drawer is open on desktop, position toast above it (~42vh from bottom)
+  // On mobile, toast is always at the top regardless
+  const desktopBottom = spellDrawerOpen ? 'bottom-[calc(38vh+2rem)]' : 'bottom-4'
   return (
-    <div className="fixed bottom-4 max-lg:bottom-auto max-lg:top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col-reverse max-lg:flex-col gap-2 items-center pointer-events-none">
+    <div className={`fixed ${desktopBottom} max-lg:bottom-auto max-lg:top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col-reverse max-lg:flex-col gap-2 items-center pointer-events-none transition-[bottom] duration-300`}>
       {rolls.map((roll) => (
         <ToastItem key={roll.id} roll={roll} onExpire={onExpire} />
       ))}
