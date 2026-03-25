@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
+import { SpellDrawer } from '../SpellDrawer'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
 export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, monsters, pcs }) {
@@ -14,6 +15,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   const [mobileLibraryMenu,  setMobileLibraryMenu]  = useState(null) // { entry }
   const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null) // mobile modal
   const [hoverPreviewEntry,   setHoverPreviewEntry]   = useState(null) // { entry, rect } desktop hover
+  const [previewSpell,        setPreviewSpell]        = useState(null) // spell name for library preview
   const hoverTimerRef = useRef(null)
 
   const filteredNPCs = useMemo(() => {
@@ -408,7 +410,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               ✕
             </button>
           </div>
-          <StatblockBody sb={hoverPreviewEntry.entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
+          <StatblockBody sb={hoverPreviewEntry.entry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={setPreviewSpell} compact />
         </div>,
         document.body
       )}
@@ -433,10 +435,15 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 ✕
               </button>
             </div>
-            <StatblockBody sb={libraryPreviewEntry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={null} compact />
+            <StatblockBody sb={libraryPreviewEntry} usage={{}} onUsageChange={null} onRoll={null} onSpellClick={setPreviewSpell} compact />
           </div>
         </div>,
         document.body
+      )}
+
+      {/* ── Spell drawer for library previews ─────────────────────────────── */}
+      {previewSpell && (
+        <SpellDrawer spellName={previewSpell} onClose={() => setPreviewSpell(null)} onRoll={null} />
       )}
     </div>
   )
