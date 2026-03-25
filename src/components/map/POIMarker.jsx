@@ -402,7 +402,7 @@ function LocationInfoModal({ poi, preview, onClose }) {
               </span>
             ))}
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-9 shrink-0">
             {poi.notionPageId && (
               <a
                 href={notionPageUrl(poi.notionPageId)}
@@ -437,7 +437,7 @@ function LocationInfoModal({ poi, preview, onClose }) {
                 if (isLocations) {
                   return (
                     <React.Fragment key={i}>
-                      <div className="sticky -top-4 z-10 bg-[#1e1e1e] -mx-6 px-6 pb-2">
+                      <div className="sticky -top-4 z-10 bg-[#1e1e1e] -mx-6 px-6 pt-6 pb-1.5 mt-2">
                         <hr className="border-white/[0.06] mb-2" />
                         <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">
                           {section.heading.text}
