@@ -255,7 +255,7 @@ function renderBlock(block, key) {
     return (
       <details key={key} className="group mt-2">
         <summary className="text-sm font-medium text-[#e6e6e6] cursor-pointer select-none list-none flex items-center gap-1.5 hover:text-gold-400 transition-colors">
-          <span className="text-[#9a9894] text-xs transition-transform group-open:rotate-90">&#9656;</span>
+          <span className="text-[#9a9894] text-base leading-none transition-transform group-open:rotate-90">&#9656;</span>
           {block.text}
         </summary>
         <div className="pl-5 mt-1.5 border-l border-white/[0.06] ml-1">
