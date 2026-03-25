@@ -438,7 +438,7 @@ export default function CombatTracker() {
 
       {/* ── Dice roll toast ──────────────────────────────────────────────── */}
       {rolls.length > 0 && (
-        <DiceRollToast rolls={rolls} onExpire={handleExpireRoll} />
+        <DiceRollToast rolls={rolls} onExpire={handleExpireRoll} spellDrawerOpen={!!activeSpell} />
       )}
 
       {/* ── Spell drawer ─────────────────────────────────────────────────── */}
