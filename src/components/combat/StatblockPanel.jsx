@@ -519,7 +519,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-[#1a1a1a]">
+      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#1a1a1a]">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
