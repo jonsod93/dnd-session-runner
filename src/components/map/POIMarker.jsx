@@ -323,7 +323,8 @@ function groupIntoSections(blocks) {
   if (current) sections.push(current)
 
   // Filter out sections that have a heading but no content
-  return sections.filter((s) => !s.heading || s.content.length > 0)
+  // Always keep "Locations" since it uses special styling
+  return sections.filter((s) => !s.heading || s.content.length > 0 || s.heading.text?.toLowerCase() === 'locations')
 }
 
 // ── Full location info modal ─────────────────────────────────────────────────
@@ -417,12 +418,26 @@ function LocationInfoModal({ poi, preview, onClose }) {
           )}
           {!loading && sections.length > 0 && (
             <div>
-              {sections.map((section, i) => (
-                <div key={i} className={i > 0 ? 'mt-6' : ''}>
-                  {section.heading && renderBlock(section.heading, `h-${i}`)}
-                  {section.content.map((block, j) => renderBlock(block, j))}
-                </div>
-              ))}
+              {sections.map((section, i) => {
+                const isLocations = section.heading?.text?.toLowerCase() === 'locations'
+                if (isLocations) {
+                  return (
+                    <div key={i} className="mt-6">
+                      <hr className="border-white/[0.06] my-3" />
+                      <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400 mb-3">
+                        {section.heading.text}
+                      </p>
+                      {section.content.map((block, j) => renderBlock(block, j))}
+                    </div>
+                  )
+                }
+                return (
+                  <div key={i} className={i > 0 ? 'mt-6' : ''}>
+                    {section.heading && renderBlock(section.heading, `h-${i}`)}
+                    {section.content.map((block, j) => renderBlock(block, j))}
+                  </div>
+                )
+              })}
             </div>
           )}
           {!loading && sections.length === 0 && (
