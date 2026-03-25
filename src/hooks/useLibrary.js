@@ -140,9 +140,25 @@ async function migrateLocalEdits() {
 
 function buildMonsterMap(sourceData) {
   const map = new Map()
+  const seenNames = new Map() // Name -> key, for deduplication
   Object.entries(sourceData)
     .filter(([k]) => k.startsWith('Creatures.'))
     .forEach(([k, v]) => {
+      const name = v.Name ?? k
+      const existingKey = seenNames.get(name)
+      if (existingKey) {
+        // Duplicate Name - prefer name-based keys (what saveCreature produces)
+        // over ID-based keys (legacy format)
+        const nameBasedKey = `Creatures.${name}`
+        if (k === nameBasedKey) {
+          map.delete(existingKey)
+        } else if (existingKey === nameBasedKey) {
+          return // keep the existing name-based key
+        }
+        // If neither is name-based, keep the first one seen
+        else return
+      }
+      seenNames.set(name, k)
       map.set(k, {
         ...v,
         _libType: 'monster',

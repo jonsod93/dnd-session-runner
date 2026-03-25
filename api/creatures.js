@@ -67,6 +67,26 @@ export default async function handler(req, res) {
         const existing = (await readBlob()) || {}
         // Merge: bundled entries fill in missing keys, existing entries are kept
         const merged = { ...bundled, ...existing }
+
+        // Deduplicate: collapse entries with the same Name to canonical Creatures.${Name} key
+        const nameToKeys = {}
+        for (const key of Object.keys(merged)) {
+          if (!key.startsWith('Creatures.')) continue
+          const name = merged[key]?.Name
+          if (!name) continue
+          if (!nameToKeys[name]) nameToKeys[name] = []
+          nameToKeys[name].push(key)
+        }
+        for (const [name, keys] of Object.entries(nameToKeys)) {
+          if (keys.length <= 1) continue
+          const canonicalKey = `Creatures.${name}`
+          // Prefer the canonical key's data, fall back to last key's data
+          const keepKey = keys.includes(canonicalKey) ? canonicalKey : keys[keys.length - 1]
+          const keepData = merged[keepKey]
+          for (const k of keys) delete merged[k]
+          merged[canonicalKey] = keepData
+        }
+
         await writeBlob(merged)
         const bundledCount = Object.keys(bundled).filter(k => k.startsWith('Creatures.')).length
         const existingCount = Object.keys(existing).filter(k => k.startsWith('Creatures.')).length
