@@ -1,8 +1,8 @@
 // Notion database IDs
 export const LOCATIONS_DB_ID = '1372674d-44b5-812e-b947-ee4c1e09cfaa'
-export const SESSIONS_DB_ID = '1372674d-44b5-81e1-9e99-000bb0d81dfc'
-export const PEOPLE_DB_ID = '1372674d-44b5-8129-b618-000bfad33ed6'
-export const ORGANIZATIONS_DB_ID = '1372674d-44b5-8126-b4c5-000bdc24912f'
+export const SESSIONS_DB_ID = '1372674d-44b5-8137-8898-f2d955405fd9'
+export const PEOPLE_DB_ID = '1372674d-44b5-81a5-a374-c0ee38a5ca16'
+export const ORGANIZATIONS_DB_ID = '1372674d-44b5-812d-9a5e-da895d041d0c'
 export const WORLD_MASTER_ID = '1382674d44b580d788daf4515b74772f'
 
 // Extract plain text from Notion rich_text array
