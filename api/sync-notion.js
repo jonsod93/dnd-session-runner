@@ -4,6 +4,7 @@ const BLOB_PATH = 'pois.json'
 const NOTION_API = 'https://api.notion.com'
 const NOTION_VERSION = '2022-06-28'
 
+// Vercel Hobby allows up to 60s with this config
 export const config = { maxDuration: 60 }
 
 // ── Notion helpers (duplicated from src/utils/notionUtils.js for serverless) ──
@@ -78,10 +79,26 @@ async function notionFetch(path) {
   return res
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function notionFetchWithRetry(path, retries = 2) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await notionFetch(path)
+    if (res.status === 429 && attempt < retries) {
+      const retryAfter = parseInt(res.headers.get('retry-after') || '1', 10)
+      await sleep(retryAfter * 1000)
+      continue
+    }
+    return res
+  }
+}
+
 async function fetchNotionCache(pageId) {
   const [propsRes, blocksRes] = await Promise.all([
-    notionFetch(`v1/pages/${pageId}`),
-    notionFetch(`v1/blocks/${pageId}/children?page_size=100`),
+    notionFetchWithRetry(`v1/pages/${pageId}`),
+    notionFetchWithRetry(`v1/blocks/${pageId}/children?page_size=100`),
   ])
 
   if (!propsRes.ok) {
@@ -102,10 +119,6 @@ async function fetchNotionCache(pageId) {
     content,
     lastSynced: new Date().toISOString(),
   }
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 // ── Auth ──
@@ -140,22 +153,26 @@ export default async function handler(req, res) {
     const toSync = pois.filter((p) => p.notionPageId)
     const results = { updated: 0, failed: 0, skipped: 0, errors: [] }
 
-    for (let i = 0; i < toSync.length; i++) {
-      const poi = toSync[i]
-      try {
-        const cached = await fetchNotionCache(poi.notionPageId)
-        poi.notionCache = cached
-        results.updated++
-      } catch (err) {
-        console.error(`[sync-notion] Failed to sync POI "${poi.name}" (${poi.notionPageId}):`, err.message)
-        results.failed++
-        results.errors.push({ name: poi.name, error: err.message })
-      }
-
-      // Rate limit: wait 350ms between POIs (Notion free tier: 3 req/s)
-      if (i < toSync.length - 1) {
-        await sleep(350)
-      }
+    // Process in batches of 3 to stay within Notion rate limits and Vercel timeout
+    const BATCH_SIZE = 3
+    for (let i = 0; i < toSync.length; i += BATCH_SIZE) {
+      const batch = toSync.slice(i, i + BATCH_SIZE)
+      const settled = await Promise.allSettled(
+        batch.map(async (poi) => {
+          const cached = await fetchNotionCache(poi.notionPageId)
+          poi.notionCache = cached
+        })
+      )
+      settled.forEach((result, idx) => {
+        if (result.status === 'fulfilled') {
+          results.updated++
+        } else {
+          const poi = batch[idx]
+          console.error(`[sync-notion] Failed to sync POI "${poi.name}" (${poi.notionPageId}):`, result.reason?.message)
+          results.failed++
+          results.errors.push({ name: poi.name, error: result.reason?.message })
+        }
+      })
     }
 
     results.skipped = pois.length - toSync.length
