@@ -163,7 +163,7 @@ function buildMonsterMap(sourceData) {
         ...v,
         _libType: 'monster',
         _key: k,
-        ChallengeRating: v.ChallengeRating ?? v.CR ?? v.Challenge ?? null,
+        ChallengeRating: v.ChallengeRating || v.CR || v.Challenge || null,
       })
     })
   return map
@@ -252,7 +252,7 @@ export function useLibrary() {
         ...statblock,
         _libType: 'monster',
         _key: newKey,
-        ChallengeRating: statblock.ChallengeRating ?? statblock.CR ?? statblock.Challenge ?? null,
+        ChallengeRating: statblock.ChallengeRating || statblock.CR || statblock.Challenge || null,
       })
       return next
     })

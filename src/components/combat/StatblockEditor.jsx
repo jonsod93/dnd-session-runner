@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const TEMPLATE = {
   Name: 'New Creature',
@@ -35,6 +35,11 @@ export function StatblockEditor({ initial, onSave, onCancel, title }) {
     JSON.stringify(initial ?? TEMPLATE, null, 2)
   )
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    setJson(JSON.stringify(initial ?? TEMPLATE, null, 2))
+    setError(null)
+  }, [initial])
 
   const handleSave = () => {
     try {

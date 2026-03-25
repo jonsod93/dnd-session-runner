@@ -116,7 +116,7 @@ export function CombatantRow({
             >
               {combatant.name}
             </span>
-            <div className="flex items-center shrink-0 ml-[25px] gap-4">
+            <div className="flex-1 flex items-center justify-center gap-4">
               <div className="w-20 shrink-0 flex justify-center">
                 {combatant.hp != null && (
                   <span className="text-sm whitespace-nowrap">
@@ -133,19 +133,19 @@ export function CombatantRow({
                   </span>
                 )}
               </div>
+              {combatant.hp != null && (
+                <button
+                  className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12]"
+                  onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+                  title="Apply damage/healing (T)"
+                >
+                  Deal damage
+                </button>
+              )}
             </div>
-            {combatant.hp != null && (
-              <button
-                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12] ml-2"
-                onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-                title="Apply damage/healing (T)"
-              >
-                Deal damage
-              </button>
-            )}
             {!isLair && (
               <button
-                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12] ml-auto"
+                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12]"
                 onClick={openConditions}
                 title="Add/manage conditions"
               >
