@@ -433,7 +433,7 @@ function LocationInfoModal({ poi, preview, onClose }) {
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {/* Blurb - sticky on desktop, scrolls on mobile */}
           {preview?.blurb && (
-            <p className="text-sm text-[#b8b5b0] italic mb-4 md:sticky md:-top-4 md:z-10 md:bg-[#1e1e1e] md:pb-4 md:-mx-6 md:px-6 md:pt-4 md:mb-0">{preview.blurb}</p>
+            <p className="text-sm text-[#b8b5b0] italic mb-4 md:sticky md:-top-4 md:z-10 md:bg-[#1e1e1e] md:pb-4 md:-mx-6 md:px-6 md:pt-4 md:mb-0 md:-mt-4">{preview.blurb}</p>
           )}
           {loading && (
             <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
