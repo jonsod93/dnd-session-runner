@@ -71,6 +71,17 @@ export function POIMarker({ poi, onEdit, onRemove }) {
     return () => map.getContainer().removeEventListener('poi-hover', handler)
   }, [map, poi.id])
 
+  // Close tooltip when tapping on the map (mobile)
+  useEffect(() => {
+    const closeOnMapClick = () => {
+      setHovered(false)
+      setTooltipHovered(false)
+      clearTimeout(hideTimer.current)
+    }
+    map.on('click', closeOnMapClick)
+    return () => map.off('click', closeOnMapClick)
+  }, [map])
+
   // Position the tooltip above the marker in screen coordinates
   const updateTooltipPos = useCallback(() => {
     if (!map) return
@@ -136,6 +147,10 @@ export function POIMarker({ poi, onEdit, onRemove }) {
         position={poi.position}
         icon={icon}
         eventHandlers={{
+          click: () => {
+            map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
+            cancelHide(); setHovered(true); updateTooltipPos()
+          },
           mouseover: () => {
             map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
             cancelHide(); setHovered(true); updateTooltipPos()
@@ -156,7 +171,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
           onMouseEnter={() => { cancelHide(); setTooltipHovered(true) }}
           onMouseLeave={() => { setTooltipHovered(false); scheduleHide() }}
         >
-          <div className="bg-[#1e1e1e] border border-white/[0.12] rounded-lg shadow-xl min-w-[220px] max-w-[340px] text-left mb-2">
+          <div className="bg-[#1e1e1e] border border-white/[0.12] rounded-lg shadow-xl w-[300px] md:w-auto md:min-w-[220px] md:max-w-[340px] text-left mb-2">
             {/* Header */}
             <div className="px-3 py-2 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
@@ -175,12 +190,12 @@ export function POIMarker({ poi, onEdit, onRemove }) {
                 <p className="text-xs text-[#b8b5b0] italic">Loading preview...</p>
               )}
               {!loading && preview?.blurb && (
-                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">
+                <p className="text-xs text-[#b8b5b0] leading-relaxed md:line-clamp-4">
                   {preview.blurb}
                 </p>
               )}
               {!loading && preview?.content && !preview.blurb && (
-                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">
+                <p className="text-xs text-[#b8b5b0] leading-relaxed md:line-clamp-4">
                   {preview.content}
                 </p>
               )}
@@ -254,8 +269,8 @@ function renderBlock(block, key) {
     if (!block.children?.length) return null
     return (
       <details key={key} className="group mt-2">
-        <summary className="text-sm font-medium text-[#e6e6e6] cursor-pointer select-none list-none flex items-center gap-1.5 hover:text-gold-400 transition-colors">
-          <span className="text-[#9a9894] text-base leading-none transition-transform group-open:rotate-90">&#9656;</span>
+        <summary className="text-sm font-medium text-[#e6e6e6] cursor-pointer select-none list-none flex items-center gap-1.5 md:hover:text-gold-400 transition-colors">
+          <span className="text-gold-400 text-base leading-none transition-transform group-open:rotate-90">&#9656;</span>
           {block.text}
         </summary>
         <div className="pl-5 mt-1.5 border-l border-white/[0.06] ml-1">
