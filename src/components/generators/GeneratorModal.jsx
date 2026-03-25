@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import useSessionLink from '../../hooks/useSessionLink'
 import SessionLinker from './SessionLinker'
+import { generateNPCName } from '../../utils/nameGenerators'
 import {
   createNotionPage,
   appendSessionBlock,
@@ -21,6 +22,12 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+
+  // NPC generation state (only for generators that support it)
+  const hasNpc = !!generator.npcRole
+  const [npcEnabled, setNpcEnabled] = useState(false)
+  const [npcName, setNpcName] = useState('')
+  const [npcDescription, setNpcDescription] = useState('')
 
   // Modal-level session (independent from page)
   const modal = useSessionLink()
@@ -45,6 +52,16 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
   const handleSubtypeChange = (subtype) => {
     setActiveSubtype(subtype)
     setName(subtype.generate())
+  }
+
+  const handleToggleNpc = () => {
+    if (!npcEnabled) {
+      // Generate a name when first enabling
+      if (!npcName) setNpcName(generateNPCName())
+      setNpcEnabled(true)
+    } else {
+      setNpcEnabled(false)
+    }
   }
 
   const handleSave = async () => {
@@ -75,14 +92,32 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
           throw new Error(`Unknown target: ${generator.notionTarget}`)
       }
 
-      // Create the entity in Notion
+      // Create the main entity in Notion
       const created = await createNotionPage(dbId, properties)
 
       // Append mention to the linked session
       await appendSessionBlock(modal.linkedSession.id, created.id)
 
+      // If NPC is enabled, create the NPC and link it
+      let npcCreated = null
+      if (hasNpc && npcEnabled && npcName.trim()) {
+        const npcBlurb = npcDescription.trim() || undefined
+        const relations = {}
+        if (generator.npcRelation === 'location') {
+          relations.locationId = created.id
+        } else if (generator.npcRelation === 'organization') {
+          relations.orgId = created.id
+        }
+
+        const npcProps = buildPersonProperties(npcName.trim(), npcBlurb, relations)
+        npcCreated = await createNotionPage(PEOPLE_DB_ID, npcProps)
+
+        // Also append NPC mention to the session
+        await appendSessionBlock(modal.linkedSession.id, npcCreated.id)
+      }
+
       const label = activeSubtype ? activeSubtype.label : generator.label
-      onSaved?.(trimmedName, label, desc || '')
+      onSaved?.(trimmedName, label, desc || '', npcCreated ? { name: npcName.trim(), role: generator.npcRole } : null)
       onClose()
     } catch (err) {
       console.error('Save failed:', err)
@@ -174,6 +209,67 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
               className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/40 placeholder:text-[#787774] transition-colors resize-none"
             />
           </div>
+
+          {/* NPC generation section */}
+          {hasNpc && (
+            <div className="border border-white/[0.08] rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={handleToggleNpc}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs hover:bg-white/[0.03] transition-colors"
+              >
+                <span className={npcEnabled ? 'text-[#e6e6e6]' : 'text-[#787774]'}>
+                  {generator.npcRole}
+                  <span className="text-[#787774] ml-1">(NPC)</span>
+                </span>
+                <span className={[
+                  'text-[10px] rounded px-1.5 py-0.5 border transition-colors',
+                  npcEnabled
+                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+                    : 'border-white/[0.1] text-[#787774]',
+                ].join(' ')}>
+                  {npcEnabled ? 'On' : 'Off'}
+                </span>
+              </button>
+
+              {npcEnabled && (
+                <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-white/[0.06]">
+                  {/* NPC name */}
+                  <div>
+                    <label className="block text-xs text-[#787774] mb-1.5">{generator.npcRole} name</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={npcName}
+                        onChange={(e) => setNpcName(e.target.value)}
+                        className="flex-1 bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                        placeholder="NPC name..."
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setNpcName(generateNPCName())}
+                        className="text-xs text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-2 py-1 transition-colors shrink-0"
+                      >
+                        Re-generate
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* NPC description */}
+                  <div>
+                    <label className="block text-xs text-[#787774] mb-1.5">{generator.npcRole} description</label>
+                    <textarea
+                      value={npcDescription}
+                      onChange={(e) => setNpcDescription(e.target.value)}
+                      placeholder="Optional description..."
+                      rows={2}
+                      className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/40 placeholder:text-[#787774] transition-colors resize-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Session linker */}
           <div>
