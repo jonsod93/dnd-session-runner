@@ -443,9 +443,9 @@ function LocationInfoModal({ poi, preview, onClose }) {
                 if (isLocations) {
                   return (
                     <React.Fragment key={i}>
-                      <div className="sticky -top-4 z-10 bg-[#1e1e1e] -mx-6 px-6 pt-4 pb-1 mt-4">
-                        <hr className="border-white/[0.06] mb-1.5" />
-                        <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">
+                      <div className="mt-4">
+                        <hr className="border-white/[0.06] mb-3" />
+                        <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400 mb-1.5">
                           {section.heading.text}
                         </p>
                       </div>
