@@ -364,11 +364,13 @@ export async function appendSessionBlock(sessionPageId, mentionPageId) {
 
 // ── Property builders for different entity types ──
 
-export function buildPersonProperties(name, blurb) {
+export function buildPersonProperties(name, blurb, relations = {}) {
   return {
     Name: { title: [{ text: { content: name } }] },
     ...(blurb ? { Blurb: { rich_text: [{ text: { content: blurb } }] } } : {}),
     World: { relation: [{ id: WORLD_MASTER_ID }] },
+    ...(relations.locationId ? { Locations: { relation: [{ id: relations.locationId }] } } : {}),
+    ...(relations.orgId ? { Orgs: { relation: [{ id: relations.orgId }] } } : {}),
   }
 }
 

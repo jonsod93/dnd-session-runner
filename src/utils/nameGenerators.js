@@ -229,9 +229,9 @@ export const ESTABLISHMENT_SUBTYPES = [
 
 export const GENERATORS = [
   { key: 'npc',            label: 'NPC',            generate: generateNPCName,        notionTarget: 'npc' },
-  { key: 'establishment',  label: 'Establishment',  generate: generateTavernName,     notionTarget: 'location', locationType: 'Establishments', subtypes: ESTABLISHMENT_SUBTYPES },
+  { key: 'establishment',  label: 'Establishment',  generate: generateTavernName,     notionTarget: 'location', locationType: 'Establishments', subtypes: ESTABLISHMENT_SUBTYPES, npcRole: 'Owner',                npcRelation: 'location' },
   { key: 'ruins',          label: 'Ruins',          generate: generateRuinName,       notionTarget: 'location', locationType: 'Ruin' },
-  { key: 'organization',   label: 'Organization',   generate: generateOrgName,        notionTarget: 'organization' },
-  { key: 'settlement',     label: 'Settlement',     generate: generateSettlementName, notionTarget: 'location', locationType: 'Settlements' },
-  { key: 'ship',           label: 'Ship',           generate: generateShipName,       notionTarget: 'location', locationType: 'Vessel' },
+  { key: 'organization',   label: 'Organization',   generate: generateOrgName,        notionTarget: 'organization', npcRole: 'Head of Organization', npcRelation: 'organization' },
+  { key: 'settlement',     label: 'Settlement',     generate: generateSettlementName, notionTarget: 'location', locationType: 'Settlements', npcRole: 'Ruler',                npcRelation: 'location' },
+  { key: 'ship',           label: 'Ship',           generate: generateShipName,       notionTarget: 'location', locationType: 'Vessel', npcRole: 'Captain',              npcRelation: 'location' },
 ]

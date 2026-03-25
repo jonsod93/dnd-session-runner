@@ -11,8 +11,8 @@ export default function GeneratorsPage() {
   const [activeGenerator, setActiveGenerator] = useState(null)
   const [notifications, setNotifications] = useState([])
 
-  const addNotification = (name, type, description) => {
-    setNotifications((prev) => [...prev, { id: ++notifId, name, type, description }])
+  const addNotification = (name, type, description, npcInfo) => {
+    setNotifications((prev) => [...prev, { id: ++notifId, name, type, description, npcInfo }])
   }
 
   const removeNotification = (id) => {
@@ -82,6 +82,11 @@ export default function GeneratorsPage() {
                 <div className="text-sm text-[#e6e6e6] font-medium">{n.name}</div>
                 {n.description && (
                   <div className="text-xs text-[#787774] mt-1 line-clamp-3">{n.description}</div>
+                )}
+                {n.npcInfo && (
+                  <div className="text-xs text-[#787774] mt-1.5 border-t border-white/[0.06] pt-1.5">
+                    <span className="text-purple-400">{n.npcInfo.role}:</span> {n.npcInfo.name}
+                  </div>
                 )}
               </div>
               <button
