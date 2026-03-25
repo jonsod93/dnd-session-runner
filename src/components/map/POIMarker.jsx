@@ -257,9 +257,14 @@ function LocationInfoModal({ poi, preview, onClose }) {
     return () => window.removeEventListener('keydown', h)
   }, [onClose])
 
-  // Fetch full page content as structured blocks
+  // Use cached full blocks if available, otherwise fetch from Notion
   useEffect(() => {
     if (!poi.notionPageId) { setLoading(false); return }
+    if (poi.notionCache?.fullBlocks?.length) {
+      setContentBlocks(poi.notionCache.fullBlocks)
+      setLoading(false)
+      return
+    }
     let cancelled = false
 
     fetchBlocksRecursive(poi.notionPageId)
@@ -273,7 +278,7 @@ function LocationInfoModal({ poi, preview, onClose }) {
       })
 
     return () => { cancelled = true }
-  }, [poi.notionPageId])
+  }, [poi.notionPageId, poi.notionCache])
 
   return (
     <div

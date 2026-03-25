@@ -4,7 +4,7 @@ const BLOB_PATH = 'pois.json'
 const NOTION_API = 'https://api.notion.com'
 const NOTION_VERSION = '2022-06-28'
 const BATCH_SIZE = 3
-const MAX_PER_CALL = 15
+const MAX_PER_CALL = 5
 
 // Vercel Hobby allows up to 60s with this config
 export const config = { maxDuration: 60 }
@@ -49,6 +49,35 @@ function blocksToPreview(blocks, maxLength = 400) {
   }
   const result = lines.join('\n')
   return result.length > maxLength ? result.slice(0, maxLength) + '\u2026' : result
+}
+
+function blocksToStructured(blocks) {
+  const result = []
+  for (const block of blocks) {
+    const type = block.type
+    if (type === 'heading_1' || type === 'heading_2' || type === 'heading_3') {
+      const text = richTextToPlain(block[type]?.rich_text)
+      if (text) result.push({ type: 'heading', text, level: parseInt(type.slice(-1)) })
+    } else if (type === 'paragraph') {
+      const text = richTextToPlain(block.paragraph?.rich_text)
+      if (text) result.push({ type: 'paragraph', text })
+    } else if (type === 'bulleted_list_item' || type === 'numbered_list_item') {
+      const text = richTextToPlain(block[type]?.rich_text)
+      if (text) result.push({ type: 'list-item', text })
+    } else if (type === 'callout') {
+      const text = richTextToPlain(block.callout?.rich_text)
+      if (text) result.push({ type: 'callout', text })
+    } else if (type === 'quote') {
+      const text = richTextToPlain(block.quote?.rich_text)
+      if (text) result.push({ type: 'quote', text })
+    } else if (type === 'toggle') {
+      const text = richTextToPlain(block.toggle?.rich_text)
+      if (text) result.push({ type: 'heading', text, level: 3 })
+    } else if (type === 'divider') {
+      result.push({ type: 'divider' })
+    }
+  }
+  return result
 }
 
 // ── Blob helpers ──
@@ -96,22 +125,51 @@ async function notionFetchWithRetry(path, retries = 2) {
   }
 }
 
+async function fetchPageBlocks(blockId) {
+  const res = await notionFetchWithRetry(`v1/blocks/${blockId}/children?page_size=100`)
+  if (!res.ok) throw new Error(`Notion blocks ${blockId} returned ${res.status}`)
+  const data = await res.json()
+  return data.results ?? []
+}
+
+async function flattenBlocks(blocks, depthLeft) {
+  const result = []
+  for (const block of blocks) {
+    result.push(block)
+    if (block.has_children && depthLeft > 0) {
+      const type = block.type
+      const expandable = type === 'toggle' || type === 'column_list' || type === 'column' || type === 'synced_block'
+        || type === 'heading_1' || type === 'heading_2' || type === 'heading_3'
+      if (expandable) {
+        try {
+          const children = await fetchPageBlocks(block.id)
+          const nested = await flattenBlocks(children, depthLeft - 1)
+          result.push(...nested)
+        } catch {
+          // Skip blocks we can't fetch
+        }
+      }
+    }
+  }
+  return result
+}
+
 async function fetchNotionCache(pageId) {
-  const [propsRes, blocksRes] = await Promise.all([
-    notionFetchWithRetry(`v1/pages/${pageId}`),
-    notionFetchWithRetry(`v1/blocks/${pageId}/children?page_size=100`),
-  ])
+  const propsRes = await notionFetchWithRetry(`v1/pages/${pageId}`)
 
   if (!propsRes.ok) {
     if (propsRes.status === 404) {
-      return { title: '', blurb: '', types: [], tags: [], content: '', lastSynced: new Date().toISOString(), notFound: true }
+      return { title: '', blurb: '', types: [], tags: [], content: '', fullBlocks: [], lastSynced: new Date().toISOString(), notFound: true }
     }
     throw new Error(`Notion page ${pageId} returned ${propsRes.status}`)
   }
 
   const props = extractPageProps(await propsRes.json())
-  const blocksData = blocksRes.ok ? await blocksRes.json() : { results: [] }
-  const content = blocksToPreview(blocksData.results ?? [])
+
+  const topBlocks = await fetchPageBlocks(pageId)
+  const allBlocks = await flattenBlocks(topBlocks, 3)
+  const content = blocksToPreview(allBlocks)
+  const fullBlocks = blocksToStructured(allBlocks)
 
   return {
     title: props.title,
@@ -119,6 +177,7 @@ async function fetchNotionCache(pageId) {
     types: props.types,
     tags: props.tags,
     content,
+    fullBlocks,
     lastSynced: new Date().toISOString(),
   }
 }
