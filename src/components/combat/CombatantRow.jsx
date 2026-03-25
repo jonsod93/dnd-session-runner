@@ -145,7 +145,7 @@ export function CombatantRow({
             )}
             {!isLair && (
               <button
-                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12] ml-2"
+                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12] ml-auto"
                 onClick={openConditions}
                 title="Add/manage conditions"
               >

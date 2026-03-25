@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Marker, useMap } from 'react-leaflet'
 import L from 'leaflet'
@@ -41,7 +41,14 @@ export function POIMarker({ poi, onEdit, onRemove }) {
   const map = useMap()
   const [hovered, setHovered] = useState(false)
   const [tooltipHovered, setTooltipHovered] = useState(false)
-  const [preview, setPreview] = useState(null)
+  const cachedPreview = (poi.notionCache && !poi.notionCache.notFound) ? {
+    title: poi.notionCache.title,
+    blurb: poi.notionCache.blurb,
+    types: poi.notionCache.types,
+    tags: poi.notionCache.tags,
+    content: poi.notionCache.content,
+  } : null
+  const [preview, setPreview] = useState(cachedPreview)
   const [loading, setLoading] = useState(false)
   const [showFullInfo, setShowFullInfo] = useState(false)
   const [tooltipPos, setTooltipPos] = useState(null)
@@ -64,6 +71,17 @@ export function POIMarker({ poi, onEdit, onRemove }) {
     return () => map.getContainer().removeEventListener('poi-hover', handler)
   }, [map, poi.id])
 
+  // Close tooltip when tapping on the map (mobile)
+  useEffect(() => {
+    const closeOnMapClick = () => {
+      setHovered(false)
+      setTooltipHovered(false)
+      clearTimeout(hideTimer.current)
+    }
+    map.on('click', closeOnMapClick)
+    return () => map.off('click', closeOnMapClick)
+  }, [map])
+
   // Position the tooltip above the marker in screen coordinates
   const updateTooltipPos = useCallback(() => {
     if (!map) return
@@ -74,9 +92,9 @@ export function POIMarker({ poi, onEdit, onRemove }) {
     setTooltipPos({ x: rect.left + point.x, y: rect.top + point.y - 28 })
   }, [map, poi.position])
 
-  // Fetch Notion preview on hover
+  // Fetch Notion preview on hover (skipped if notionCache already provided instant data)
   useEffect(() => {
-    if (!isVisible || !poi.notionPageId) return
+    if (!isVisible || !poi.notionPageId || preview) return
     if (previewCache.has(poi.notionPageId)) {
       setPreview(previewCache.get(poi.notionPageId))
       return
@@ -101,7 +119,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
       })
 
     return () => { cancelled = true }
-  }, [isVisible, poi.notionPageId])
+  }, [isVisible, poi.notionPageId, preview])
 
   // Update position on map move/zoom
   useEffect(() => {
@@ -129,17 +147,21 @@ export function POIMarker({ poi, onEdit, onRemove }) {
         position={poi.position}
         icon={icon}
         eventHandlers={{
+          click: () => {
+            if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
+              // Desktop: open full info directly
+              setShowFullInfo(true)
+            } else {
+              // Mobile: show preview tooltip
+              map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
+              cancelHide(); setHovered(true); updateTooltipPos()
+            }
+          },
           mouseover: () => {
             map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
             cancelHide(); setHovered(true); updateTooltipPos()
           },
           mouseout: () => scheduleHide(),
-          click: () => {
-            // Desktop: open full info directly; mobile: handled via tooltip button
-            if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
-              setShowFullInfo(true)
-            }
-          },
           contextmenu: (e) => {
             L.DomEvent.preventDefault(e)
             onEdit?.(poi)
@@ -155,15 +177,28 @@ export function POIMarker({ poi, onEdit, onRemove }) {
           onMouseEnter={() => { cancelHide(); setTooltipHovered(true) }}
           onMouseLeave={() => { setTooltipHovered(false); scheduleHide() }}
         >
-          <div className="bg-[#1e1e1e] border border-white/[0.12] rounded-lg shadow-xl min-w-[220px] max-w-[340px] text-left mb-2">
+          <div className="bg-[#1e1e1e] border border-white/[0.12] rounded-lg shadow-xl w-[300px] md:w-auto md:min-w-[220px] md:max-w-[340px] text-left mb-2">
             {/* Header */}
             <div className="px-3 py-2 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-[#e6e6e6]">{poi.name}</span>
-                {preview?.types?.length > 0 && (
-                  <span className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded">
-                    {preview.types[0]}
-                  </span>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <span className="text-sm font-medium text-[#e6e6e6]">{poi.name}</span>
+                  {preview?.types?.length > 0 && (
+                    <span className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded whitespace-nowrap">
+                      {preview.types[0]}
+                    </span>
+                  )}
+                </div>
+                {poi.notionPageId && (
+                  <a
+                    href={notionPageUrl(poi.notionPageId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
+                  >
+                    Notion
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                  </a>
                 )}
               </div>
             </div>
@@ -174,12 +209,12 @@ export function POIMarker({ poi, onEdit, onRemove }) {
                 <p className="text-xs text-[#b8b5b0] italic">Loading preview...</p>
               )}
               {!loading && preview?.blurb && (
-                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">
+                <p className="text-xs text-[#b8b5b0] leading-relaxed md:line-clamp-4">
                   {preview.blurb}
                 </p>
               )}
               {!loading && preview?.content && !preview.blurb && (
-                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">
+                <p className="text-xs text-[#b8b5b0] leading-relaxed md:line-clamp-4">
                   {preview.content}
                 </p>
               )}
@@ -196,22 +231,12 @@ export function POIMarker({ poi, onEdit, onRemove }) {
             {/* Actions */}
             <div className="px-3 py-1.5 border-t border-white/[0.06] flex items-center gap-2">
               {poi.notionPageId && (
-                <>
-                  <a
-                    href={notionPageUrl(poi.notionPageId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-gold-400 hover:text-gold-300 transition-colors"
-                  >
-                    View page
-                  </a>
-                  <button
-                    className="text-xs text-[#9a9894] hover:text-[#e6e6e6] transition-colors pointer-fine:hidden"
-                    onClick={() => setShowFullInfo(true)}
-                  >
-                    Full info
-                  </button>
-                </>
+                <button
+                  className="text-xs text-white font-bold hover:text-gold-300 transition-colors pointer-fine:hidden"
+                  onClick={() => setShowFullInfo(true)}
+                >
+                  Full info
+                </button>
               )}
               <div className="flex-1" />
               <button
@@ -245,6 +270,87 @@ export function POIMarker({ poi, onEdit, onRemove }) {
   )
 }
 
+// ── Block rendering helpers ──────────────────────────────────────────────────
+
+function renderBlock(block, key) {
+  if (block.type === 'toggle') {
+    // Skip toggles with no children
+    if (!block.children?.length) return null
+    return (
+      <details key={key} className="group mt-2">
+        <summary className="text-sm font-normal text-[#b8b5b0] cursor-pointer select-none list-none flex items-center gap-2 md:hover:text-gold-400 transition-colors">
+          <span className="text-gold-400 transition-transform group-open:rotate-90 flex-shrink-0" style={{ fontSize: '2rem', lineHeight: 1 }}>&#9656;</span>
+          <span className="underline decoration-white/[0.2] underline-offset-2 md:group-hover:decoration-gold-400/40">{block.text}</span>
+        </summary>
+        <div className="pl-5 mt-1.5 border-l border-white/[0.06] ml-1">
+          {block.children.map((child, j) => renderBlock(child, j))}
+        </div>
+      </details>
+    )
+  }
+  if (block.type === 'heading') {
+    const Tag = block.level === 1 ? 'h2' : block.level === 2 ? 'h3' : 'h4'
+    const size = block.level === 1 ? 'text-base' : 'text-sm'
+    return (
+      <Tag key={key} className={`${size} font-semibold text-[#e6e6e6] mb-1.5`}>
+        {block.text}
+      </Tag>
+    )
+  }
+  if (block.type === 'list-item') {
+    return (
+      <p key={key} className="text-sm text-[#b8b5b0] leading-relaxed pl-4 mb-0.5">
+        <span className="text-[#9a9894] mr-1.5">-</span>{block.text}
+      </p>
+    )
+  }
+  if (block.type === 'quote') {
+    return (
+      <blockquote key={key} className="text-sm text-[#b8b5b0] italic leading-relaxed border-l-2 border-white/[0.12] pl-3 my-2">
+        {block.text}
+      </blockquote>
+    )
+  }
+  if (block.type === 'callout') {
+    return (
+      <div key={key} className="text-sm text-[#b8b5b0] leading-relaxed bg-white/[0.03] rounded px-3 py-2 my-2">
+        {block.text}
+      </div>
+    )
+  }
+  if (block.type === 'divider') {
+    return <hr key={key} className="border-white/[0.06] my-3" />
+  }
+  // paragraph
+  return (
+    <p key={key} className="text-sm text-[#b8b5b0] leading-relaxed mb-1.5">
+      {block.text}
+    </p>
+  )
+}
+
+// Group blocks into sections (heading + content until next heading).
+// Filters out empty sections (heading with no content blocks or toggles after it).
+function groupIntoSections(blocks) {
+  const sections = []
+  let current = null
+
+  for (const block of blocks) {
+    if (block.type === 'heading') {
+      if (current) sections.push(current)
+      current = { heading: block, content: [] }
+    } else {
+      if (!current) current = { heading: null, content: [] }
+      current.content.push(block)
+    }
+  }
+  if (current) sections.push(current)
+
+  // Filter out sections that have a heading but no content
+  // Always keep "Locations" since it uses special styling
+  return sections.filter((s) => !s.heading || s.content.length > 0 || s.heading.text?.toLowerCase() === 'locations')
+}
+
 // ── Full location info modal ─────────────────────────────────────────────────
 function LocationInfoModal({ poi, preview, onClose }) {
   const [contentBlocks, setContentBlocks] = useState(null)
@@ -256,9 +362,14 @@ function LocationInfoModal({ poi, preview, onClose }) {
     return () => window.removeEventListener('keydown', h)
   }, [onClose])
 
-  // Fetch full page content as structured blocks
+  // Use cached full blocks if available, otherwise fetch from Notion
   useEffect(() => {
     if (!poi.notionPageId) { setLoading(false); return }
+    if (poi.notionCache?.fullBlocks?.length) {
+      setContentBlocks(poi.notionCache.fullBlocks)
+      setLoading(false)
+      return
+    }
     let cancelled = false
 
     fetchBlocksRecursive(poi.notionPageId)
@@ -272,7 +383,9 @@ function LocationInfoModal({ poi, preview, onClose }) {
       })
 
     return () => { cancelled = true }
-  }, [poi.notionPageId])
+  }, [poi.notionPageId, poi.notionCache])
+
+  const sections = contentBlocks ? groupIntoSections(contentBlocks) : []
 
   return (
     <div
@@ -285,94 +398,69 @@ function LocationInfoModal({ poi, preview, onClose }) {
         style={{ boxShadow: '0 12px 48px rgba(0,0,0,0.5)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="shrink-0 px-6 py-4 border-b border-white/[0.06]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h2 className="text-base font-medium text-[#e6e6e6]">{poi.name}</h2>
-              {preview?.types?.map((t) => (
-                <span key={t} className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded">
-                  {t}
-                </span>
-              ))}
-            </div>
-            <div className="flex items-center gap-3">
-              {poi.notionPageId && (
-                <a
-                  href={notionPageUrl(poi.notionPageId)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-gold-400 hover:text-gold-300 transition-colors"
-                >
-                  Open in Notion
-                </a>
-              )}
-              <button
-                className="text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
-                onClick={onClose}
-              >
-                ✕
-              </button>
-            </div>
+        {/* Header - title row only */}
+        <div className="shrink-0 border-b border-white/[0.06] px-6 py-3 flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <h2 className="text-base font-medium text-[#e6e6e6]">{poi.name}</h2>
+            {preview?.types?.map((t) => (
+              <span key={t} className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded whitespace-nowrap">
+                {t}
+              </span>
+            ))}
           </div>
-
-          {/* Blurb */}
-          {preview?.blurb && (
-            <p className="text-sm text-[#b8b5b0] mt-2 italic">{preview.blurb}</p>
-          )}
+          <div className="flex items-center gap-3 shrink-0">
+            {poi.notionPageId && (
+              <a
+                href={notionPageUrl(poi.notionPageId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1"
+              >
+                Notion
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
+            )}
+            <button
+              className="text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+              onClick={onClose}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
+          {/* Blurb - inside scroll area so it scrolls on mobile */}
+          {preview?.blurb && (
+            <p className="text-sm text-[#b8b5b0] italic mb-4">{preview.blurb}</p>
+          )}
           {loading && (
             <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
           )}
-          {!loading && contentBlocks?.length > 0 && (
-            <div className="space-y-0">
-              {contentBlocks.map((block, i) => {
-                if (block.type === 'heading') {
-                  const Tag = block.level === 1 ? 'h2' : block.level === 2 ? 'h3' : 'h4'
-                  const size = block.level === 1 ? 'text-base' : block.level === 2 ? 'text-sm' : 'text-sm'
+          {!loading && sections.length > 0 && sections.map((section, i) => {
+                const isLocations = section.heading?.text?.toLowerCase() === 'locations'
+                if (isLocations) {
                   return (
-                    <Tag key={i} className={`${size} font-semibold text-[#e6e6e6] ${i > 0 ? 'mt-5' : ''} mb-1.5`}>
-                      {block.text}
-                    </Tag>
+                    <React.Fragment key={i}>
+                      <div className="sticky -top-4 z-10 bg-[#1e1e1e] -mx-6 px-6 pb-2">
+                        <hr className="border-white/[0.06] mb-2" />
+                        <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">
+                          {section.heading.text}
+                        </p>
+                      </div>
+                      {section.content.map((block, j) => renderBlock(block, j))}
+                    </React.Fragment>
                   )
                 }
-                if (block.type === 'list-item') {
-                  return (
-                    <p key={i} className="text-sm text-[#b8b5b0] leading-relaxed pl-4 mb-0.5">
-                      <span className="text-[#9a9894] mr-1.5">-</span>{block.text}
-                    </p>
-                  )
-                }
-                if (block.type === 'quote') {
-                  return (
-                    <blockquote key={i} className="text-sm text-[#b8b5b0] italic leading-relaxed border-l-2 border-white/[0.12] pl-3 my-2">
-                      {block.text}
-                    </blockquote>
-                  )
-                }
-                if (block.type === 'callout') {
-                  return (
-                    <div key={i} className="text-sm text-[#b8b5b0] leading-relaxed bg-white/[0.03] rounded px-3 py-2 my-2">
-                      {block.text}
-                    </div>
-                  )
-                }
-                if (block.type === 'divider') {
-                  return <hr key={i} className="border-white/[0.06] my-3" />
-                }
-                // paragraph
                 return (
-                  <p key={i} className="text-sm text-[#b8b5b0] leading-relaxed mb-1.5">
-                    {block.text}
-                  </p>
+                  <div key={i} className={i > 0 ? 'mt-6' : ''}>
+                    {section.heading && renderBlock(section.heading, `h-${i}`)}
+                    {section.content.map((block, j) => renderBlock(block, j))}
+                  </div>
                 )
               })}
-            </div>
-          )}
-          {!loading && (!contentBlocks || contentBlocks.length === 0) && (
+          {!loading && sections.length === 0 && (
             <p className="text-sm text-[#b8b5b0] italic">No content available.</p>
           )}
         </div>
