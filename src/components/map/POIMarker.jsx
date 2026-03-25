@@ -188,7 +188,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
                     href={notionPageUrl(poi.notionPageId)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-[#9a9894] hover:text-gold-400 transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
+                    className="text-xs text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
                   >
                     Notion
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -226,7 +226,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
             <div className="px-3 py-1.5 border-t border-white/[0.06] flex items-center gap-2">
               {poi.notionPageId && (
                 <button
-                  className="text-xs text-gold-400 hover:text-gold-300 transition-colors"
+                  className="text-xs text-white font-bold hover:text-gold-300 transition-colors"
                   onClick={() => setShowFullInfo(true)}
                 >
                   Full info
@@ -392,49 +392,43 @@ function LocationInfoModal({ poi, preview, onClose }) {
         style={{ boxShadow: '0 12px 48px rgba(0,0,0,0.5)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="shrink-0 border-b border-white/[0.06]">
-          {/* Title row - always visible */}
-          <div className="px-6 py-3 flex items-start justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2 min-w-0">
-              <h2 className="text-base font-medium text-[#e6e6e6]">{poi.name}</h2>
-              {preview?.types?.map((t) => (
-                <span key={t} className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded whitespace-nowrap">
-                  {t}
-                </span>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              {poi.notionPageId && (
-                <a
-                  href={notionPageUrl(poi.notionPageId)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[#9a9894] hover:text-gold-400 transition-colors flex items-center gap-1"
-                >
-                  Notion
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                </a>
-              )}
-              <button
-                className="text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
-                onClick={onClose}
-              >
-                ✕
-              </button>
-            </div>
+        {/* Header - title row only */}
+        <div className="shrink-0 border-b border-white/[0.06] px-6 py-3 flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <h2 className="text-base font-medium text-[#e6e6e6]">{poi.name}</h2>
+            {preview?.types?.map((t) => (
+              <span key={t} className="text-xs text-[#9a9894] border border-white/[0.1] px-1.5 py-0.5 rounded whitespace-nowrap">
+                {t}
+              </span>
+            ))}
           </div>
-
-          {/* Blurb */}
-          {preview?.blurb && (
-            <div className="px-6 pb-3">
-              <p className="text-sm text-[#b8b5b0] italic">{preview.blurb}</p>
-            </div>
-          )}
+          <div className="flex items-center gap-3 shrink-0">
+            {poi.notionPageId && (
+              <a
+                href={notionPageUrl(poi.notionPageId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1"
+              >
+                Notion
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
+            )}
+            <button
+              className="text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+              onClick={onClose}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
+          {/* Blurb - inside scroll area so it scrolls on mobile */}
+          {preview?.blurb && (
+            <p className="text-sm text-[#b8b5b0] italic mb-4">{preview.blurb}</p>
+          )}
           {loading && (
             <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
           )}
@@ -443,7 +437,7 @@ function LocationInfoModal({ poi, preview, onClose }) {
                 if (isLocations) {
                   return (
                     <React.Fragment key={i}>
-                      <div className="sticky top-0 z-10 bg-[#1e1e1e] -mx-6 px-6 pt-1 pb-2">
+                      <div className="sticky -top-4 z-10 bg-[#1e1e1e] -mx-6 px-6 pb-2">
                         <hr className="border-white/[0.06] mb-2" />
                         <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">
                           {section.heading.text}
