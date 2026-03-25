@@ -135,7 +135,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             )}
             {filteredNPCs.map((entry) => (
               <div
-                key={entry.Id ?? entry.Name}
+                key={entry._key ?? entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
                 onMouseEnter={(e) => {
@@ -199,7 +199,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             )}
             {filteredPCs.map((entry) => (
               <div
-                key={entry.Id ?? entry.Name}
+                key={entry._key ?? entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
                 onMouseEnter={(e) => {
