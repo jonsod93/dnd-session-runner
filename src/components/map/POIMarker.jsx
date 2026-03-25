@@ -431,9 +431,9 @@ function LocationInfoModal({ poi, preview, onClose }) {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          {/* Blurb - inside scroll area so it scrolls on mobile */}
+          {/* Blurb - sticky on desktop, scrolls on mobile */}
           {preview?.blurb && (
-            <p className="text-sm text-[#b8b5b0] italic mb-4">{preview.blurb}</p>
+            <p className="text-sm text-[#b8b5b0] italic mb-4 md:sticky md:-top-4 md:z-10 md:bg-[#1e1e1e] md:pb-3 md:-mx-6 md:px-6 md:pt-4">{preview.blurb}</p>
           )}
           {loading && (
             <p className="text-sm text-[#b8b5b0] italic">Loading page content...</p>
@@ -443,8 +443,8 @@ function LocationInfoModal({ poi, preview, onClose }) {
                 if (isLocations) {
                   return (
                     <React.Fragment key={i}>
-                      <div className="sticky -top-4 z-10 bg-[#1e1e1e] -mx-6 px-6 pt-6 pb-1.5 mt-2">
-                        <hr className="border-white/[0.06] mb-2" />
+                      <div className="sticky -top-4 z-10 bg-[#1e1e1e] -mx-6 px-6 pt-4 pb-1 mt-4">
+                        <hr className="border-white/[0.06] mb-1.5" />
                         <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">
                           {section.heading.text}
                         </p>
