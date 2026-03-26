@@ -21,12 +21,13 @@ const LS_CACHE_KEY = 'mythranos:creature-cache'
 const LS_EDITS_KEY = 'mythranos:creature-edits'
 const LS_DELETES_KEY = 'mythranos:creature-deletes'
 
-// Auth token for write operations (set via VITE_API_SECRET env var)
-const API_SECRET = import.meta.env.VITE_API_SECRET || ''
+// Auth token for write operations (JWT from login)
+import { getToken } from './useAuth'
 
 function authHeaders() {
   const headers = { 'Content-Type': 'application/json' }
-  if (API_SECRET) headers['Authorization'] = `Bearer ${API_SECRET}`
+  const token = getToken()
+  if (token) headers['Authorization'] = `Bearer ${token}`
   return headers
 }
 

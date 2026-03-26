@@ -17,11 +17,10 @@ async function writeBlob(data) {
   })
 }
 
-function checkAuth(req) {
-  const secret = process.env.API_SECRET
-  if (!secret) return true
-  const header = req.headers['authorization'] || ''
-  return header === `Bearer ${secret}`
+import { verifyToken } from './lib/auth.js'
+
+async function checkAuth(req) {
+  return verifyToken(req)
 }
 
 export default async function handler(req, res) {
@@ -35,7 +34,7 @@ export default async function handler(req, res) {
     }
 
     // Auth gate for mutations
-    if (!checkAuth(req)) {
+    if (!(await checkAuth(req))) {
       return res.status(401).json({ error: 'Unauthorized' })
     }
 

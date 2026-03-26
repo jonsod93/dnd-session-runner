@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 const LS_CACHE_KEY = 'mythranos-map-pois-v1'
-const IS_DEV = import.meta.env.DEV
-const API_SECRET = import.meta.env.VITE_API_SECRET || ''
+import { getToken } from './useAuth'
 
 function authHeaders() {
   const headers = { 'Content-Type': 'application/json' }
-  if (API_SECRET) headers['Authorization'] = `Bearer ${API_SECRET}`
+  const token = getToken()
+  if (token) headers['Authorization'] = `Bearer ${token}`
   return headers
 }
 
