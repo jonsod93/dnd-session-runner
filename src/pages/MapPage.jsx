@@ -138,13 +138,12 @@ export default function MapPage() {
         <MapViewRestorer />
         <MapClickHandler onRightClick={handleRightClick} />
 
-        {pois.map((poi) => (
+        {!editingPath && pois.map((poi) => (
           <POIMarker
             key={poi.id}
             poi={poi}
             onEdit={handleEdit}
             onRemove={removePOI}
-            disabled={editingPath}
           />
         ))}
 

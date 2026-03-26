@@ -37,7 +37,7 @@ function makeIcon(icon = 'generic', color = '#facc15') {
 // ── Notion preview cache ─────────────────────────────────────────────────────
 const previewCache = new Map()
 
-export function POIMarker({ poi, onEdit, onRemove, disabled }) {
+export function POIMarker({ poi, onEdit, onRemove }) {
   const map = useMap()
   const [hovered, setHovered] = useState(false)
   const [tooltipHovered, setTooltipHovered] = useState(false)
@@ -144,11 +144,9 @@ export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   return (
     <>
       <Marker
-        key={disabled ? 'disabled' : 'enabled'}
         position={poi.position}
         icon={icon}
-        interactive={!disabled}
-        eventHandlers={disabled ? {} : {
+        eventHandlers={{
           click: () => {
             if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
               // Desktop: open full info directly
