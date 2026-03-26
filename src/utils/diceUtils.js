@@ -20,6 +20,7 @@ export function evalDiceExpr(exprRaw) {
       detail:   `[${roll}]${modStr} = ${total}`,
       total,
       rollType: 'attack',
+      naturalRoll: roll,
     }
   }
 

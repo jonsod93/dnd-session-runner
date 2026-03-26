@@ -22,11 +22,14 @@ function ToastItem({ roll, onExpire }) {
   }, [roll.id, onExpire])
 
   const isAttack = roll.rollType === 'attack'
-  const totalColor = roll.damageTypeColor || (isAttack ? '#93c5fd' : undefined) // blue-300 for attacks
+  const isCrit = isAttack && roll.naturalRoll === 20
+  const isCritMiss = isAttack && roll.naturalRoll === 1
+  const totalColor = isCrit ? '#4ade80' : isCritMiss ? '#f87171' : roll.damageTypeColor || (isAttack ? '#93c5fd' : undefined)
+  const borderColor = isCrit ? 'border-green-400/40' : isCritMiss ? 'border-red-400/40' : 'border-white/[0.12]'
   const hasContext = roll.context || roll.combatantName
 
   return (
-    <div className="pointer-events-auto bg-[#252525] border border-white/[0.12] rounded-lg shadow-xl px-4 py-2.5 min-w-[240px] max-w-[420px]">
+    <div className={`pointer-events-auto bg-[#252525] border ${borderColor} rounded-lg shadow-xl px-4 py-2.5 min-w-[240px] max-w-[420px]`}>
       {/* Heading row: context as title, combatant name smaller */}
       {hasContext && (
         <div className="flex items-baseline gap-2 mb-1.5">
@@ -49,6 +52,12 @@ function ToastItem({ roll, onExpire }) {
         </span>
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-xs text-[#787774]/70 font-mono truncate">{roll.detail}</span>
+          {isCrit && (
+            <span className="text-xs font-bold text-green-400">Critical hit!</span>
+          )}
+          {isCritMiss && (
+            <span className="text-xs font-bold text-red-400">Critical miss!</span>
+          )}
           {roll.damageType && (
             <span
               className="text-xs font-medium capitalize"
