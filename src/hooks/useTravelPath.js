@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 const LS_CACHE_KEY = 'mythranos-travel-path-v1'
+const LS_DIRTY_KEY = 'mythranos-travel-path-dirty'
 const API_SECRET = import.meta.env.VITE_API_SECRET || ''
+const DEBOUNCE_MS = 2000
 
 function authHeaders() {
   const headers = { 'Content-Type': 'application/json' }
@@ -25,6 +27,18 @@ function saveCache(waypoints) {
   }
 }
 
+function isDirty() {
+  return localStorage.getItem(LS_DIRTY_KEY) === '1'
+}
+
+function markDirty() {
+  try { localStorage.setItem(LS_DIRTY_KEY, '1') } catch {}
+}
+
+function clearDirty() {
+  try { localStorage.removeItem(LS_DIRTY_KEY) } catch {}
+}
+
 async function fetchWaypoints() {
   const res = await fetch('/api/travel-path')
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -43,10 +57,39 @@ async function persistWaypoints(waypoints) {
 export function useTravelPath() {
   const [waypoints, setWaypoints] = useState(loadCache)
   const hasFetched = useRef(false)
+  const debounceTimer = useRef(null)
+  const latestWaypoints = useRef(waypoints)
+
+  // Keep ref in sync for debounced persist
+  useEffect(() => {
+    latestWaypoints.current = waypoints
+  }, [waypoints])
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (hasFetched.current) return
     hasFetched.current = true
+
+    // If we have unsynced local changes, push them to server first
+    if (isDirty()) {
+      console.log('[useTravelPath] Found unsynced local changes, pushing to server...')
+      const localData = loadCache()
+      persistWaypoints(localData)
+        .then(() => {
+          clearDirty()
+          console.log('[useTravelPath] Successfully synced local changes to server')
+        })
+        .catch((err) => {
+          console.warn('[useTravelPath] Still unable to sync local changes:', err.message)
+        })
+      return // Keep local data, don't overwrite with server
+    }
 
     fetchWaypoints()
       .then((serverWaypoints) => {
@@ -58,16 +101,30 @@ export function useTravelPath() {
       })
   }, [])
 
+  const debouncedPersist = useCallback(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      const data = latestWaypoints.current
+      persistWaypoints(data)
+        .then(() => {
+          clearDirty()
+        })
+        .catch((err) => {
+          markDirty()
+          console.warn('[useTravelPath] Failed to persist:', err.message)
+        })
+    }, DEBOUNCE_MS)
+  }, [])
+
   const update = useCallback((updater) => {
     setWaypoints((prev) => {
       const next = updater(prev)
       saveCache(next)
-      persistWaypoints(next).catch((err) => {
-        console.warn('[useTravelPath] Failed to persist:', err.message)
-      })
+      markDirty() // Mark dirty immediately, clear on successful persist
+      debouncedPersist()
       return next
     })
-  }, [])
+  }, [debouncedPersist])
 
   const addWaypoint = useCallback((waypoint) => {
     update((prev) => [...prev, { ...waypoint, id: crypto.randomUUID() }])
