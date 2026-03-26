@@ -39,6 +39,7 @@ const previewCache = new Map()
 
 export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   const map = useMap()
+  const markerRef = useRef(null)
   const [hovered, setHovered] = useState(false)
   const [tooltipHovered, setTooltipHovered] = useState(false)
   const cachedPreview = (poi.notionCache && !poi.notionCache.notFound) ? {
@@ -55,6 +56,12 @@ export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   const hideTimer = useRef(null)
 
   const icon = makeIcon(poi.icon, poi.color)
+
+  // Toggle pointer-events so the marker doesn't capture clicks when disabled
+  useEffect(() => {
+    const el = markerRef.current?.getElement?.()
+    if (el) el.style.pointerEvents = disabled ? 'none' : ''
+  }, [disabled])
 
   const isVisible = hovered || tooltipHovered
 
@@ -144,11 +151,11 @@ export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   return (
     <>
       <Marker
+        ref={markerRef}
         position={poi.position}
         icon={icon}
         eventHandlers={{
           click: () => {
-            if (disabled) return
             if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
               // Desktop: open full info directly
               setShowFullInfo(true)
@@ -159,14 +166,12 @@ export function POIMarker({ poi, onEdit, onRemove, disabled }) {
             }
           },
           mouseover: () => {
-            if (disabled) return
             map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
             cancelHide(); setHovered(true); updateTooltipPos()
           },
-          mouseout: () => { if (!disabled) scheduleHide() },
+          mouseout: () => scheduleHide(),
           contextmenu: (e) => {
             L.DomEvent.preventDefault(e)
-            if (disabled) return
             onEdit?.(poi)
           },
         }}
