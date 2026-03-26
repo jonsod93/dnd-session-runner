@@ -4,6 +4,7 @@ import { parseRichText, evalDiceExpr } from '../../utils/diceUtils'
 import { SPELL_REGEX } from '../../data/srdSpellNames'
 
 const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
+const ABILITY_NAMES = { Str: 'Strength', Dex: 'Dexterity', Con: 'Constitution', Int: 'Intelligence', Wis: 'Wisdom', Cha: 'Charisma' }
 
 // ── Usage parsing — checks both Usage field and item Name ─────────────────────
 function parseUsage(item) {
@@ -677,17 +678,25 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
         <>
           <hr className="border-white/[0.06] my-3" />
           <div className="grid grid-cols-6 gap-1 text-center">
-            {ABILITIES.map((a) => (
-              <div key={a}>
-                <div className="label-section mb-0.5">{a}</div>
-                <div className="text-[#e6e6e6] font-medium font-mono text-sm">
-                  {sb.Abilities[a]}
-                </div>
-                <div className="text-[#9a9894] text-xs">
-                  ({formatMod(abilityMod(sb.Abilities[a]))})
-                </div>
-              </div>
-            ))}
+            {ABILITIES.map((a) => {
+              const mod = abilityMod(sb.Abilities[a])
+              return (
+                <button
+                  key={a}
+                  className="flex flex-col items-center cursor-pointer rounded px-1 py-1 transition-colors hover:bg-white/[0.06]"
+                  onClick={() => handleAbilityRoll(`${ABILITY_NAMES[a]} Check`, mod)}
+                  title={`Roll ${ABILITY_NAMES[a]} Check ${formatMod(mod)}`}
+                >
+                  <div className="label-section mb-0.5">{a}</div>
+                  <div className="text-[#e6e6e6] font-medium font-mono text-sm">
+                    {sb.Abilities[a]}
+                  </div>
+                  <div className="text-[#9a9894] text-xs underline decoration-dotted underline-offset-2">
+                    ({formatMod(mod)})
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </>
       )}
