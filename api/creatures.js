@@ -42,11 +42,10 @@ function readBundledJson() {
 
 // ── Auth check for write operations ─────────────────────────────────────────
 
-function checkAuth(req) {
-  const secret = process.env.API_SECRET
-  if (!secret) return true // no secret configured = skip auth
-  const header = req.headers['authorization'] || ''
-  return header === `Bearer ${secret}`
+import { verifyToken } from './lib/auth.js'
+
+async function checkAuth(req) {
+  return verifyToken(req)
 }
 
 // ── Handler ─────────────────────────────────────────────────────────────────
@@ -59,7 +58,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       // ?reseed=true merges bundled JSON into blob (adds missing creatures)
       if (req.query.reseed === 'true') {
-        if (!checkAuth(req)) {
+        if (!(await checkAuth(req))) {
           return res.status(401).json({ error: 'Unauthorized' })
         }
         console.log('[api/creatures] Reseed requested, merging bundled JSON into blob...')
@@ -109,7 +108,7 @@ export default async function handler(req, res) {
     }
 
     // ── Auth gate for mutations ──────────────────────────────────────────
-    if (!checkAuth(req)) {
+    if (!(await checkAuth(req))) {
       return res.status(401).json({ error: 'Unauthorized' })
     }
 

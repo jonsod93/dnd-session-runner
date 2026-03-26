@@ -7,11 +7,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!login(username, password)) {
-      setError(true)
-    }
+    setLoading(true)
+    const ok = await login(username, password)
+    setLoading(false)
+    if (!ok) setError(true)
   }
 
   return (
@@ -49,9 +52,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2.5 transition-colors"
+            disabled={loading}
+            className="w-full bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2.5 transition-colors disabled:opacity-50"
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
       </div>
