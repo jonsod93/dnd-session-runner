@@ -18,6 +18,7 @@ function creatureKey(name) {
 // ── Persistence helpers ─────────────────────────────────────────────────────
 const IS_DEV = import.meta.env.DEV
 const LS_CACHE_KEY = 'mythranos:creature-cache'
+const LS_DIRTY_KEY = 'mythranos:creature-dirty'
 const LS_EDITS_KEY = 'mythranos:creature-edits'
 const LS_DELETES_KEY = 'mythranos:creature-deletes'
 
@@ -96,6 +97,18 @@ function saveCachedCreatures(data) {
   } catch {
     // localStorage full or unavailable - ignore
   }
+}
+
+function isCreaturesDirty() {
+  return localStorage.getItem(LS_DIRTY_KEY) === '1'
+}
+
+function markCreaturesDirty() {
+  try { localStorage.setItem(LS_DIRTY_KEY, '1') } catch {}
+}
+
+function clearCreaturesDirty() {
+  try { localStorage.removeItem(LS_DIRTY_KEY) } catch {}
 }
 
 // ── One-time migration: replay old localStorage edits into the API ──────────
@@ -195,6 +208,12 @@ export function useLibrary() {
         // Migrate any old localStorage edits first
         await migrateLocalEdits()
 
+        // If we have unsynced local changes, don't overwrite with server data
+        if (isCreaturesDirty()) {
+          console.log('[useLibrary] Found unsynced local changes, keeping local data')
+          return
+        }
+
         const res = await fetch('/api/creatures')
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
@@ -262,10 +281,16 @@ export function useLibrary() {
     const { _libType, _key, _custom, ...clean } = statblock
 
     // Persist
-    if (IS_DEV) {
-      await devSaveCreature(clean, originalKey)
-    } else {
-      await prodSaveCreature(clean, originalKey)
+    try {
+      if (IS_DEV) {
+        await devSaveCreature(clean, originalKey)
+      } else {
+        await prodSaveCreature(clean, originalKey)
+      }
+      clearCreaturesDirty()
+    } catch (err) {
+      markCreaturesDirty()
+      throw err
     }
   }, [])
 
@@ -283,10 +308,16 @@ export function useLibrary() {
     })
 
     // Persist - server needs the key to find the right entry
-    if (IS_DEV) {
-      await devDeleteCreature(name, key)
-    } else {
-      await prodDeleteCreature(name, key)
+    try {
+      if (IS_DEV) {
+        await devDeleteCreature(name, key)
+      } else {
+        await prodDeleteCreature(name, key)
+      }
+      clearCreaturesDirty()
+    } catch (err) {
+      markCreaturesDirty()
+      throw err
     }
   }, [])
 

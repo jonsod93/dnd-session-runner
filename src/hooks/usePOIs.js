@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 const LS_CACHE_KEY = 'mythranos-map-pois-v1'
+const LS_DIRTY_KEY = 'mythranos-map-pois-dirty'
+const DEBOUNCE_MS = 2000
 import { getToken } from './useAuth'
 
 function authHeaders() {
@@ -26,6 +28,18 @@ function saveCache(pois) {
   }
 }
 
+function isDirty() {
+  return localStorage.getItem(LS_DIRTY_KEY) === '1'
+}
+
+function markDirty() {
+  try { localStorage.setItem(LS_DIRTY_KEY, '1') } catch {}
+}
+
+function clearDirty() {
+  try { localStorage.removeItem(LS_DIRTY_KEY) } catch {}
+}
+
 async function fetchPOIs() {
   const res = await fetch('/api/pois')
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -44,11 +58,40 @@ async function persistPOIs(pois) {
 export function usePOIs() {
   const [pois, setPois] = useState(loadCache)
   const hasFetched = useRef(false)
+  const debounceTimer = useRef(null)
+  const latestPois = useRef(pois)
+
+  // Keep ref in sync for debounced persist
+  useEffect(() => {
+    latestPois.current = pois
+  }, [pois])
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [])
 
   // Sync from server on mount
   useEffect(() => {
     if (hasFetched.current) return
     hasFetched.current = true
+
+    // If we have unsynced local changes, push them to server first
+    if (isDirty()) {
+      console.log('[usePOIs] Found unsynced local changes, pushing to server...')
+      const localData = loadCache()
+      persistPOIs(localData)
+        .then(() => {
+          clearDirty()
+          console.log('[usePOIs] Successfully synced local changes to server')
+        })
+        .catch((err) => {
+          console.warn('[usePOIs] Still unable to sync local changes:', err.message)
+        })
+      return // Keep local data, don't overwrite with server
+    }
 
     fetchPOIs()
       .then((serverPois) => {
@@ -60,17 +103,31 @@ export function usePOIs() {
       })
   }, [])
 
+  const debouncedPersist = useCallback(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      const data = latestPois.current
+      persistPOIs(data)
+        .then(() => {
+          clearDirty()
+        })
+        .catch((err) => {
+          markDirty()
+          console.warn('[usePOIs] Failed to persist:', err.message)
+        })
+    }, DEBOUNCE_MS)
+  }, [])
+
   // Helper: update state, cache, and persist
   const update = useCallback((updater) => {
     setPois((prev) => {
       const next = updater(prev)
       saveCache(next)
-      persistPOIs(next).catch((err) => {
-        console.warn('[usePOIs] Failed to persist:', err.message)
-      })
+      markDirty()
+      debouncedPersist()
       return next
     })
-  }, [])
+  }, [debouncedPersist])
 
   const addPOI = useCallback((poi) => {
     update((prev) => [...prev, { ...poi, id: crypto.randomUUID() }])
