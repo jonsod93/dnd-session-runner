@@ -144,6 +144,7 @@ export default function MapPage() {
             poi={poi}
             onEdit={handleEdit}
             onRemove={removePOI}
+            disabled={editingPath}
           />
         ))}
 

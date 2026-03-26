@@ -37,7 +37,7 @@ function makeIcon(icon = 'generic', color = '#facc15') {
 // ── Notion preview cache ─────────────────────────────────────────────────────
 const previewCache = new Map()
 
-export function POIMarker({ poi, onEdit, onRemove }) {
+export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   const map = useMap()
   const [hovered, setHovered] = useState(false)
   const [tooltipHovered, setTooltipHovered] = useState(false)
@@ -148,6 +148,7 @@ export function POIMarker({ poi, onEdit, onRemove }) {
         icon={icon}
         eventHandlers={{
           click: () => {
+            if (disabled) return
             if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
               // Desktop: open full info directly
               setShowFullInfo(true)
@@ -158,12 +159,14 @@ export function POIMarker({ poi, onEdit, onRemove }) {
             }
           },
           mouseover: () => {
+            if (disabled) return
             map.getContainer().dispatchEvent(new CustomEvent('poi-hover', { detail: poi.id }))
             cancelHide(); setHovered(true); updateTooltipPos()
           },
-          mouseout: () => scheduleHide(),
+          mouseout: () => { if (!disabled) scheduleHide() },
           contextmenu: (e) => {
             L.DomEvent.preventDefault(e)
+            if (disabled) return
             onEdit?.(poi)
           },
         }}
