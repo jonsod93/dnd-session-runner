@@ -39,7 +39,6 @@ const previewCache = new Map()
 
 export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   const map = useMap()
-  const markerRef = useRef(null)
   const [hovered, setHovered] = useState(false)
   const [tooltipHovered, setTooltipHovered] = useState(false)
   const cachedPreview = (poi.notionCache && !poi.notionCache.notFound) ? {
@@ -56,12 +55,6 @@ export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   const hideTimer = useRef(null)
 
   const icon = makeIcon(poi.icon, poi.color)
-
-  // Toggle pointer-events so the marker doesn't capture clicks when disabled
-  useEffect(() => {
-    const el = markerRef.current?.getElement?.()
-    if (el) el.style.pointerEvents = disabled ? 'none' : ''
-  }, [disabled])
 
   const isVisible = hovered || tooltipHovered
 
@@ -151,10 +144,11 @@ export function POIMarker({ poi, onEdit, onRemove, disabled }) {
   return (
     <>
       <Marker
-        ref={markerRef}
+        key={disabled ? 'disabled' : 'enabled'}
         position={poi.position}
         icon={icon}
-        eventHandlers={{
+        interactive={!disabled}
+        eventHandlers={disabled ? {} : {
           click: () => {
             if (window.matchMedia('(pointer: fine)').matches && poi.notionPageId) {
               // Desktop: open full info directly
