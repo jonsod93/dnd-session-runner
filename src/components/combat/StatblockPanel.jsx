@@ -4,7 +4,7 @@ import { parseRichText, evalDiceExpr } from '../../utils/diceUtils'
 import { SPELL_REGEX } from '../../data/srdSpellNames'
 
 const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
-const ABILITY_NAMES = { Str: 'Strength', Dex: 'Dexterity', Con: 'Constitution', Int: 'Intelligence', Wis: 'Wisdom', Cha: 'Charisma' }
+const ABILITY_LABELS = { Str: 'Strength', Dex: 'Dexterity', Con: 'Constitution', Int: 'Intelligence', Wis: 'Wisdom', Cha: 'Charisma' }
 
 // ── Usage parsing — checks both Usage field and item Name ─────────────────────
 function parseUsage(item) {
@@ -684,8 +684,8 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
                 <button
                   key={a}
                   className="flex flex-col items-center cursor-pointer rounded px-1 py-1 transition-colors hover:bg-white/[0.06]"
-                  onClick={() => handleAbilityRoll(`${ABILITY_NAMES[a]} Check`, mod)}
-                  title={`Roll ${ABILITY_NAMES[a]} Check ${formatMod(mod)}`}
+                  onClick={() => handleAbilityRoll(`${ABILITY_LABELS[a]} Check`, mod)}
+                  title={`Roll ${ABILITY_LABELS[a]} Check ${formatMod(mod)}`}
                 >
                   <div className="label-section mb-0.5">{a}</div>
                   <div className="text-[#e6e6e6] font-medium font-mono text-sm">
