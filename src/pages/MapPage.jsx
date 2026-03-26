@@ -220,7 +220,7 @@ export default function MapPage() {
       {/* Editing mode indicator */}
       {editingPath && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
-          <div className="bg-gold-400/10 border border-gold-400/30 text-gold-400 text-xs font-mono px-3 py-1.5 rounded backdrop-blur-sm">
+          <div className="bg-black/80 border border-slate-600 text-white text-xs font-mono px-3 py-1.5 rounded backdrop-blur-sm">
             Path editing mode - right-click to add waypoints
           </div>
         </div>
