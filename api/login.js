@@ -16,20 +16,30 @@ export default async function handler(req, res) {
   const jwtSecret = process.env.JWT_SECRET
 
   if (!validUser || !validHash || !jwtSecret) {
-    console.error('[api/login] Missing AUTH_USERNAME, AUTH_PASSWORD_HASH, or JWT_SECRET env vars')
-    return res.status(500).json({ error: 'Server auth not configured' })
+    const missing = [
+      !validUser && 'AUTH_USERNAME',
+      !validHash && 'AUTH_PASSWORD_HASH',
+      !jwtSecret && 'JWT_SECRET',
+    ].filter(Boolean)
+    console.error('[api/login] Missing env vars:', missing.join(', '))
+    return res.status(500).json({ error: 'Server auth not configured', missing })
   }
 
-  if (username !== validUser || !bcrypt.compareSync(password, validHash)) {
-    return res.status(401).json({ error: 'Invalid credentials' })
+  try {
+    if (username !== validUser || !bcrypt.compareSync(password, validHash)) {
+      return res.status(401).json({ error: 'Invalid credentials' })
+    }
+
+    const secret = new TextEncoder().encode(jwtSecret)
+    const token = await new SignJWT({ sub: username })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('7d')
+      .sign(secret)
+
+    return res.status(200).json({ token })
+  } catch (err) {
+    console.error('[api/login] Error:', err.message)
+    return res.status(500).json({ error: err.message })
   }
-
-  const secret = new TextEncoder().encode(jwtSecret)
-  const token = await new SignJWT({ sub: username })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(secret)
-
-  return res.status(200).json({ token })
 }
