@@ -11,6 +11,15 @@ export default {
         display: ['Cinzel', 'Georgia', 'serif'],
         mono:    ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
+      animation: {
+        'fade-in': 'fadeIn 0.4s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(-8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
       colors: {
         gold: {
           300: '#fcd98a',

@@ -1,0 +1,899 @@
+[
+  {
+    "position": [
+      6624,
+      7986
+    ],
+    "type": "event",
+    "label": "Uronas",
+    "customText": "The party meets",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "d812ff95-11d0-4200-8911-cc69a2030958"
+  },
+  {
+    "position": [
+      6592,
+      8572
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "d8579073-4866-40af-86fb-b8ce79eb6234"
+  },
+  {
+    "position": [
+      6684,
+      9082
+    ],
+    "type": "event",
+    "label": "Bramlow",
+    "customText": "Shit goes down",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "4d4b4198-899e-45e2-9aa5-5cb26957c2ec"
+  },
+  {
+    "position": [
+      6356,
+      9652
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "f31592ab-f17a-4119-9076-ca5c4dfbbc68"
+  },
+  {
+    "position": [
+      5918,
+      10124
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "9338f31c-72ae-4cd5-b3b5-48f074102223"
+  },
+  {
+    "position": [
+      5600,
+      10574
+    ],
+    "type": "event",
+    "label": "Graymire investigation",
+    "customText": "The party arrived at the scene of their investigation",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "60aa1fa7-7394-47f7-8e7c-ef9fe1df1e40"
+  },
+  {
+    "position": [
+      5576,
+      10384
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "067af711-525f-4767-bc7d-1f5e223f8a68"
+  },
+  {
+    "position": [
+      5706,
+      10282
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "a35aac1b-dc78-450b-887a-317d533600b2"
+  },
+  {
+    "position": [
+      5622,
+      9960
+    ],
+    "type": "event",
+    "label": "Brenna's hut",
+    "customText": "She's been taken! But luckily a bounty hunter called Kira shows up to help the party track down the Hag that took Brenna.",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "0b224df0-da8e-4330-b9bd-a45dbd546e4f"
+  },
+  {
+    "position": [
+      5544,
+      9530
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "9348159b-cfd6-44f5-95a6-18716d609ba0"
+  },
+  {
+    "position": [
+      5412,
+      9282
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "ddd8ebfd-2583-4bea-a54b-ac1062583989"
+  },
+  {
+    "position": [
+      5310,
+      9126
+    ],
+    "type": "event",
+    "label": "Shtriga Nonna's Hut",
+    "customText": "The party fights Shtriga Nonna together with Kira, ensuring their alliance as they save Brenna.",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "15778fa5-60f1-4e2a-8d93-0af48becf796"
+  },
+  {
+    "position": [
+      5262,
+      8736
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "551034a6-a49e-4eea-aff3-633f64f2839a"
+  },
+  {
+    "position": [
+      5118,
+      8474
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "f31ad0e0-5e49-4e93-b1fc-1c44ead992bc"
+  },
+  {
+    "position": [
+      5004,
+      8134
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "13d5f779-199c-4cbc-95aa-1284095d4df0"
+  },
+  {
+    "position": [
+      4860,
+      7902
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "477ec6d6-2464-472f-b10c-5504bba3ff19"
+  },
+  {
+    "position": [
+      4784,
+      7754
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "56dcfffa-e91d-4eb2-af8c-3b8c705f13ef"
+  },
+  {
+    "position": [
+      4572,
+      7668
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "b82aa7e2-fc94-4320-a2a2-2b5d2ea03f21"
+  },
+  {
+    "position": [
+      4088,
+      7706
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "e882a939-f71f-4c16-bf50-4bd50ad12d1a"
+  },
+  {
+    "position": [
+      3928,
+      7588
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "b800f2f8-bafe-4e7b-b86a-8830c42216f7"
+  },
+  {
+    "position": [
+      3808,
+      7606
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "0b6ff11b-d7d3-438b-9a79-7fcdea7715f2"
+  },
+  {
+    "position": [
+      3456,
+      7534
+    ],
+    "type": "event",
+    "label": "Saltmere",
+    "customText": "Where did Merrick Kael go? And here is Brecca to help!",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "cede4e8d-f17e-4505-85a8-bb8d13cfed71"
+  },
+  {
+    "position": [
+      2664,
+      7864
+    ],
+    "type": "event",
+    "label": "Leviathan, city of blades and bargains",
+    "customText": "Pirates Ahoy!",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "a8b5d305-7e9c-468f-abc2-6f3c7a8b4f5e"
+  },
+  {
+    "position": [
+      2072,
+      8088
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "9050ea3c-50e9-4d66-908b-0a497bd2767e"
+  },
+  {
+    "position": [
+      1432,
+      8288
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "b93000c2-550d-4489-9ab5-50ec292b67f5"
+  },
+  {
+    "position": [
+      928,
+      8816
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "cdac031c-af8e-4dfc-aca0-03dda44310ed"
+  },
+  {
+    "position": [
+      824,
+      9720
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "a09a06d3-864d-48ab-87f1-5e161ad7a76e"
+  },
+  {
+    "position": [
+      864,
+      10216
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "5a37d716-c5d2-4e2d-9766-8b5e87dafe0c"
+  },
+  {
+    "position": [
+      1424,
+      10408
+    ],
+    "type": "event",
+    "label": "The Hanged King's Tomb",
+    "customText": "He is free once more, free to pursue his ultimate goal to fix Fathers design.",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "7bd0e82c-c4bf-4d60-98ba-5c34d6a0538b"
+  },
+  {
+    "position": [
+      1160,
+      10680
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "c8c0ac0c-a1b9-40d5-ba6b-3ef5aa2f64d6"
+  },
+  {
+    "position": [
+      936,
+      10952
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "b13b6e41-b1f1-488d-8b67-20a3fe13fdb9"
+  },
+  {
+    "position": [
+      992,
+      11856
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "370daeda-937f-4a01-b7fb-2db390cd41f4"
+  },
+  {
+    "position": [
+      1264,
+      13448
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "796ba9a2-06cc-4452-bd7e-c4959c3d4065"
+  },
+  {
+    "position": [
+      688,
+      14784
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "23f37dfc-9ca0-4aa2-9930-b9cdb86e5f64"
+  },
+  {
+    "position": [
+      360,
+      16280
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "63830e61-39c1-4bee-a82d-ecfc51b99d2d"
+  },
+  {
+    "position": [
+      464,
+      16760
+    ],
+    "type": "event",
+    "label": "Get of my boat/city",
+    "customText": "Time to leave Leviathan",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "1e139064-a5bc-4525-95f0-19fd08690c83"
+  },
+  {
+    "position": [
+      1864,
+      16736
+    ],
+    "type": "event",
+    "label": "Sharada's Cove",
+    "customText": "Let us find a good guide, and Samuel tips his toe into spirituality",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "71d3d729-6160-4c0b-b9f8-368505cf6539"
+  },
+  {
+    "position": [
+      2062,
+      16628
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "cf010fa9-e824-4ba8-b97a-996f38782984"
+  },
+  {
+    "position": [
+      2114,
+      16488
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "ee391c35-241a-4cb8-885b-cd5c9da087cb"
+  },
+  {
+    "position": [
+      2042,
+      16402
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "2d2c5f56-c029-4669-b330-57dd4087cdc6"
+  },
+  {
+    "position": [
+      2120,
+      16298
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "da25c098-a33b-4a88-a40b-497eb52e5436"
+  },
+  {
+    "position": [
+      2258,
+      16244
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "a1f931e7-e0b6-47b4-9662-a4df68df9e3a"
+  },
+  {
+    "position": [
+      2378,
+      16226
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "4d9771ae-ee6f-4a05-8ee8-75c65deaaad0"
+  },
+  {
+    "position": [
+      2502,
+      16134
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "a3a90817-5c02-4523-8cc2-26c866e49748"
+  },
+  {
+    "position": [
+      2474,
+      16022
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "acf06020-329e-452b-9146-7dcb221616d9"
+  },
+  {
+    "position": [
+      2622,
+      15964
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "3e738435-766a-41b1-aadc-0097a4c0a07c"
+  },
+  {
+    "position": [
+      2698,
+      16092
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "562a700b-c918-4c2a-bfc0-60c4d1ddab66"
+  },
+  {
+    "position": [
+      2834,
+      16138
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "78a89ffd-ee93-4af9-845b-cad49e541679"
+  },
+  {
+    "position": [
+      2916,
+      16170
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "b5f6139b-da85-4b8d-bfda-12a2f51c9b58"
+  },
+  {
+    "position": [
+      3036,
+      16224
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "a6e30f03-48e5-467f-94a8-03cb438becda"
+  },
+  {
+    "position": [
+      3192,
+      16306
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "d8892646-d0c0-4fb4-81d1-2cc6e985dfa5"
+  },
+  {
+    "position": [
+      3242,
+      16296
+    ],
+    "type": "event",
+    "label": "Rhizanth's Crossing",
+    "customText": "Oh fuck we already meet THK again",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "714c0ee6-2e4d-4baf-ad7b-33050e813115"
+  },
+  {
+    "position": [
+      3306,
+      16488
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "999da31e-d9d0-453e-bedf-e9206f23b1d1"
+  },
+  {
+    "position": [
+      3358,
+      16638
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "04df8b4f-0168-465d-8fd7-13a57188be38"
+  },
+  {
+    "position": [
+      3444,
+      16720
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "f868a9c3-110e-4207-813d-b8c8f356d9bf"
+  },
+  {
+    "position": [
+      3562,
+      16738
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "fee0da2b-88d5-4a2d-bf47-df56c2472e39"
+  },
+  {
+    "position": [
+      3678,
+      16776
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "ac460e02-72e9-4ed0-bb0b-d33af8bf987a"
+  },
+  {
+    "position": [
+      3808,
+      16850
+    ],
+    "type": "event",
+    "label": "Zah'raan",
+    "customText": "The priesthood is corrupted!",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "0f0d14ec-3a47-4ebd-8ac3-a2b056e8293e"
+  },
+  {
+    "position": [
+      2418,
+      19824
+    ],
+    "type": "event",
+    "label": "Sha'vezkora",
+    "customText": "This is no ordinary library",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": true,
+    "id": "df7a387f-31fe-47f5-ad02-f3d0f22a09a4"
+  },
+  {
+    "position": [
+      3804,
+      16852
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": true,
+    "id": "190ac53b-947d-4ae1-9d5e-a7d28fe4ddd6"
+  },
+  {
+    "position": [
+      3892,
+      16874
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "55844185-109c-40fc-b031-792974621bb2"
+  },
+  {
+    "position": [
+      3976,
+      16980
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "a60a9201-987c-4568-90b6-77c42868a9b5"
+  },
+  {
+    "position": [
+      4104,
+      16976
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "021f03ff-0a00-4380-8fee-5344b844c4e1"
+  },
+  {
+    "position": [
+      4326,
+      16970
+    ],
+    "type": "event",
+    "label": "Solan's Caravan",
+    "customText": "After saving Diego from Orumai, the party travels on in style",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "e0ab7bb3-83e9-46c2-a0b0-d5b64456777d"
+  },
+  {
+    "position": [
+      4526,
+      16908
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "391842ae-d193-4e27-a912-2e5cb20d4d80"
+  },
+  {
+    "position": [
+      4748,
+      16710
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "b7a0737b-ad97-43de-b453-1b65e4f42fc1"
+  },
+  {
+    "position": [
+      4942,
+      16654
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "4b5b1e74-a414-4127-a574-8eae60b80c0f"
+  },
+  {
+    "position": [
+      5116,
+      16630
+    ],
+    "type": "travel",
+    "label": "",
+    "customText": "",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "69ec5114-6869-428f-85b6-efe3c85072fb"
+  },
+  {
+    "position": [
+      5406,
+      16416
+    ],
+    "type": "event",
+    "label": "Tir'al'kar",
+    "customText": "Let's find a boat",
+    "linkedPoiId": null,
+    "session": null,
+    "teleport": false,
+    "id": "7b0fa149-dc87-4693-b346-b75650dab7ca"
+  }
+]

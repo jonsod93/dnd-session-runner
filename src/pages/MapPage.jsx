@@ -3,8 +3,12 @@ import { MapContainer, ImageOverlay, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { usePOIs } from '../hooks/usePOIs'
+import { useTravelPath } from '../hooks/useTravelPath'
 import { POIMarker } from '../components/map/POIMarker'
 import { POIEditor } from '../components/map/POIEditor'
+import { TravelPath } from '../components/map/TravelPath'
+import { JourneyPlayback } from '../components/map/JourneyPlayback'
+import { TravelPathEditor } from '../components/map/TravelPathEditor'
 
 // ─── Fix Leaflet's default marker icon path issue with Vite ────────────────
 delete L.Icon.Default.prototype._getIconUrl
@@ -71,26 +75,24 @@ function MapViewRestorer() {
   return null
 }
 
-function MapHint() {
-  return (
-    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
-      <div className="bg-slate-900/80 border border-slate-700 text-slate-400 text-xs font-mono px-3 py-1.5 rounded backdrop-blur-sm">
-        Map image:{' '}
-        <span className="text-gold-400">public/maps/campaign-map.jpg</span>
-      </div>
-    </div>
-  )
-}
-
 export default function MapPage() {
   const mapHeight = 'calc(100vh - 48px)'
   const { pois, addPOI, updatePOI, removePOI } = usePOIs()
+  const { waypoints, addWaypoint, updateWaypoint, removeWaypoint, reorderWaypoints } = useTravelPath()
 
   const [editorState, setEditorState] = useState(null) // null | { position } | { poi }
+  const [showTravelPath, setShowTravelPath] = useState(true)
+  const [editingPath, setEditingPath] = useState(false)
+  const [showPathEditor, setShowPathEditor] = useState(false)
+  const [journeyPlaying, setJourneyPlaying] = useState(false)
 
   const handleRightClick = useCallback((position) => {
-    setEditorState({ position })
-  }, [])
+    if (editingPath) {
+      addWaypoint({ position, type: 'travel', label: '', customText: '', linkedPoiId: null, session: null, teleport: false })
+    } else {
+      setEditorState({ position })
+    }
+  }, [editingPath, addWaypoint])
 
   const handleEdit = useCallback((poi) => {
     setEditorState({ poi })
@@ -107,6 +109,10 @@ export default function MapPage() {
     },
     [editorState, addPOI, updatePOI]
   )
+
+  const handleStopJourney = useCallback(() => {
+    setJourneyPlaying(false)
+  }, [])
 
   return (
     <div className="relative w-full" style={{ height: mapHeight }}>
@@ -140,6 +146,20 @@ export default function MapPage() {
             onRemove={removePOI}
           />
         ))}
+
+        {/* Travel path overlay */}
+        <TravelPath
+          waypoints={waypoints}
+          visible={showTravelPath && !journeyPlaying}
+        />
+
+        {/* Journey playback */}
+        <JourneyPlayback
+          waypoints={waypoints}
+          playing={journeyPlaying}
+          onStop={handleStopJourney}
+          pois={pois}
+        />
       </MapContainer>
 
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
@@ -148,9 +168,64 @@ export default function MapPage() {
           {pois.length} point{pois.length !== 1 ? 's' : ''} of interest
           <span className="block text-[10px] mt-0.5 text-[#9a9894]/60">Right-click map to add</span>
         </div>
+
+        {/* Travel path controls */}
+        <div className="bg-[#252525]/90 rounded-lg border border-white/[0.1] shadow-lg overflow-hidden">
+          {/* Toggle path visibility */}
+          <button
+            onClick={() => setShowTravelPath(!showTravelPath)}
+            className={[
+              'w-full text-left text-xs px-3 py-1.5 transition-colors',
+              showTravelPath ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]',
+            ].join(' ')}
+          >
+            {showTravelPath ? '◉' : '○'} Travel Path
+          </button>
+
+          {showTravelPath && waypoints.length >= 2 && (
+            <button
+              onClick={() => setJourneyPlaying(true)}
+              disabled={journeyPlaying}
+              className="w-full text-left text-xs px-3 py-1.5 text-[#9a9894] hover:text-gold-400 disabled:opacity-30 transition-colors border-t border-white/[0.06]"
+            >
+              ▶ See the Journey
+            </button>
+          )}
+
+          {/* Edit path toggle */}
+          <button
+            onClick={() => {
+              setEditingPath(!editingPath)
+              if (!editingPath) setShowTravelPath(true)
+            }}
+            className={[
+              'w-full text-left text-xs px-3 py-1.5 transition-colors border-t border-white/[0.06]',
+              editingPath ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]',
+            ].join(' ')}
+          >
+            {editingPath ? '✎ Editing path...' : '✎ Edit Path'}
+          </button>
+
+          {editingPath && (
+            <button
+              onClick={() => setShowPathEditor(true)}
+              className="w-full text-left text-xs px-3 py-1.5 text-[#9a9894] hover:text-[#e6e6e6] transition-colors border-t border-white/[0.06]"
+            >
+              ≡ Manage Waypoints ({waypoints.length})
+            </button>
+          )}
+        </div>
       </div>
 
-      <MapHint />
+      {/* Editing mode indicator */}
+      {editingPath && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
+          <div className="bg-gold-400/10 border border-gold-400/30 text-gold-400 text-xs font-mono px-3 py-1.5 rounded backdrop-blur-sm">
+            Path editing mode - right-click to add waypoints
+          </div>
+        </div>
+      )}
+
 
       {/* ── POI Editor Modal ────────────────────────────────────────────── */}
       {editorState && (
@@ -159,6 +234,19 @@ export default function MapPage() {
           position={editorState.position ?? null}
           onSave={handleSave}
           onCancel={() => setEditorState(null)}
+        />
+      )}
+
+      {/* ── Travel Path Editor Modal ────────────────────────────────────── */}
+      {showPathEditor && (
+        <TravelPathEditor
+          waypoints={waypoints}
+          pois={pois}
+          onAdd={addWaypoint}
+          onUpdate={updateWaypoint}
+          onRemove={removeWaypoint}
+          onReorder={reorderWaypoints}
+          onClose={() => setShowPathEditor(false)}
         />
       )}
     </div>
