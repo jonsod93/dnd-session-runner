@@ -164,59 +164,67 @@ export default function MapPage() {
       </MapContainer>
 
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
-      <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
-        <div className="bg-[#252525]/90 text-[#9a9894] text-xs px-3 py-1.5 rounded-lg border border-white/[0.1] shadow-lg">
-          {pois.length} point{pois.length !== 1 ? 's' : ''} of interest
-          <span className="block text-[10px] mt-0.5 text-[#9a9894]/60">Right-click map to add</span>
+      {!journeyPlaying && (
+        <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
+          <div className="bg-[#252525]/90 text-[#9a9894] text-xs px-3 py-1.5 rounded-lg border border-white/[0.1] shadow-lg">
+            {pois.length} point{pois.length !== 1 ? 's' : ''} of interest
+            <span className="block text-[10px] mt-0.5 text-[#9a9894]/60">Right-click map to add</span>
+          </div>
+
+          {/* Travel path controls - compact 2-column layout */}
+          <div className="bg-[#252525]/90 rounded-lg border border-white/[0.1] shadow-lg overflow-hidden">
+            <div className="grid grid-cols-2">
+              {/* Toggle path visibility */}
+              <button
+                onClick={() => setShowTravelPath(!showTravelPath)}
+                className={[
+                  'text-xs px-3 py-1.5 transition-colors text-left',
+                  showTravelPath ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]',
+                ].join(' ')}
+              >
+                {showTravelPath ? '◉' : '○'} Path
+              </button>
+
+              {/* Edit path toggle */}
+              <button
+                onClick={() => {
+                  setEditingPath(!editingPath)
+                  if (!editingPath) setShowTravelPath(true)
+                }}
+                className={[
+                  'text-xs px-3 py-1.5 transition-colors text-left border-l border-white/[0.06]',
+                  editingPath ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]',
+                ].join(' ')}
+              >
+                {editingPath ? '✎ Editing...' : '✎ Edit'}
+              </button>
+            </div>
+
+            {(showTravelPath && waypoints.length >= 2 || editingPath) && (
+              <div className="grid grid-cols-2 border-t border-white/[0.06]">
+                {showTravelPath && waypoints.length >= 2 ? (
+                  <button
+                    onClick={() => setJourneyPlaying(true)}
+                    disabled={journeyPlaying}
+                    className="text-xs px-3 py-1.5 text-[#9a9894] hover:text-gold-400 disabled:opacity-30 transition-colors text-left"
+                  >
+                    ▶ Journey
+                  </button>
+                ) : <span />}
+
+                {editingPath ? (
+                  <button
+                    onClick={() => setShowPathEditor(true)}
+                    className="text-xs px-3 py-1.5 text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-left border-l border-white/[0.06]"
+                  >
+                    ≡ Waypoints ({waypoints.length})
+                  </button>
+                ) : <span />}
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* Travel path controls */}
-        <div className="bg-[#252525]/90 rounded-lg border border-white/[0.1] shadow-lg overflow-hidden">
-          {/* Toggle path visibility */}
-          <button
-            onClick={() => setShowTravelPath(!showTravelPath)}
-            className={[
-              'w-full text-left text-xs px-3 py-1.5 transition-colors',
-              showTravelPath ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]',
-            ].join(' ')}
-          >
-            {showTravelPath ? '◉' : '○'} Travel Path
-          </button>
-
-          {showTravelPath && waypoints.length >= 2 && (
-            <button
-              onClick={() => setJourneyPlaying(true)}
-              disabled={journeyPlaying}
-              className="w-full text-left text-xs px-3 py-1.5 text-[#9a9894] hover:text-gold-400 disabled:opacity-30 transition-colors border-t border-white/[0.06]"
-            >
-              ▶ See the Journey
-            </button>
-          )}
-
-          {/* Edit path toggle */}
-          <button
-            onClick={() => {
-              setEditingPath(!editingPath)
-              if (!editingPath) setShowTravelPath(true)
-            }}
-            className={[
-              'w-full text-left text-xs px-3 py-1.5 transition-colors border-t border-white/[0.06]',
-              editingPath ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]',
-            ].join(' ')}
-          >
-            {editingPath ? '✎ Editing path...' : '✎ Edit Path'}
-          </button>
-
-          {editingPath && (
-            <button
-              onClick={() => setShowPathEditor(true)}
-              className="w-full text-left text-xs px-3 py-1.5 text-[#9a9894] hover:text-[#e6e6e6] transition-colors border-t border-white/[0.06]"
-            >
-              ≡ Manage Waypoints ({waypoints.length})
-            </button>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Editing mode indicator */}
       {editingPath && (

@@ -397,14 +397,31 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
     // ── Teleport flash animation ─────────────────────────────────────
 
     async function teleportTo(destination) {
+      // Flash 1 – slow
       setTeleportFlash(true)
-      await wait(450) // fade in
-      if (cancelledRef.current) return
-      map.setView(clampPos(destination), -1, { animate: false })
-      await wait(250) // hold
+      await wait(300)
       if (cancelledRef.current) return
       setTeleportFlash(false)
-      await wait(400) // fade out
+      await wait(250)
+      if (cancelledRef.current) return
+
+      // Flash 2 – faster
+      setTeleportFlash(true)
+      await wait(180)
+      if (cancelledRef.current) return
+      setTeleportFlash(false)
+      await wait(140)
+      if (cancelledRef.current) return
+
+      // Flash 3 – fastest, camera moves here
+      setTeleportFlash(true)
+      await wait(100)
+      if (cancelledRef.current) return
+      map.setView(clampPos(destination), -1, { animate: false })
+      await wait(150)
+      if (cancelledRef.current) return
+      setTeleportFlash(false)
+      await wait(300) // fade out
     }
 
     // ── Main playback (supports resuming from a waypoint index) ──────
@@ -658,7 +675,7 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
     <>
       {/* Teleport flash overlay */}
       <div
-        className="fixed inset-0 z-[2002] pointer-events-none transition-opacity duration-[400ms]"
+        className="fixed inset-0 z-[2002] pointer-events-none transition-opacity duration-[120ms]"
         style={{
           background: 'radial-gradient(circle, rgba(200,220,240,0.85) 0%, rgba(15,20,30,0.95) 100%)',
           opacity: teleportFlash ? 1 : 0,
@@ -667,8 +684,8 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
 
       {/* Event info popup - centered on screen */}
       {eventPopup && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[2001] animate-fade-in">
-          <div className="bg-[#1e1e1e]/95 border border-white/[0.15] rounded-lg px-5 py-4 backdrop-blur-sm shadow-2xl w-72 text-center">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[2001] animate-fade-in w-[80vw] max-w-[18rem] md:w-72">
+          <div className="bg-[#1e1e1e]/95 border border-white/[0.15] rounded-lg px-5 py-4 backdrop-blur-sm shadow-2xl text-center">
             <h3 className="text-sm font-medium text-[#e6e6e6] mb-1 truncate">
               {eventPopup.label}
             </h3>
@@ -679,10 +696,10 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
             </div>
             <div className="min-h-[2rem] flex items-center justify-center">
               {eventPopup.text && (
-                <p className="text-xs text-[#b8b5b0] leading-relaxed">{eventPopup.text}</p>
+                <p className="text-xs text-[#b8b5b0] leading-relaxed line-clamp-4">{eventPopup.text}</p>
               )}
               {eventPopup.poiName && !eventPopup.text && (
-                <p className="text-xs text-[#9a9894] italic">Location: {eventPopup.poiName}</p>
+                <p className="text-xs text-[#9a9894] italic truncate">Location: {eventPopup.poiName}</p>
               )}
             </div>
             <div className="flex items-center justify-center gap-4 mt-2">
@@ -704,59 +721,58 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       )}
 
       {/* Bottom controls */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[2000]">
-        <div className="bg-slate-900/90 border border-white/[0.12] rounded-lg px-4 py-2.5 backdrop-blur-sm shadow-xl flex items-center gap-3 w-[480px]">
-          {/* Label area - fixed width */}
-          <span className={`text-sm font-medium whitespace-nowrap w-[140px] truncate ${currentLabel ? 'text-gold-400' : 'text-transparent'}`}>
-            {currentLabel || '\u00A0'}
-          </span>
-
-          {/* Progress bar */}
-          <div className="w-28 h-1.5 bg-white/[0.08] rounded-full overflow-hidden shrink-0">
-            <div
-              className="h-full bg-gold-400 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[2000] w-[260px]">
+        <div className="bg-slate-900/90 border border-white/[0.12] rounded-lg px-3 py-2 backdrop-blur-sm shadow-xl">
+          {/* Row 1: Label + progress */}
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className={`text-xs font-medium truncate flex-1 ${currentLabel ? 'text-gold-400' : 'text-transparent'}`}>
+              {currentLabel || '\u00A0'}
+            </span>
+            <div className="w-16 h-1.5 bg-white/[0.08] rounded-full overflow-hidden shrink-0">
+              <div
+                className="h-full bg-gold-400 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
 
-          {/* Navigation buttons */}
-          <button
-            onClick={handleBack}
-            className={`text-xs whitespace-nowrap transition-colors ${canGoBack ? 'text-[#9a9894] hover:text-gold-400' : 'text-[#9a9894]/20 pointer-events-none'}`}
-            title="Previous event"
-          >
-            ⏮
-          </button>
-          <button
-            onClick={handleSkip}
-            className="text-xs text-[#9a9894] hover:text-gold-400 transition-colors whitespace-nowrap"
-            title="Skip to next event"
-          >
-            ⏭
-          </button>
+          {/* Row 2: Navigation controls */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleBack}
+                className={`text-xs whitespace-nowrap transition-colors ${canGoBack ? 'text-[#9a9894] hover:text-gold-400' : 'text-[#9a9894]/20 pointer-events-none'}`}
+                title="Previous event"
+              >
+                ⏮
+              </button>
+              <button
+                onClick={handleSkip}
+                className="text-xs text-[#9a9894] hover:text-gold-400 transition-colors whitespace-nowrap"
+                title="Skip to next event"
+              >
+                ⏭
+              </button>
+            </div>
 
-          <div className="w-px h-4 bg-white/[0.1] shrink-0" />
+            <label className="flex items-center gap-1.5 cursor-pointer" title="Automatically continue past events">
+              <input
+                type="checkbox"
+                checked={autoContinue}
+                onChange={toggleAutoContinue}
+                className="w-3 h-3 accent-gold-400 cursor-pointer"
+              />
+              <span className="text-xs text-[#9a9894] whitespace-nowrap">Auto</span>
+            </label>
 
-          {/* Auto-continue toggle */}
-          <label className="flex items-center gap-1.5 cursor-pointer shrink-0" title="Automatically continue past events">
-            <input
-              type="checkbox"
-              checked={autoContinue}
-              onChange={toggleAutoContinue}
-              className="w-3 h-3 accent-gold-400 cursor-pointer"
-            />
-            <span className="text-xs text-[#9a9894] whitespace-nowrap">Auto</span>
-          </label>
-
-          <div className="w-px h-4 bg-white/[0.1] shrink-0" />
-
-          <button
-            onClick={handleEndJourney}
-            className="text-xs text-[#9a9894] hover:text-red-400 transition-colors whitespace-nowrap shrink-0"
-            title="End journey"
-          >
-            End
-          </button>
+            <button
+              onClick={handleEndJourney}
+              className="text-xs text-[#9a9894] hover:text-red-400 transition-colors whitespace-nowrap"
+              title="End journey"
+            >
+              End
+            </button>
+          </div>
         </div>
       </div>
     </>,
