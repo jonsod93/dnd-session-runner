@@ -359,7 +359,7 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
   if (!items?.length) return null
   return (
     <div className="mb-1">
-      <div className="sticky -top-3 z-10 bg-inherit -mx-4 px-4 pb-2">
+      <div className="sticky -top-3 z-10 bg-[var(--sb-bg)] -mx-4 px-4 pb-2">
         <hr className="border-white/[0.06] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
           <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">{title}</p>
@@ -520,7 +520,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#1a1a1a]">
+      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#1a1a1a]" style={{ '--sb-bg': '#1a1a1a' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
@@ -560,7 +560,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   }
 
   return (
-    <div className="shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col relative" style={{ width }}>
+    <div className="shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col relative" style={{ width, '--sb-bg': '#1e1e1e' }}>
       {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}
@@ -704,12 +704,12 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
   )
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-inherit">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* In compact mode (preview), everything scrolls together */}
       {!compact && statsHeader}
 
       {/* ── Scrollable content: properties, traits, actions, etc. ─── */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 bg-inherit">
+      <div className="flex-1 overflow-y-auto px-4 py-3">
       {compact && <div className="-mx-4 -mt-3">{statsHeader}</div>}
 
       {/* Properties */}
