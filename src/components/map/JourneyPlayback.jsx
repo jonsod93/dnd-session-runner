@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { buildSegments, catmullRomSpline } from './TravelPath'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 // ── Distance helpers ──────────────────────────────────────────────────────────
 
@@ -54,6 +55,10 @@ const LINE_STYLE = {
 
 export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
   const map = useMap()
+  const isMobile = useIsMobile()
+  const journeyZoom = isMobile ? -2 : -1
+  const journeyZoomRef = useRef(journeyZoom)
+  journeyZoomRef.current = journeyZoom
   const layerRef = useRef(null)
   const cancelledRef = useRef(false)
   const skipRef = useRef(null)
@@ -202,7 +207,7 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       return new Promise((resolve) => {
         if (cancelledRef.current) return resolve()
         const bounds = L.latLngBounds(positions)
-        map.flyToBounds(bounds, { padding: [80, 80], duration: 1.5, maxZoom: -1, ...options })
+        map.flyToBounds(bounds, { padding: [80, 80], duration: 1.5, maxZoom: journeyZoomRef.current, ...options })
         map.once('moveend', resolve)
       })
     }
@@ -417,7 +422,7 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       setTeleportFlash(true)
       await wait(100)
       if (cancelledRef.current) return
-      map.setView(clampPos(destination), -1, { animate: false })
+      map.setView(clampPos(destination), journeyZoomRef.current, { animate: false })
       await wait(150)
       if (cancelledRef.current) return
       setTeleportFlash(false)
@@ -433,7 +438,7 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       if (resumeFromWpIdx > 0) {
         fastForwardTo(group, renderer, resumeFromWpIdx)
         const wp = waypoints[resumeFromWpIdx]
-        map.setView(clampPos(wp.position), -1, { animate: false })
+        map.setView(clampPos(wp.position), journeyZoomRef.current, { animate: false })
         setCurrentLabel(wp.label || '')
         setProgress(Math.round((resumeFromWpIdx / totalWaypoints) * 100))
         showEvent(wp)
@@ -451,7 +456,7 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
         setCurrentLabel(firstWp.label || 'Journey begins')
         setProgress(0)
 
-        await flyToAsync(firstWp.position, -1, { duration: 2 })
+        await flyToAsync(firstWp.position, journeyZoomRef.current, { duration: 2 })
         if (cancelledRef.current) return 'end'
 
         if (firstWp.type === 'event') {

@@ -22,7 +22,6 @@ L.Icon.Default.mergeOptions({
 })
 
 // ─── Map configuration ─────────────────────────────────────────────────────
-const isMobileInit = window.matchMedia('(max-width: 1023px)').matches
 const MAP_CONFIG = {
   imageUrl: '/maps/campaign-map.jpg',
   bounds: [
@@ -30,7 +29,7 @@ const MAP_CONFIG = {
     [12960, 23040],
   ],
   center: [6480, 11520],
-  zoom: isMobileInit ? -4 : -3,
+  zoom: -3,
   minZoom: -4,
   maxZoom: 0,
 }
