@@ -22,6 +22,7 @@ L.Icon.Default.mergeOptions({
 })
 
 // ─── Map configuration ─────────────────────────────────────────────────────
+const isMobileInit = window.matchMedia('(max-width: 1023px)').matches
 const MAP_CONFIG = {
   imageUrl: '/maps/campaign-map.jpg',
   bounds: [
@@ -29,8 +30,8 @@ const MAP_CONFIG = {
     [12960, 23040],
   ],
   center: [6480, 11520],
-  zoom: -3,
-  minZoom: -3,
+  zoom: isMobileInit ? -4 : -3,
+  minZoom: -4,
   maxZoom: 0,
 }
 
@@ -81,7 +82,7 @@ export default function MapPage() {
   const { waypoints, addWaypoint, updateWaypoint, removeWaypoint, reorderWaypoints } = useTravelPath()
 
   const [editorState, setEditorState] = useState(null) // null | { position } | { poi }
-  const [showTravelPath, setShowTravelPath] = useState(true)
+  const [showTravelPath, setShowTravelPath] = useState(false)
   const [editingPath, setEditingPath] = useState(false)
   const [showPathEditor, setShowPathEditor] = useState(false)
   const [journeyPlaying, setJourneyPlaying] = useState(false)
