@@ -359,7 +359,7 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
   if (!items?.length) return null
   return (
     <div className="mb-1">
-      <div className="sticky -top-3 z-10 bg-[#1e1e1e] -mx-4 px-4 pb-2">
+      <div className="sticky -top-3 z-10 bg-inherit -mx-4 px-4 pb-2">
         <hr className="border-white/[0.06] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
           <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">{title}</p>
