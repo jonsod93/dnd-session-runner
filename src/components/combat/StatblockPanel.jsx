@@ -709,7 +709,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
       {!compact && statsHeader}
 
       {/* ── Scrollable content: properties, traits, actions, etc. ─── */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto px-4 py-3 bg-inherit">
       {compact && <div className="-mx-4 -mt-3">{statsHeader}</div>}
 
       {/* Properties */}
