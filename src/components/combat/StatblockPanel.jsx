@@ -704,7 +704,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
   )
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 bg-inherit">
       {/* In compact mode (preview), everything scrolls together */}
       {!compact && statsHeader}
 
