@@ -65,7 +65,7 @@ export function buildSegments(waypoints) {
   return segments
 }
 
-export function TravelPath({ waypoints, visible }) {
+export function TravelPath({ waypoints, visible, editing }) {
   const map = useMap()
   const layerRef = useRef(null)
 
@@ -100,25 +100,52 @@ export function TravelPath({ waypoints, visible }) {
       group.addLayer(line)
     })
 
-    // Only show dots for event waypoints (plus first/last always)
     waypoints.forEach((wp, i) => {
       const isFirst = i === 0
       const isLast = i === waypoints.length - 1
       const isEvent = wp.type === 'event'
 
-      if (!isFirst && !isLast && !isEvent) return
+      // In edit mode, show all waypoints; otherwise only events + first/last
+      if (!editing && !isFirst && !isLast && !isEvent) return
 
-      const radius = isFirst || isLast ? 6 : 5
+      const showAsMinor = editing && !isFirst && !isLast && !isEvent
+
+      const radius = showAsMinor ? 3 : (isFirst || isLast ? 6 : 5)
+      const fillColor = showAsMinor ? '#64748b' : '#d4a843'
+      const fillOpacity = showAsMinor ? 0.7 : 0.9
 
       const circle = L.circleMarker(wp.position, {
         radius,
-        fillColor: '#d4a843',
-        fillOpacity: 0.9,
+        fillColor,
+        fillOpacity,
         color: '#000',
-        weight: 1.5,
-        opacity: 0.6,
-        interactive: false,
+        weight: showAsMinor ? 1 : 1.5,
+        opacity: showAsMinor ? 0.4 : 0.6,
+        interactive: !!editing,
       })
+
+      // Show tooltip on hover during edit mode
+      if (editing) {
+        const label = wp.label || `Waypoint ${i + 1}`
+        const typeBadge = isEvent ? 'Event' : 'Travel'
+        const index = `#${i + 1}`
+        const session = wp.session ? ` - Session ${wp.session}` : ''
+        const teleport = wp.teleport ? ' ⚡' : ''
+
+        circle.bindTooltip(
+          `<span style="font-size:11px;font-family:'DM Sans',sans-serif;">`
+          + `<strong>${label}</strong>`
+          + `<br/><span style="opacity:0.7">${index} · ${typeBadge}${session}${teleport}</span>`
+          + `</span>`,
+          {
+            direction: 'top',
+            offset: [0, -8],
+            className: 'travel-waypoint-tooltip',
+            sticky: false,
+          }
+        )
+      }
+
       group.addLayer(circle)
     })
 
@@ -131,7 +158,7 @@ export function TravelPath({ waypoints, visible }) {
         layerRef.current = null
       }
     }
-  }, [map, segments, waypoints, visible])
+  }, [map, segments, waypoints, visible, editing])
 
   return null
 }

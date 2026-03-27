@@ -151,6 +151,7 @@ export default function MapPage() {
         <TravelPath
           waypoints={waypoints}
           visible={showTravelPath && !journeyPlaying}
+          editing={editingPath}
         />
 
         {/* Journey playback */}

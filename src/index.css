@@ -42,6 +42,19 @@
     display: none !important;
   }
 
+  /* Travel waypoint tooltip dark theme */
+  .travel-waypoint-tooltip {
+    background: rgba(0, 0, 0, 0.85) !important;
+    border: 1px solid rgba(100, 116, 139, 0.5) !important;
+    border-radius: 4px !important;
+    color: #e6e6e6 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    padding: 4px 8px !important;
+  }
+  .travel-waypoint-tooltip::before {
+    border-top-color: rgba(0, 0, 0, 0.85) !important;
+  }
+
   /* Leaflet zoom controls dark theme */
   .leaflet-control-zoom a {
     background-color: #252525 !important;
