@@ -78,19 +78,36 @@ export function usePOIs() {
     if (hasFetched.current) return
     hasFetched.current = true
 
-    // If we have unsynced local changes, push them to server first
+    // If we have unsynced local changes, merge with server and push
     if (isDirty()) {
-      console.log('[usePOIs] Found unsynced local changes, pushing to server...')
+      console.log('[usePOIs] Found unsynced local changes, merging with server...')
       const localData = loadCache()
-      persistPOIs(localData)
+      // Fetch server data to preserve cron-synced notionCache updates
+      fetchPOIs()
+        .then((serverPois) => {
+          const serverById = new Map(serverPois.map((p) => [p.id, p]))
+          const merged = localData.map((local) => {
+            const server = serverById.get(local.id)
+            if (!server?.notionCache?.lastSynced) return local
+            // If server has newer notionCache (from cron sync), use it
+            if (!local.notionCache?.lastSynced || server.notionCache.lastSynced > local.notionCache.lastSynced) {
+              return { ...local, notionCache: server.notionCache }
+            }
+            return local
+          })
+          setPois(merged)
+          saveCache(merged)
+          return persistPOIs(merged)
+        })
         .then(() => {
           clearDirty()
-          console.log('[usePOIs] Successfully synced local changes to server')
+          console.log('[usePOIs] Successfully merged and synced changes to server')
         })
         .catch((err) => {
+          // Server unreachable — keep local data, try again next load
           console.warn('[usePOIs] Still unable to sync local changes:', err.message)
         })
-      return // Keep local data, don't overwrite with server
+      return
     }
 
     fetchPOIs()

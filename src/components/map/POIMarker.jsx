@@ -49,6 +49,23 @@ export function POIMarker({ poi, onEdit, onRemove }) {
     content: poi.notionCache.content,
   } : null
   const [preview, setPreview] = useState(cachedPreview)
+
+  // Sync preview state when notionCache is updated (e.g. after cron sync refreshes server data)
+  const lastSynced = poi.notionCache?.lastSynced
+  useEffect(() => {
+    if (poi.notionCache && !poi.notionCache.notFound) {
+      const updated = {
+        title: poi.notionCache.title,
+        blurb: poi.notionCache.blurb,
+        types: poi.notionCache.types,
+        tags: poi.notionCache.tags,
+        content: poi.notionCache.content,
+      }
+      setPreview(updated)
+      // Also update the in-memory preview cache so other interactions see fresh data
+      if (poi.notionPageId) previewCache.set(poi.notionPageId, updated)
+    }
+  }, [lastSynced, poi.notionPageId])
   const [loading, setLoading] = useState(false)
   const [showFullInfo, setShowFullInfo] = useState(false)
   const [tooltipPos, setTooltipPos] = useState(null)
