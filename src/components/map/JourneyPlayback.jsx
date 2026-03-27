@@ -640,7 +640,7 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       <div
         className="fixed inset-0 z-[2002] pointer-events-none transition-opacity duration-[400ms]"
         style={{
-          background: 'radial-gradient(circle, rgba(107,79,160,0.85) 0%, rgba(15,8,25,0.95) 100%)',
+          background: 'radial-gradient(circle, rgba(200,220,240,0.85) 0%, rgba(15,20,30,0.95) 100%)',
           opacity: teleportFlash ? 1 : 0,
         }}
       />
