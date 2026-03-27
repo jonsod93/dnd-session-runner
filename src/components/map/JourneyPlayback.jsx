@@ -64,6 +64,8 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
   const [eventPopup, setEventPopup] = useState(null)
   const [teleportFlash, setTeleportFlash] = useState(false)
   const [canGoBack, setCanGoBack] = useState(false)
+  const [autoContinue, setAutoContinue] = useState(false)
+  const autoContinueRef = useRef(false)
 
   const cleanup = useCallback(() => {
     if (layerRef.current) {
@@ -94,6 +96,16 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
 
   const handleBack = useCallback(() => {
     if (advanceRef.current) advanceRef.current('back')
+  }, [])
+
+  const toggleAutoContinue = useCallback(() => {
+    setAutoContinue((prev) => {
+      const next = !prev
+      autoContinueRef.current = next
+      // If toggling on while paused at an event, advance immediately
+      if (next && advanceRef.current) advanceRef.current('advance')
+      return next
+    })
   }, [])
 
   useEffect(() => {
@@ -155,8 +167,11 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       return new Promise((resolve) => {
         if (cancelledRef.current) return resolve('end')
 
+        let autoTimer = null
+
         function done(reason) {
           window.removeEventListener('keydown', onKey)
+          if (autoTimer) clearTimeout(autoTimer)
           advanceRef.current = null
           skipRef.current = null
           resolve(reason)
@@ -175,6 +190,11 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
 
         advanceRef.current = (reason) => done(reason || 'advance')
         skipRef.current = (reason) => done(reason)
+
+        // Auto-continue after delay if enabled
+        if (autoContinueRef.current) {
+          autoTimer = setTimeout(() => done('advance'), 4000)
+        }
       })
     }
 
@@ -648,34 +668,35 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       {/* Event info popup - centered on screen */}
       {eventPopup && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[2001] animate-fade-in">
-          <div className="bg-[#1e1e1e]/95 border border-white/[0.15] rounded-lg px-5 py-4 backdrop-blur-sm shadow-2xl max-w-sm text-center">
-            <h3 className="text-sm font-medium text-[#e6e6e6] mb-1">
+          <div className="bg-[#1e1e1e]/95 border border-white/[0.15] rounded-lg px-5 py-4 backdrop-blur-sm shadow-2xl w-72 text-center">
+            <h3 className="text-sm font-medium text-[#e6e6e6] mb-1 truncate">
               {eventPopup.label}
             </h3>
-            {eventPopup.session && (
-              <p className="text-xs text-gold-400 mb-1">Session {eventPopup.session}</p>
-            )}
-            {eventPopup.text && (
-              <p className="text-xs text-[#b8b5b0] leading-relaxed mb-3">{eventPopup.text}</p>
-            )}
-            {eventPopup.poiName && !eventPopup.text && (
-              <p className="text-xs text-[#9a9894] italic mb-3">Location: {eventPopup.poiName}</p>
-            )}
-            {!eventPopup.text && !eventPopup.poiName && <div className="mb-3" />}
-            <div className="flex items-center justify-center gap-4">
-              {canGoBack && (
-                <button
-                  onClick={handleBack}
-                  className="text-xs text-[#9a9894] hover:text-gold-400 transition-colors"
-                >
-                  &larr; Prev <span className="text-[#787774] ml-0.5">(&#8592;)</span>
-                </button>
+            <div className="min-h-[1.25rem]">
+              {eventPopup.session && (
+                <p className="text-xs text-gold-400">Session {eventPopup.session}</p>
               )}
+            </div>
+            <div className="min-h-[2rem] flex items-center justify-center">
+              {eventPopup.text && (
+                <p className="text-xs text-[#b8b5b0] leading-relaxed">{eventPopup.text}</p>
+              )}
+              {eventPopup.poiName && !eventPopup.text && (
+                <p className="text-xs text-[#9a9894] italic">Location: {eventPopup.poiName}</p>
+              )}
+            </div>
+            <div className="flex items-center justify-center gap-4 mt-2">
+              <button
+                onClick={handleBack}
+                className={`text-xs transition-colors ${canGoBack ? 'text-[#9a9894] hover:text-gold-400' : 'text-transparent pointer-events-none'}`}
+              >
+                &larr; Prev <span className={canGoBack ? 'text-[#787774] ml-0.5' : 'text-transparent'}>(&#8592;)</span>
+              </button>
               <button
                 onClick={handleAdvance}
                 className="text-xs text-[#9a9894] hover:text-gold-400 transition-colors"
               >
-                Next &rarr; <span className="text-[#787774] ml-0.5">(Space)</span>
+                {autoContinue ? 'Continuing...' : <>Next &rarr; <span className="text-[#787774] ml-0.5">(Space)</span></>}
               </button>
             </div>
           </div>
@@ -683,42 +704,58 @@ export function JourneyPlayback({ waypoints, playing, onStop, pois }) {
       )}
 
       {/* Bottom controls */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[2000] flex items-center gap-3">
-        <div className="bg-slate-900/90 border border-white/[0.12] rounded-lg px-4 py-2.5 backdrop-blur-sm flex items-center gap-3 shadow-xl">
-          {currentLabel && (
-            <span className="text-sm text-gold-400 font-medium whitespace-nowrap max-w-[180px] truncate">
-              {currentLabel}
-            </span>
-          )}
-          <div className="w-32 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[2000]">
+        <div className="bg-slate-900/90 border border-white/[0.12] rounded-lg px-4 py-2.5 backdrop-blur-sm shadow-xl flex items-center gap-3 w-[480px]">
+          {/* Label area - fixed width */}
+          <span className={`text-sm font-medium whitespace-nowrap w-[140px] truncate ${currentLabel ? 'text-gold-400' : 'text-transparent'}`}>
+            {currentLabel || '\u00A0'}
+          </span>
+
+          {/* Progress bar */}
+          <div className="w-28 h-1.5 bg-white/[0.08] rounded-full overflow-hidden shrink-0">
             <div
               className="h-full bg-gold-400 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
-          {canGoBack && (
-            <button
-              onClick={handleBack}
-              className="text-xs text-[#9a9894] hover:text-gold-400 transition-colors whitespace-nowrap"
-              title="Previous event"
-            >
-              ⏮ Prev
-            </button>
-          )}
+
+          {/* Navigation buttons */}
+          <button
+            onClick={handleBack}
+            className={`text-xs whitespace-nowrap transition-colors ${canGoBack ? 'text-[#9a9894] hover:text-gold-400' : 'text-[#9a9894]/20 pointer-events-none'}`}
+            title="Previous event"
+          >
+            ⏮
+          </button>
           <button
             onClick={handleSkip}
             className="text-xs text-[#9a9894] hover:text-gold-400 transition-colors whitespace-nowrap"
             title="Skip to next event"
           >
-            Skip ⏭
+            ⏭
           </button>
-          <div className="w-px h-4 bg-white/[0.1]" />
+
+          <div className="w-px h-4 bg-white/[0.1] shrink-0" />
+
+          {/* Auto-continue toggle */}
+          <label className="flex items-center gap-1.5 cursor-pointer shrink-0" title="Automatically continue past events">
+            <input
+              type="checkbox"
+              checked={autoContinue}
+              onChange={toggleAutoContinue}
+              className="w-3 h-3 accent-gold-400 cursor-pointer"
+            />
+            <span className="text-xs text-[#9a9894] whitespace-nowrap">Auto</span>
+          </label>
+
+          <div className="w-px h-4 bg-white/[0.1] shrink-0" />
+
           <button
             onClick={handleEndJourney}
-            className="text-xs text-[#9a9894] hover:text-red-400 transition-colors whitespace-nowrap"
+            className="text-xs text-[#9a9894] hover:text-red-400 transition-colors whitespace-nowrap shrink-0"
             title="End journey"
           >
-            End Journey
+            End
           </button>
         </div>
       </div>
