@@ -10,6 +10,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const JSON_PATH = path.resolve('src/data/improved-initiative.json')
+const PCS_PATH = path.resolve('src/data/pcs.json')
 
 function readLibrary() {
   return JSON.parse(fs.readFileSync(JSON_PATH, 'utf-8'))
@@ -37,6 +38,33 @@ export default function libraryApiPlugin() {
   return {
     name: 'library-api',
     configureServer(server) {
+      // ── PC endpoints ──────────────────────────────────────────────────
+      server.middlewares.use('/api/library/pcs', async (req, res) => {
+        res.setHeader('Content-Type', 'application/json')
+        try {
+          if (req.method === 'GET') {
+            const data = fs.existsSync(PCS_PATH) ? JSON.parse(fs.readFileSync(PCS_PATH, 'utf-8')) : []
+            return res.end(JSON.stringify(data))
+          }
+          if (req.method === 'POST') {
+            const { pcs } = await bodyOf(req)
+            if (!Array.isArray(pcs)) {
+              res.statusCode = 400
+              return res.end(JSON.stringify({ error: 'pcs array is required' }))
+            }
+            fs.writeFileSync(PCS_PATH, JSON.stringify(pcs, null, 2), 'utf-8')
+            return res.end(JSON.stringify({ ok: true }))
+          }
+          res.statusCode = 405
+          res.end(JSON.stringify({ error: 'Method not allowed' }))
+        } catch (err) {
+          console.error('[library-api/pcs]', err)
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: err.message }))
+        }
+      })
+
+      // ── Creature endpoints ──────────────────────────────────────────────
       server.middlewares.use('/api/library/creature', async (req, res) => {
         res.setHeader('Content-Type', 'application/json')
 

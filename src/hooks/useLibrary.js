@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import rawData from '../data/improved-initiative.json'
+import bundledPCs from '../data/pcs.json'
 
 function safeParse(val) {
   if (!val) return []
@@ -21,6 +22,8 @@ const LS_CACHE_KEY = 'mythranos:creature-cache'
 const LS_DIRTY_KEY = 'mythranos:creature-dirty'
 const LS_EDITS_KEY = 'mythranos:creature-edits'
 const LS_DELETES_KEY = 'mythranos:creature-deletes'
+const LS_PCS_CACHE_KEY = 'mythranos:pcs-cache'
+const LS_PCS_DIRTY_KEY = 'mythranos:pcs-dirty'
 
 // Auth token for write operations (JWT from login)
 import { getToken } from './useAuth'
@@ -235,89 +238,159 @@ export function useLibrary() {
     [monsterMap]
   )
 
-  // PCs — merged from static import + localStorage custom PCs
-  const LS_PCS_KEY = 'mythranos:custom-pcs'
-  const LS_PCS_HIDDEN_KEY = 'mythranos:hidden-pcs'
+  // ── PCs — synced via blob storage ───────────────────────────────────────
 
-  const [customPCs, setCustomPCs] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(LS_PCS_KEY) || '[]')
-    } catch { return [] }
+  const [pcList, setPcList] = useState(() => {
+    if (!IS_DEV) {
+      try {
+        const cached = localStorage.getItem(LS_PCS_CACHE_KEY)
+        if (cached) return JSON.parse(cached)
+      } catch {}
+    }
+    return bundledPCs
   })
+  const hasFetchedPCs = useRef(false)
 
-  const [hiddenPCs, setHiddenPCs] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(LS_PCS_HIDDEN_KEY) || '[]')
-    } catch { return [] }
-  })
+  // Sync PCs from server on mount (production)
+  useEffect(() => {
+    if (IS_DEV || hasFetchedPCs.current) return
+    hasFetchedPCs.current = true
+
+    // Migrate old localStorage PCs to server if present
+    async function migrateLegacyPCs() {
+      try {
+        const oldCustom = localStorage.getItem('mythranos:custom-pcs')
+        const oldHidden = localStorage.getItem('mythranos:hidden-pcs')
+        if (!oldCustom && !oldHidden) return
+
+        const custom = oldCustom ? JSON.parse(oldCustom) : []
+        const hidden = new Set(oldHidden ? JSON.parse(oldHidden) : [])
+        if (custom.length === 0 && hidden.size === 0) return
+
+        console.log('[useLibrary] Migrating legacy PC data to server...')
+        // Fetch current server PCs, apply hidden + custom changes
+        const res = await fetch('/api/pcs')
+        const serverPCs = res.ok ? await res.json() : bundledPCs
+        const merged = serverPCs.filter((pc) => !hidden.has(pc.Name))
+        for (const pc of custom) {
+          const idx = merged.findIndex((p) => p.Name === pc.Name)
+          const clean = { Name: pc.Name }
+          if (pc.AC != null) clean.AC = pc.AC
+          if (idx >= 0) merged[idx] = clean
+          else merged.push(clean)
+        }
+        await fetch('/api/pcs', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ pcs: merged }),
+        })
+        localStorage.removeItem('mythranos:custom-pcs')
+        localStorage.removeItem('mythranos:hidden-pcs')
+        console.log('[useLibrary] Legacy PC migration complete')
+        return merged
+      } catch (err) {
+        console.warn('[useLibrary] Legacy PC migration failed:', err.message)
+        return null
+      }
+    }
+
+    async function syncPCs() {
+      try {
+        const migrated = await migrateLegacyPCs()
+        if (migrated) {
+          setPcList(migrated)
+          try { localStorage.setItem(LS_PCS_CACHE_KEY, JSON.stringify(migrated)) } catch {}
+          return
+        }
+
+        if (localStorage.getItem(LS_PCS_DIRTY_KEY) === '1') {
+          console.log('[useLibrary] PCs have unsynced local changes, keeping local data')
+          return
+        }
+
+        const res = await fetch('/api/pcs')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        setPcList(data)
+        try { localStorage.setItem(LS_PCS_CACHE_KEY, JSON.stringify(data)) } catch {}
+      } catch (err) {
+        console.warn('[useLibrary] Failed to sync PCs from server:', err.message)
+      }
+    }
+
+    syncPCs()
+  }, [])
 
   const pcs = useMemo(() => {
-    const hiddenSet = new Set(hiddenPCs)
-    const topLevelPCs = Object.entries(rawData)
-      .filter(([k]) => k.startsWith('PersistentCharacters.'))
-      .map(([, v]) => v)
-    const legacyPCs = [
-      ...safeParse(rawData['ImprovedInitiative.PersistentCharacters']),
-      ...safeParse(rawData['ImprovedInitiative.PlayerCharacters']),
-    ]
     const seen = new Set()
-    // Filter static/legacy PCs by hidden set, but never filter custom PCs
-    const staticFiltered = [...topLevelPCs, ...legacyPCs].filter((pc) => {
-      if (!pc.Name || seen.has(pc.Name) || hiddenSet.has(pc.Name)) return false
-      seen.add(pc.Name)
-      return true
-    })
-    return [...staticFiltered, ...customPCs.filter((pc) => {
-      if (!pc.Name || seen.has(pc.Name)) return false
-      seen.add(pc.Name)
-      return true
-    })]
+    return pcList
+      .filter((pc) => {
+        if (!pc.Name || seen.has(pc.Name)) return false
+        seen.add(pc.Name)
+        return true
+      })
       .map((pc) => ({ ...pc, _libType: 'pc' }))
       .sort((a, b) => a.Name.localeCompare(b.Name))
-  }, [customPCs, hiddenPCs])
+  }, [pcList])
 
-  const savePC = useCallback((name, originalName, ac) => {
-    const acVal = ac != null && ac !== '' ? Number(ac) : undefined
-    if (originalName) {
-      // If renaming, hide the original (in case it's static) and add/update custom entry
-      setHiddenPCs((prev) => {
-        const next = prev.includes(originalName) ? prev : [...prev, originalName]
-        localStorage.setItem(LS_PCS_HIDDEN_KEY, JSON.stringify(next))
-        return next
-      })
-      setCustomPCs((prev) => {
-        const entry = { Name: name, _custom: true }
-        if (acVal != null) entry.AC = acVal
-        const next = prev.some((pc) => pc.Name === originalName)
-          ? prev.map((pc) => pc.Name === originalName ? entry : pc)
-          : [...prev, entry]
-        localStorage.setItem(LS_PCS_KEY, JSON.stringify(next))
-        return next
-      })
-    } else {
-      setCustomPCs((prev) => {
-        const entry = { Name: name, _custom: true }
-        if (acVal != null) entry.AC = acVal
-        const next = [...prev, entry]
-        localStorage.setItem(LS_PCS_KEY, JSON.stringify(next))
-        return next
-      })
+  const persistPCs = useCallback(async (newList) => {
+    // Cache locally
+    try { localStorage.setItem(LS_PCS_CACHE_KEY, JSON.stringify(newList)) } catch {}
+
+    // Persist to server
+    const clean = newList.map(({ _libType, _custom, ...rest }) => rest)
+    try {
+      if (IS_DEV) {
+        await fetch('/api/library/pcs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pcs: clean }),
+        })
+      } else {
+        await fetch('/api/pcs', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ pcs: clean }),
+        })
+      }
+      try { localStorage.removeItem(LS_PCS_DIRTY_KEY) } catch {}
+    } catch (err) {
+      try { localStorage.setItem(LS_PCS_DIRTY_KEY, '1') } catch {}
+      console.warn('[useLibrary] Failed to sync PCs to server:', err.message)
     }
   }, [])
 
+  const savePC = useCallback((name, originalName, ac) => {
+    const acVal = ac != null && ac !== '' ? Number(ac) : undefined
+    setPcList((prev) => {
+      let next
+      if (originalName) {
+        const entry = { Name: name }
+        if (acVal != null) entry.AC = acVal
+        const idx = prev.findIndex((pc) => pc.Name === originalName)
+        if (idx >= 0) {
+          next = [...prev]
+          next[idx] = entry
+        } else {
+          next = [...prev, entry]
+        }
+      } else {
+        const entry = { Name: name }
+        if (acVal != null) entry.AC = acVal
+        next = [...prev, entry]
+      }
+      persistPCs(next)
+      return next
+    })
+  }, [persistPCs])
+
   const deletePC = useCallback((name) => {
-    // Hide from static list + remove from custom list
-    setHiddenPCs((prev) => {
-      const next = prev.includes(name) ? prev : [...prev, name]
-      localStorage.setItem(LS_PCS_HIDDEN_KEY, JSON.stringify(next))
-      return next
-    })
-    setCustomPCs((prev) => {
+    setPcList((prev) => {
       const next = prev.filter((pc) => pc.Name !== name)
-      localStorage.setItem(LS_PCS_KEY, JSON.stringify(next))
+      persistPCs(next)
       return next
     })
-  }, [])
+  }, [persistPCs])
 
   // ── Add or update a creature ──────────────────────────────────────────────
 

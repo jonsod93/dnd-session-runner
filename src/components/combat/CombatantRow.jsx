@@ -102,7 +102,7 @@ export function CombatantRow({
       style={sortableStyle}
       data-combatant-id={combatant.id}
       className={[
-        'flex max-lg:items-center gap-2 px-4 py-3 rounded-xl min-h-[52px] cursor-default outline-none',
+        'flex max-lg:items-center gap-2 px-4 py-3 rounded-xl min-h-[52px] shrink-0 cursor-default outline-none',
         isActive
           ? `active-border${isSelected ? ' is-selected' : ''}`
           : isLair

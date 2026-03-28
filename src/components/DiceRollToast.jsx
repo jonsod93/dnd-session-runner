@@ -55,7 +55,9 @@ function ToastItem({ roll, onExpire }) {
           {roll.total}
         </span>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-xs text-[#5a5854] font-mono truncate">{roll.detail}</span>
+          <span className="text-xs text-[#5a5854] font-mono truncate">
+            <DetailWithNatColor detail={roll.detail} />
+          </span>
           {isCrit && (
             <span className="text-xs font-bold text-green-400">Critical hit!</span>
           )}
@@ -74,4 +76,16 @@ function ToastItem({ roll, onExpire }) {
       </div>
     </div>
   )
+}
+
+function DetailWithNatColor({ detail }) {
+  if (!detail) return null
+  // Match [X] or d20(X) patterns
+  const match = detail.match(/^(.*?)([\[(](\d+)[\])])(.*)$/)
+  if (!match) return detail
+  const [, before, bracket, num, after] = match
+  const n = parseInt(num, 10)
+  const color = n === 20 ? '#4ade80' : n === 1 ? 'rgb(255, 90, 90)' : null
+  if (!color) return detail
+  return <>{before}<span style={{ color }}>{bracket}</span>{after}</>
 }
