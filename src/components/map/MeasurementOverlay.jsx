@@ -29,10 +29,18 @@ function segmentDist(a, b) {
   return Math.sqrt(dx * dx + dy * dy)
 }
 
+// Inject style once for measurement label containers
+if (typeof document !== 'undefined' && !document.getElementById('measurement-label-style')) {
+  const style = document.createElement('style')
+  style.id = 'measurement-label-style'
+  style.textContent = `.measurement-label{background:none!important;border:none!important;width:auto!important;height:auto!important;}`
+  document.head.appendChild(style)
+}
+
 function makeLabelIcon({ prefix, mi, km, time }) {
   const header = prefix ? `<div style="color:#d4a843;font-weight:600;margin-bottom:2px;">${prefix}</div>` : ''
   return L.divIcon({
-    className: '',
+    className: 'measurement-label',
     html: `<div style="
       background: rgba(18,18,18,0.92);
       border: 1px solid rgba(255,255,255,0.18);

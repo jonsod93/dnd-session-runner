@@ -143,7 +143,7 @@ export default function MapPage() {
         <MapViewRestorer />
         <MapClickHandler onRightClick={handleRightClick} />
 
-        {!editingPath && pois.map((poi) => (
+        {!editingPath && !measuring && pois.map((poi) => (
           <POIMarker
             key={poi.id}
             poi={poi}
