@@ -56,7 +56,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
           {condition.name} - Save
         </h3>
         <p className="text-xs text-[#9a9894] mb-3">
-          {combatant?.name ?? 'Unknown'} must save or lose {condition.name}
+          {combatant?.name ?? 'Unknown'} must save to lose {condition.name}
         </p>
 
         {/* Ability buttons */}
@@ -92,19 +92,19 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Action buttons: Saved = remove condition, Failed = keep condition */}
         <div className="flex gap-2">
           <button
-            onClick={onKeep}
-            className="flex-1 text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] rounded px-4 py-2 transition-colors border border-white/[0.1]"
+            onClick={onClear}
+            className="flex-1 bg-emerald-600/80 hover:bg-emerald-600 text-white font-semibold text-sm rounded px-4 py-2 transition-colors"
           >
-            Keep
+            Saved
           </button>
           <button
-            onClick={onClear}
+            onClick={onKeep}
             className="flex-1 bg-red-500/80 hover:bg-red-500 text-white font-semibold text-sm rounded px-4 py-2 transition-colors"
           >
-            Clear
+            Failed
           </button>
         </div>
       </div>
