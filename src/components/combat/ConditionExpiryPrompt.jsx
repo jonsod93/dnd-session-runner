@@ -56,7 +56,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
           {combatant?.name ?? 'Unknown'} - Saving Throw
         </h3>
         <p className="text-xs text-[#9a9894] mb-3">
-          <span className="font-semibold text-[#e6e6e6]">{combatant?.name ?? 'Unknown'}</span> must save to lose <span className="font-semibold text-[#e6e6e6]">{condition.name}</span>
+          <span className="text-amber-400">{combatant?.name ?? 'Unknown'}</span> must save to lose <span className="text-amber-400">{condition.name}</span>
         </p>
 
         {/* Ability buttons */}
