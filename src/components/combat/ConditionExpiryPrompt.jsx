@@ -53,10 +53,10 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-1">
-          {condition.name} - Save
+          {combatant?.name ?? 'Unknown'} - Saving Throw
         </h3>
         <p className="text-xs text-[#9a9894] mb-3">
-          {combatant?.name ?? 'Unknown'} must save to lose {condition.name}
+          <span className="font-semibold text-[#e6e6e6]">{combatant?.name ?? 'Unknown'}</span> must save to lose <span className="font-semibold text-[#e6e6e6]">{condition.name}</span>
         </p>
 
         {/* Ability buttons */}
