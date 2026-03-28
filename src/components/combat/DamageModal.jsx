@@ -14,18 +14,20 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
     return () => window.removeEventListener('keydown', h)
   }, [onClose])
 
-  const handleSubmit = (e) => {
+  const handleApply = (e) => {
     e.preventDefault()
-    const amount = parseInt(value, 10)
-    if (!isNaN(amount)) onConfirm(amount)
-  }
+    const dmgAmount = parseInt(value, 10)
+    const tmpAmount = parseInt(tempHpValue, 10)
+    const hasDmg = !isNaN(dmgAmount) && dmgAmount !== 0
+    const hasTmp = !isNaN(tmpAmount) && tmpAmount >= 0
 
-  const handleSetTempHp = () => {
-    const amount = parseInt(tempHpValue, 10)
-    if (!isNaN(amount) && amount >= 0) {
-      onSetTempHp?.(combatant.id, amount)
-      setTempHpValue('')
-    }
+    if (!hasDmg && !hasTmp) return
+
+    // Apply temp HP first so damage is absorbed correctly
+    if (hasTmp) onSetTempHp?.(combatant.id, tmpAmount)
+    if (hasDmg) onConfirm(dmgAmount)
+
+    if (!hasDmg) onClose()
   }
 
   const parsed  = parseInt(value, 10)
@@ -39,9 +41,18 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
       onClick={onClose}
     >
       <div
-        className="glass-modal rounded-2xl w-80 p-5"
+        className="glass-modal rounded-2xl w-80 p-5 relative"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 text-[#787774] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
+        >
+          ✕
+        </button>
+
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-0.5">Apply Damage / Healing</h3>
         <p className="text-xs text-[#7a7874] mb-4">
           {combatant.name} -{' '}
@@ -52,7 +63,10 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
             <span className="font-mono text-blue-400 ml-1">(+{tempHp} temp)</span>
           )}
         </p>
-        <form onSubmit={handleSubmit}>
+
+        <form onSubmit={handleApply}>
+          {/* Damage / Healing */}
+          <label className="text-xs text-[#7a7874] block mb-1.5">Damage or Healing</label>
           <input
             ref={inputRef}
             type="number"
@@ -66,27 +80,10 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
               {isDmg ? `${parsed} damage` : isHeal ? `${-parsed} healing` : 'no change'}
             </p>
           )}
-          <div className="flex gap-2 mt-5">
-            <button
-              type="submit"
-              className="btn-neon-gold flex-1"
-            >
-              Apply
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-outline flex-1"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
 
-        {/* Temp HP section */}
-        <div className="mt-4 pt-4 border-t border-black/[0.15]">
-          <label className="text-xs text-[#7a7874] block mb-1.5">Temporary HP</label>
-          <div className="flex gap-2">
+          {/* Temp HP */}
+          <div className="mt-4 pt-4 border-t border-black/[0.15]">
+            <label className="text-xs text-[#7a7874] block mb-1.5">Temporary HP</label>
             <input
               type="number"
               value={tempHpValue}
@@ -95,15 +92,16 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
               min="0"
               className="input-field flex-1 font-mono !border-blue-400/20 focus:!border-blue-400/50"
             />
-            <button
-              type="button"
-              onClick={handleSetTempHp}
-              className="shrink-0 text-xs text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 px-2.5 py-1 rounded-lg transition-all hover:shadow-neon-blue"
-            >
-              Set
-            </button>
           </div>
-        </div>
+
+          {/* Apply button */}
+          <button
+            type="submit"
+            className="btn-action w-full mt-5 !text-sm !px-4 !py-2 !text-[#e87830]"
+          >
+            Apply
+          </button>
+        </form>
       </div>
     </div>
   )

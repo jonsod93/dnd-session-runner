@@ -51,7 +51,7 @@ export default function Navigation() {
               [
                 'flex items-center px-3 text-sm border-b-2 transition-colors duration-150',
                 isActive
-                  ? 'border-gold-400 text-[#e6e6e6]'
+                  ? 'border-[#e87830] text-[#e6e6e6]'
                   : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
               ].join(' ')
             }

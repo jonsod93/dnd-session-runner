@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import useSessionLink from '../../hooks/useSessionLink'
 import SessionLinker from './SessionLinker'
 import { generateNPCName } from '../../utils/nameGenerators'
@@ -210,19 +211,18 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
     const usingNotionIngredients = isIngredients && notionIngredients && notionIngredients.length > 0
     const usingNotionTradeItems = isMagical && notionTradeItems && notionTradeItems.length > 0
 
-    return (
+    return createPortal(
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 neumorphic"
         style={{ background: 'rgba(0,0,0,0.5)' }}
         onClick={onClose}
       >
         <div
-          className="bg-[#252525] border border-white/[0.1] rounded-lg w-full max-w-md flex flex-col max-h-[85vh]"
-          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+          className="glass-modal rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.15]">
             <h2 className="text-sm font-medium text-[#e6e6e6]">
               Generate {generator.label}
             </h2>
@@ -252,10 +252,10 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                       type="button"
                       onClick={() => handleOptionChange(opt.key, choice)}
                       className={[
-                        'text-xs rounded px-2.5 py-1 border transition-colors',
+                        'text-xs rounded-lg px-2.5 py-1 transition-colors',
                         selectedOptions[opt.key] === choice
-                          ? 'border-gold-400/60 bg-gold-400/10 text-gold-400'
-                          : 'border-white/[0.1] text-[#787774] hover:text-[#e6e6e6] hover:border-white/[0.2]',
+                          ? 'btn-action !border-gold-400/60 !bg-gold-400/10 text-gold-400'
+                          : 'btn-action',
                       ].join(' ')}
                     >
                       {choice}
@@ -288,13 +288,13 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                 <button
                   type="button"
                   onClick={regenerateContent}
-                  className="text-xs text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-2 py-1 transition-colors"
+                  className="btn-action text-xs"
                 >
                   Re-generate
                 </button>
               </div>
               {Array.isArray(output) ? (
-                <div className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-3 text-sm font-mono leading-relaxed min-h-[120px] max-h-[300px] overflow-y-auto">
+                <div className="w-full input-field !rounded-xl font-mono leading-relaxed min-h-[120px] max-h-[300px] overflow-y-auto">
                   {output.map((line, i) => (
                     <div key={i} className={line.color ? LINE_COLORS[line.color] : 'text-[#e6e6e6]'}>
                       {line.text || '\u00A0'}
@@ -302,7 +302,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                   ))}
                 </div>
               ) : (
-                <pre className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-3 text-sm text-[#e6e6e6] font-mono whitespace-pre-wrap leading-relaxed min-h-[120px] max-h-[300px] overflow-y-auto">
+                <pre className="w-full input-field !rounded-xl font-mono whitespace-pre-wrap leading-relaxed min-h-[120px] max-h-[300px] overflow-y-auto">
                   {output}
                 </pre>
               )}
@@ -310,33 +310,33 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
           </div>
 
           {/* Footer */}
-          <div className="px-5 py-4 border-t border-white/[0.06]">
+          <div className="px-5 py-4 border-t border-black/[0.15]">
             <button
               onClick={handleCopy}
-              className="w-full bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2.5 transition-colors"
+              className="w-full btn-action !text-sm !py-2.5 font-semibold"
             >
               {copied ? 'Copied!' : 'Copy to Clipboard'}
             </button>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     )
   }
 
   // ── Name generator modal (existing behavior) ──
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 neumorphic"
       style={{ background: 'rgba(0,0,0,0.5)' }}
       onClick={() => !saving && onClose()}
     >
       <div
-        className="bg-[#252525] border border-white/[0.1] rounded-lg w-full max-w-md flex flex-col max-h-[85vh]"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+        className="glass-modal rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.15]">
           <h2 className="text-sm font-medium text-[#e6e6e6]">
             Generate {generator.label}
           </h2>
@@ -362,10 +362,10 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                     type="button"
                     onClick={() => handleSubtypeChange(st)}
                     className={[
-                      'text-xs rounded px-2.5 py-1 border transition-colors',
+                      'text-xs rounded-lg px-2.5 py-1 transition-colors',
                       activeSubtype?.key === st.key
-                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400'
-                        : 'border-white/[0.1] text-[#787774] hover:text-[#e6e6e6] hover:border-white/[0.2]',
+                        ? 'btn-action !border-gold-400/60 !bg-gold-400/10 text-gold-400'
+                        : 'btn-action',
                     ].join(' ')}
                   >
                     {st.label}
@@ -384,12 +384,12 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
-                className="flex-1 bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                className="input-field flex-1"
               />
               <button
                 type="button"
                 onClick={regenerate}
-                className="text-xs text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-2 py-1 transition-colors shrink-0"
+                className="btn-action text-xs shrink-0"
               >
                 Re-generate
               </button>
@@ -404,17 +404,17 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional description..."
               rows={3}
-              className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/40 placeholder:text-[#787774] transition-colors resize-none"
+              className="input-field w-full resize-none"
             />
           </div>
 
           {/* NPC generation section */}
           {hasNpc && (
-            <div className="border border-white/[0.08] rounded-lg overflow-hidden">
+            <div className="glass-panel rounded-xl overflow-hidden">
               <button
                 type="button"
                 onClick={handleToggleNpc}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs hover:bg-white/[0.03] transition-colors"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs hover:bg-[#383b43] transition-colors"
               >
                 <span className={npcEnabled ? 'text-[#e6e6e6]' : 'text-[#787774]'}>
                   {generator.npcRole}
@@ -431,7 +431,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
               </button>
 
               {npcEnabled && (
-                <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-white/[0.06]">
+                <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-black/[0.15]">
                   {/* NPC name */}
                   <div>
                     <label className="block text-xs text-[#787774] mb-1.5">{generator.npcRole} name</label>
@@ -440,13 +440,13 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                         type="text"
                         value={npcName}
                         onChange={(e) => setNpcName(e.target.value)}
-                        className="flex-1 bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                        className="input-field flex-1"
                         placeholder="NPC name..."
                       />
                       <button
                         type="button"
                         onClick={() => setNpcName(generateNPCName())}
-                        className="text-xs text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-2 py-1 transition-colors shrink-0"
+                        className="btn-action text-xs shrink-0"
                       >
                         Re-generate
                       </button>
@@ -461,7 +461,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                       onChange={(e) => setNpcDescription(e.target.value)}
                       placeholder="Optional description..."
                       rows={2}
-                      className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/40 placeholder:text-[#787774] transition-colors resize-none"
+                      className="input-field w-full resize-none"
                     />
                   </div>
                 </div>
@@ -486,23 +486,24 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
 
           {/* Error */}
           {error && (
-            <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded px-3 py-2">
+            <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
               {error}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-white/[0.06]">
+        <div className="px-5 py-4 border-t border-black/[0.15]">
           <button
             onClick={handleSave}
             disabled={!modal.linkedSession || !name.trim() || saving}
-            className="w-full bg-gold-400 hover:bg-gold-300 disabled:opacity-30 disabled:cursor-not-allowed text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2.5 transition-colors"
+            className="w-full btn-action !text-sm !py-2.5 font-semibold disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : `Save and create ${generator.label}`}
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

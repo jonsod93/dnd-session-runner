@@ -192,6 +192,14 @@ export default function CombatTracker() {
               notifications.notify(`Failed to delete: ${err.message}`, 'error')
             }
           }}
+          onSavePC={(name, originalName, ac) => {
+            library.savePC(name, originalName, ac)
+            notifications.notify(originalName ? `Updated "${name}"` : `Added PC "${name}"`, 'success')
+          }}
+          onDeletePC={(name) => {
+            library.deletePC(name)
+            notifications.notify(`Deleted PC "${name}"`, 'success')
+          }}
         />      </div>
 
       {/* ── Centre: editor OR tracker ────────────────────────────────────── */}
@@ -230,9 +238,9 @@ export default function CombatTracker() {
               if (uri) setTimeout(() => spotify.play(uri), 1000)
               setShowInitModal(true)
             }}
-            className="btn-neon-gold"
+            className="btn-action !text-sm !px-4 !py-2"
           >
-            Roll Initiative
+            ⚔ Roll Initiative
           </button>
 
           <div className="flex-1" />
@@ -297,25 +305,26 @@ export default function CombatTracker() {
             <div className="w-3 shrink-0" />
             {/* Initiative */}
             <div className="w-8 shrink-0 text-center">#</div>
-            {/* Name */}
-            <div className="w-36 shrink-0">Name</div>
-            {/* HP + AC + Deal damage group — centered to match row layout */}
-            <div className="flex-1 flex items-center justify-center gap-4">
-              <div className="w-20 flex justify-center pr-2" title="Hit Points">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
+            {/* Content column — mirrors row's flex-1 content div */}
+            <div className="flex-1 min-w-0 flex items-center">
+              <div className="w-36 shrink-0">Name</div>
+              <div className="flex-1 flex items-center justify-center gap-4" style={{ transform: 'translateX(-13px)' }}>
+                <div className="w-24 shrink-0 flex justify-center" title="Hit Points">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </div>
+                <div className="w-14 shrink-0 flex justify-center" title="Armor Class">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </div>
+                {/* Deal damage spacer to match row button */}
+                <div className="shrink-0" style={{ width: 96 }} />
               </div>
-              <div className="w-14 flex justify-center" title="Armor Class">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              </div>
-              {/* Deal damage spacer to match row button */}
-              <div className="shrink-0" style={{ width: 82 }} />
+              {/* Conditions button spacer */}
+              <div className="w-[72px] shrink-0" />
             </div>
-            {/* Conditions button spacer */}
-            <div className="w-[72px] shrink-0" />
             {/* Remove button spacer */}
             <div className="w-4 shrink-0 ml-0.5" />
           </div>
@@ -439,7 +448,7 @@ export default function CombatTracker() {
               className={[
                 'flex-1 text-sm font-medium border-t-2 transition-colors',
                 mobileTab === key
-                  ? 'border-gold-400 text-[#e6e6e6]'
+                  ? 'border-[#e87830] text-[#e6e6e6]'
                   : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
               ].join(' ')}
               onClick={() => setMobileTab(key)}

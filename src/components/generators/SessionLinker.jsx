@@ -39,8 +39,8 @@ export default function SessionLinker({
         type="button"
         onClick={() => setShowSearch(!showSearch)}
         className={[
-          'text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded transition-colors',
-          compact ? 'text-xs px-2 py-1' : 'text-xs px-2.5 py-1.5',
+          'btn-action transition-colors',
+          compact ? 'text-xs !px-2 !py-1' : 'text-xs',
         ].join(' ')}
       >
         Link Session...
@@ -54,9 +54,9 @@ export default function SessionLinker({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search sessions..."
             autoFocus
-            className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/40 placeholder:text-[#787774] transition-colors"
+            className="input-field"
           />
-          <div className="mt-1.5 max-h-40 overflow-y-auto bg-[#1e1e1e] border border-white/[0.08] rounded">
+          <div className="mt-1.5 max-h-40 overflow-y-auto glass-panel rounded-lg">
             {searching && (
               <p className="text-[11px] text-[#787774] px-3 py-2 italic">Searching...</p>
             )}
@@ -67,7 +67,7 @@ export default function SessionLinker({
               <button
                 key={s.id}
                 type="button"
-                className="w-full text-left px-3 py-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] last:border-0"
+                className="w-full text-left px-3 py-2 hover:bg-[#383b43] transition-colors border-b border-black/[0.15] last:border-0"
                 onClick={() => { onLink(s); setShowSearch(false) }}
               >
                 <div className="text-xs text-[#e6e6e6]">{sessionLabel(s)}</div>

@@ -2,6 +2,18 @@ import { useState, useEffect } from 'react'
 import { d20, abilityMod, formatMod } from '../../utils/combatUtils'
 
 const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
+const ABILITY_FULL = { str: 'strength', dex: 'dexterity', con: 'constitution', int: 'intelligence', wis: 'wisdom', cha: 'charisma' }
+
+function getSaveMod(statblock, ability) {
+  const key = ability.toLowerCase()
+  const save = statblock?.Saves?.find((s) => {
+    const n = s.Name?.toLowerCase().trim()
+    return n === key || n === ABILITY_FULL[key]
+  })
+  if (save != null) return { mod: save.Modifier, proficient: true }
+  const score = statblock?.Abilities?.[ability] ?? 10
+  return { mod: abilityMod(score), proficient: false }
+}
 
 export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
   const { condition } = expiry
@@ -15,8 +27,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
   }, [condition.needsSave, onClear])
 
   const handleRoll = (ability) => {
-    const score = combatant?.statblock?.Abilities?.[ability] ?? 10
-    const mod = abilityMod(score)
+    const { mod } = getSaveMod(combatant?.statblock, ability)
     const roll = d20()
     const total = roll + mod
     setRollResult({ ability, roll, mod, total })
@@ -59,8 +70,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
         {/* Ability buttons */}
         <div className="grid grid-cols-3 gap-1.5 mb-3">
           {ABILITIES.map((ab) => {
-            const score = combatant?.statblock?.Abilities?.[ab] ?? 10
-            const mod = abilityMod(score)
+            const { mod, proficient } = getSaveMod(combatant?.statblock, ab)
             return (
               <button
                 key={ab}
@@ -72,7 +82,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
                 onClick={() => handleRoll(ab)}
               >
                 <div className="font-medium">{ab}</div>
-                <div className="text-[10px] text-[#7a7874] font-mono">{formatMod(mod)}</div>
+                <div className={`text-[10px] font-mono ${proficient ? 'text-gold-400' : 'text-[#7a7874]'}`}>{formatMod(mod)}</div>
               </button>
             )
           })}
@@ -93,13 +103,13 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
         <div className="flex gap-2">
           <button
             onClick={onClear}
-            className="flex-1 bg-green-400/80 hover:bg-green-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all shadow-neu-raised-sm hover:shadow-neu-glow-green active:shadow-neu-pressed"
+            className="flex-1 btn-action text-sm !px-4 !py-2 !text-green-400"
           >
             Saved
           </button>
           <button
             onClick={onKeep}
-            className="flex-1 bg-red-400/80 hover:bg-red-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all shadow-neu-raised-sm hover:shadow-neu-glow-red active:shadow-neu-pressed"
+            className="flex-1 btn-action text-sm !px-4 !py-2 !text-[rgb(255,90,90)]"
           >
             Failed
           </button>

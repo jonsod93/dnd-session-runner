@@ -161,7 +161,7 @@ function reducer(state, action) {
       return {
         ...state,
         combatants: state.combatants.map((c) =>
-          c.id === action.id ? { ...c, tempHp: Math.max(0, action.amount) } : c
+          c.id === action.id ? { ...c, tempHp: Math.max(c.tempHp ?? 0, action.amount, 0) } : c
         ),
       }
     case 'SET_DEATH_SAVES': {

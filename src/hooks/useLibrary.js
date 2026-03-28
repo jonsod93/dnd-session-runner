@@ -235,8 +235,24 @@ export function useLibrary() {
     [monsterMap]
   )
 
-  // PCs (read-only from static import)
+  // PCs — merged from static import + localStorage custom PCs
+  const LS_PCS_KEY = 'mythranos:custom-pcs'
+  const LS_PCS_HIDDEN_KEY = 'mythranos:hidden-pcs'
+
+  const [customPCs, setCustomPCs] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(LS_PCS_KEY) || '[]')
+    } catch { return [] }
+  })
+
+  const [hiddenPCs, setHiddenPCs] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(LS_PCS_HIDDEN_KEY) || '[]')
+    } catch { return [] }
+  })
+
   const pcs = useMemo(() => {
+    const hiddenSet = new Set(hiddenPCs)
     const topLevelPCs = Object.entries(rawData)
       .filter(([k]) => k.startsWith('PersistentCharacters.'))
       .map(([, v]) => v)
@@ -245,14 +261,62 @@ export function useLibrary() {
       ...safeParse(rawData['ImprovedInitiative.PlayerCharacters']),
     ]
     const seen = new Set()
-    return [...topLevelPCs, ...legacyPCs]
-      .filter((pc) => {
-        if (!pc.Name || seen.has(pc.Name)) return false
-        seen.add(pc.Name)
-        return true
-      })
+    // Filter static/legacy PCs by hidden set, but never filter custom PCs
+    const staticFiltered = [...topLevelPCs, ...legacyPCs].filter((pc) => {
+      if (!pc.Name || seen.has(pc.Name) || hiddenSet.has(pc.Name)) return false
+      seen.add(pc.Name)
+      return true
+    })
+    return [...staticFiltered, ...customPCs.filter((pc) => {
+      if (!pc.Name || seen.has(pc.Name)) return false
+      seen.add(pc.Name)
+      return true
+    })]
       .map((pc) => ({ ...pc, _libType: 'pc' }))
       .sort((a, b) => a.Name.localeCompare(b.Name))
+  }, [customPCs, hiddenPCs])
+
+  const savePC = useCallback((name, originalName, ac) => {
+    const acVal = ac != null && ac !== '' ? Number(ac) : undefined
+    if (originalName) {
+      // If renaming, hide the original (in case it's static) and add/update custom entry
+      setHiddenPCs((prev) => {
+        const next = prev.includes(originalName) ? prev : [...prev, originalName]
+        localStorage.setItem(LS_PCS_HIDDEN_KEY, JSON.stringify(next))
+        return next
+      })
+      setCustomPCs((prev) => {
+        const entry = { Name: name, _custom: true }
+        if (acVal != null) entry.AC = acVal
+        const next = prev.some((pc) => pc.Name === originalName)
+          ? prev.map((pc) => pc.Name === originalName ? entry : pc)
+          : [...prev, entry]
+        localStorage.setItem(LS_PCS_KEY, JSON.stringify(next))
+        return next
+      })
+    } else {
+      setCustomPCs((prev) => {
+        const entry = { Name: name, _custom: true }
+        if (acVal != null) entry.AC = acVal
+        const next = [...prev, entry]
+        localStorage.setItem(LS_PCS_KEY, JSON.stringify(next))
+        return next
+      })
+    }
+  }, [])
+
+  const deletePC = useCallback((name) => {
+    // Hide from static list + remove from custom list
+    setHiddenPCs((prev) => {
+      const next = prev.includes(name) ? prev : [...prev, name]
+      localStorage.setItem(LS_PCS_HIDDEN_KEY, JSON.stringify(next))
+      return next
+    })
+    setCustomPCs((prev) => {
+      const next = prev.filter((pc) => pc.Name !== name)
+      localStorage.setItem(LS_PCS_KEY, JSON.stringify(next))
+      return next
+    })
   }, [])
 
   // ── Add or update a creature ──────────────────────────────────────────────
@@ -335,6 +399,8 @@ export function useLibrary() {
     saveCreature,
     deleteCreature,
     hasCreature,
+    savePC,
+    deletePC,
     isLoading,
   }
 }

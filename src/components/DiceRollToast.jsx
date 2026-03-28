@@ -22,7 +22,7 @@ function ToastItem({ roll, onExpire }) {
   const isAttack = roll.rollType === 'attack'
   const isCrit = isAttack && roll.naturalRoll === 20
   const isCritMiss = isAttack && roll.naturalRoll === 1
-  const totalColor = isCrit ? '#4ade80' : isCritMiss ? '#f87171' : roll.damageTypeColor || (isAttack ? '#93c5fd' : undefined)
+  const totalColor = isCrit ? '#4ade80' : isCritMiss ? '#f87171' : roll.damageTypeColor || (isAttack ? '#e87830' : undefined)
   const borderColor = isCrit ? 'border-green-400/40' : isCritMiss ? 'border-red-400/40' : 'border-white/[0.08]'
   const glowStyle = isCrit
     ? { boxShadow: '0 0 16px rgba(74, 222, 128, 0.2)' }

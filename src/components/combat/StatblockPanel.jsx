@@ -362,7 +362,7 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
       <div className="sticky -top-3 z-10 bg-[var(--sb-bg)] -mx-4 px-4 pb-2">
         <hr className="border-black/[0.15] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400 section-title-glow">{title}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-[#e87830] section-title-glow">{title}</p>
           {legendaryPerRound != null && (
             <UsageBoxes
               trackKey={`__${title}`}
@@ -520,7 +520,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#131517]" style={{ '--sb-bg': '#131517' }}>
+      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#131517]" style={{ '--sb-bg': '#181a1d' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.15] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
@@ -560,11 +560,11 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   }
 
   return (
-    <div className="shrink-0 border-l border-black/[0.15] flex flex-col relative bg-[#181a1d]" style={{ width, '--sb-bg': '#131517' }}>
+    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[#181a1d]" style={{ width, '--sb-bg': '#181a1d' }}>
       {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}
-        className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-[#ff6b35]/30 active:bg-[#ff6b35]/50 transition-colors"
+        className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-[#e87830]/30 active:bg-[#e87830]/50 transition-colors"
       />
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.15] shrink-0 min-h-[48px]">

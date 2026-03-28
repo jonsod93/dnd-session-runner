@@ -42,7 +42,7 @@ export const getConditionColor = (name) =>
 
 // ── Damage type colors ────────────────────────────────────────────────────────
 export const DAMAGE_TYPE_COLORS = {
-  fire:        '#f87171', // red-400
+  fire:        'rgb(255, 90, 90)',
   cold:        '#60a5fa', // blue-400
   lightning:   '#facc15', // yellow-400
   thunder:     '#a78bfa', // violet-400

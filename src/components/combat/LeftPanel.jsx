@@ -1,11 +1,53 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
 import { SpellDrawer } from '../SpellDrawer'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
-export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, monsters, pcs }) {
+const LEFT_MIN_WIDTH = 200
+const LEFT_MAX_WIDTH = 400
+const LEFT_DEFAULT_WIDTH = 256
+
+export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, onSavePC, onDeletePC, monsters, pcs }) {
   const isMobile = useIsMobile()
+  const [panelWidth, setPanelWidth] = useState(() => {
+    const saved = localStorage.getItem('left-panel-width')
+    return saved ? Math.max(LEFT_MIN_WIDTH, Math.min(LEFT_MAX_WIDTH, parseInt(saved))) : LEFT_DEFAULT_WIDTH
+  })
+  const draggingRef = useRef(false)
+  const dragStartX = useRef(0)
+  const dragStartW = useRef(0)
+
+  const onResizeMouseDown = useCallback((e) => {
+    e.preventDefault()
+    draggingRef.current = true
+    dragStartX.current = e.clientX
+    dragStartW.current = panelWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }, [panelWidth])
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!draggingRef.current) return
+      const delta = e.clientX - dragStartX.current
+      const newW = Math.max(LEFT_MIN_WIDTH, Math.min(LEFT_MAX_WIDTH, dragStartW.current + delta))
+      setPanelWidth(newW)
+    }
+    const onMouseUp = () => {
+      if (!draggingRef.current) return
+      draggingRef.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      setPanelWidth((w) => { localStorage.setItem('left-panel-width', String(w)); return w })
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [])
   const [tab,   setTab]   = useState('npc')
   const [query, setQuery] = useState('')
   const [pcQuery, setPcQuery] = useState('')
@@ -13,6 +55,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   const [qaType, setQaType] = useState('quick')
   const [qaHp, setQaHp]     = useState('')
   const [qaAc, setQaAc]     = useState('')
+  const [pcEditName,         setPcEditName]         = useState(null) // { original: string|null, value: string, ac: string }
   const [deleteConfirm,      setDeleteConfirm]      = useState(null) // { name, type, key }
   const [mobileLibraryMenu,  setMobileLibraryMenu]  = useState(null) // { entry }
   const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null) // mobile modal
@@ -39,7 +82,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
 
   const handleLibraryAdd = (entry) => {
     if (entry._libType === 'pc') {
-      onAdd({ type: 'pc', name: entry.Name, ac: null, hp: null, statblock: entry })
+      onAdd({ type: 'pc', name: entry.Name, ac: entry.AC ?? null, hp: null, statblock: entry })
     } else {
       onAdd({
         type: 'monster',
@@ -75,7 +118,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 bg-[#181a1d] border-r border-black/[0.15] flex flex-col items-center pt-3">
+      <div className="w-10 shrink-0 bg-[#181a1d] neu-panel-left flex flex-col items-center pt-3">
         <button
           onClick={onToggleCollapse}
           className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-[#202226]"
@@ -90,7 +133,14 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   }
 
   return (
-    <div className={`${isMobile ? 'w-full flex-1' : 'w-64 shrink-0'} bg-[#181a1d] border-r border-black/[0.15] flex flex-col`}>
+    <div className={`${isMobile ? 'w-full flex-1' : 'shrink-0'} bg-[#181a1d] neu-panel-left flex flex-col relative`} style={isMobile ? undefined : { width: panelWidth }}>
+      {/* Resize handle */}
+      {!isMobile && (
+        <div
+          onMouseDown={onResizeMouseDown}
+          className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-[#e87830]/30 active:bg-[#e87830]/50 transition-colors"
+        />
+      )}
       {/* Tabs + collapse button */}
       <div className="flex border-b border-black/[0.15] shrink-0">
         {[
@@ -103,7 +153,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             className={[
               'flex-1 py-3 text-sm border-b-2 transition-all',
               tab === key
-                ? 'border-gold-400 text-[#e6e6e6] nav-active-glow'
+                ? 'border-[#e87830] text-[#e6e6e6] nav-active-glow'
                 : 'border-transparent text-[#7a7874] hover:text-[#e6e6e6]',
             ].join(' ')}
             onClick={() => setTab(key)}
@@ -126,16 +176,21 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {tab === 'npc' && (
         <>
           <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0 flex items-center gap-2">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search NPCs…"
-              className="input-field flex-1 !py-1.5 !text-xs"
-            />
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search NPCs…"
+                className="input-field w-full !pr-8"
+              />
+              {query && (
+                <button type="button" onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787774] hover:text-[#e6e6e6] text-xs leading-none transition-colors">✕</button>
+              )}
+            </div>
             <button
               onClick={() => onNewStatblock?.()}
-              className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
+              className="shrink-0 btn-action !px-2.5"
               title="Add new statblock from JSON"
             >
               + New
@@ -196,15 +251,60 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── PC Library ─────────────────────────────────────────────────── */}
       {tab === 'pc' && (
         <>
-          <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0">
-            <input
-              type="text"
-              value={pcQuery}
-              onChange={(e) => setPcQuery(e.target.value)}
-              placeholder="Search PCs…"
-              className="input-field !py-1.5 !text-xs"
-            />
+          <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0 flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={pcQuery}
+                onChange={(e) => setPcQuery(e.target.value)}
+                placeholder="Search PCs…"
+                className="input-field w-full !pr-8"
+              />
+              {pcQuery && (
+                <button type="button" onClick={() => setPcQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787774] hover:text-[#e6e6e6] text-xs leading-none transition-colors">✕</button>
+              )}
+            </div>
+            <button
+              onClick={() => setPcEditName({ original: null, value: '', ac: '' })}
+              className="shrink-0 btn-action !px-2.5"
+              title="Add new PC"
+            >
+              + New
+            </button>
           </div>
+          {pcEditName && (
+            <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const name = pcEditName.value.trim()
+                  if (!name) return
+                  onSavePC?.(name, pcEditName.original, pcEditName.ac)
+                  setPcEditName(null)
+                }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  value={pcEditName.value}
+                  onChange={(e) => setPcEditName((prev) => ({ ...prev, value: e.target.value }))}
+                  placeholder="PC name…"
+                  className="input-field flex-1"
+                  autoFocus
+                />
+                <input
+                  type="number"
+                  value={pcEditName.ac}
+                  onChange={(e) => setPcEditName((prev) => ({ ...prev, ac: e.target.value }))}
+                  placeholder="AC"
+                  min="1"
+                  className="input-field w-14 text-center"
+                />
+                <button type="submit" className="btn-action !px-2.5">Save</button>
+                <button type="button" onClick={() => setPcEditName(null)} className="btn-action !px-2.5">✕</button>
+              </form>
+            </div>
+          )}
           <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-1.5">
             {filteredPCs.length === 0 && (
               <p className="text-[#7a7874] text-sm text-center py-6">No results</p>
@@ -224,8 +324,27 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
                 }}
               >
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex items-center gap-2">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
+                  {entry.AC != null && (
+                    <span className="text-[10px] text-[#7a7874] font-mono shrink-0">AC {entry.AC}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                  <button
+                    className="text-[#7a7874] hover:text-[#e87830] text-xs"
+                    onClick={(e) => { e.stopPropagation(); setPcEditName({ original: entry.Name, value: entry.Name, ac: entry.AC != null ? String(entry.AC) : '' }) }}
+                    title="Edit PC"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    className="text-[#7a7874] hover:text-red-400 text-xs"
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'pc' }) }}
+                    title="Delete PC"
+                  >
+                    ✕
+                  </button>
                 </div>
               </div>
             ))}
@@ -239,13 +358,18 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           <form onSubmit={handleQuickAdd} className="space-y-4">
             <div>
               <label className="label-section mb-2 block">Name</label>
-              <input
-                type="text"
-                value={qaName}
-                onChange={(e) => setQaName(e.target.value)}
-                placeholder="Creature name…"
-                className="input-field"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={qaName}
+                  onChange={(e) => setQaName(e.target.value)}
+                  placeholder="Creature name…"
+                  className="input-field w-full !pr-8"
+                />
+                {qaName && (
+                  <button type="button" onClick={() => setQaName('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787774] hover:text-[#e6e6e6] text-xs leading-none transition-colors">✕</button>
+                )}
+              </div>
             </div>
             <div>
               <label className="label-section mb-2 block">Type</label>
@@ -321,7 +445,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             className="glass-modal rounded-2xl w-full max-w-sm p-5"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete Statblock</h3>
+            <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete {deleteConfirm.type === 'pc' ? 'PC' : 'Statblock'}</h3>
             <p className="text-sm text-[#8a8884] mb-4">
               Are you sure you want to delete <span className="text-[#e6e6e6] font-medium">{deleteConfirm.name}</span>? This action cannot be undone.
             </p>
@@ -334,7 +458,11 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               </button>
               <button
                 onClick={() => {
-                  onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type, deleteConfirm.key)
+                  if (deleteConfirm.type === 'pc') {
+                    onDeletePC?.(deleteConfirm.name)
+                  } else {
+                    onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type, deleteConfirm.key)
+                  }
                   setDeleteConfirm(null)
                 }}
                 className="text-sm bg-red-400/80 hover:bg-red-400 text-white font-medium rounded-xl px-3 py-1.5 transition-all hover:shadow-neon-red"
@@ -432,7 +560,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
             width: 320,
             maxHeight: 'calc(100vh - 64px)',
-            '--sb-bg': '#131517',
+            '--sb-bg': '#181a1d',
           }}
           onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
           onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
@@ -460,7 +588,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         >
           <div
             className="bg-[#181a1d] w-full h-full flex flex-col overflow-hidden"
-            style={{ '--sb-bg': '#131517' }}
+            style={{ '--sb-bg': '#181a1d' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center justify-between">

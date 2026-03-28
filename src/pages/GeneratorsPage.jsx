@@ -20,7 +20,7 @@ export default function GeneratorsPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-[#1a1a1a]">
+    <div className="h-full overflow-y-auto neumorphic" style={{ background: 'var(--neu-bg)' }}>
       <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
         <h1 className="font-display text-lg font-semibold text-[#e6e6e6] mb-6">
@@ -49,9 +49,9 @@ export default function GeneratorsPage() {
             <button
               key={gen.key}
               onClick={() => setActiveGenerator(gen)}
-              className="flex flex-col items-center gap-2 px-4 py-5 rounded-lg border border-white/[0.08] bg-[#252525] hover:border-gold-400/40 hover:bg-white/[0.04] transition-colors group"
+              className="flex flex-col items-center gap-2 px-4 py-5 rounded-xl library-card transition-colors group cursor-pointer"
             >
-              <span className="text-sm text-[#e6e6e6] group-hover:text-gold-300 transition-colors">
+              <span className="text-sm text-[#e6e6e6] group-hover:text-gold-400 transition-colors">
                 {gen.label}
               </span>
             </button>
@@ -75,7 +75,7 @@ export default function GeneratorsPage() {
           {notifications.map((n) => (
             <div
               key={n.id}
-              className="bg-[#252525] border border-emerald-500/30 rounded-lg shadow-lg px-4 py-3 flex gap-3"
+              className="glass-panel rounded-xl shadow-lg px-4 py-3 flex gap-3 border-l-2 border-l-emerald-500"
             >
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-emerald-400 mb-0.5">{n.type}</div>
@@ -84,7 +84,7 @@ export default function GeneratorsPage() {
                   <div className="text-xs text-[#787774] mt-1 line-clamp-3">{n.description}</div>
                 )}
                 {n.npcInfo && (
-                  <div className="text-xs text-[#787774] mt-1.5 border-t border-white/[0.06] pt-1.5">
+                  <div className="text-xs text-[#787774] mt-1.5 border-t border-black/[0.15] pt-1.5">
                     <span className="text-purple-400">{n.npcInfo.role}:</span> {n.npcInfo.name}
                   </div>
                 )}

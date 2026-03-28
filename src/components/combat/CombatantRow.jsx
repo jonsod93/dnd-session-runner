@@ -55,11 +55,11 @@ export function CombatantRow({
   const hpPercent = combatant.hp ? combatant.hp.current / combatant.hp.max : null
   const hpColor =
     hpPercent === null ? 'text-[#e6e6e6]' :
-    hpPercent <= 0.25  ? 'text-red-400'   :
+    hpPercent <= 0.25  ? 'text-[rgb(255,90,90)]'   :
     hpPercent <= 0.5   ? 'text-amber-400'  :
                          'text-[#e6e6e6]'
 
-  const nameColor = isLair ? 'text-red-400' : isPC ? 'text-green-400' : 'text-[#e6e6e6]'
+  const nameColor = isLair ? 'text-[#e6e6e6]' : isActive ? 'text-[#e87830]' : 'text-[#e6e6e6]'
 
   const openConditions = (e) => {
     e.stopPropagation()
@@ -81,13 +81,13 @@ export function CombatantRow({
     return (
       <span
         key={cond.id}
-        className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded ${cond.color}`}
+        className={`inline-flex items-center gap-0.5 text-xs px-2 py-1 rounded-lg condition-badge ${cond.color}`}
         title={title}
       >
         {label}
         {cond.expiry && <span className="opacity-50 ml-0.5">⏱</span>}
         <button
-          className="opacity-50 hover:opacity-100 leading-none ml-0.5"
+          className="opacity-50 hover:opacity-100 leading-none ml-0.5 text-base -my-2 py-2"
           onClick={(e) => { e.stopPropagation(); onRemoveCondition(combatant.id, cond.id) }}
         >
           ×
@@ -105,9 +105,11 @@ export function CombatantRow({
         'flex max-lg:items-center gap-2 px-4 py-3 rounded-xl min-h-[52px] cursor-default outline-none',
         isActive
           ? `active-border${isSelected ? ' is-selected' : ''}`
-          : isConcentrating && !isDragging
-            ? `concentration-border${isSelected ? ' is-selected' : ''}`
-            : `combat-card${isSelected ? ' is-selected' : ''}`,
+          : isLair
+            ? `lair-border${isSelected ? ' is-selected' : ''}`
+            : isConcentrating && !isDragging
+              ? `concentration-border${isSelected ? ' is-selected' : ''}`
+              : `combat-card${isSelected ? ' is-selected' : ''}`,
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
       {...(!isLair ? { ...attributes, ...listeners } : {})}
@@ -123,13 +125,13 @@ export function CombatantRow({
       </button>
 
       {/* Active arrow — desktop only */}
-      <span className={`max-lg:hidden shrink-0 self-center w-3 text-gold-400 text-xs leading-none ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+      <span className={`max-lg:hidden shrink-0 self-center w-3 text-[#e87830] text-xs leading-none ${isActive ? 'opacity-100' : 'opacity-0'}`}>
         ▶
       </span>
 
       {/* Initiative */}
       <button
-        className={`shrink-0 self-center text-center font-mono font-medium transition-colors w-8 text-sm max-lg:w-10 max-lg:text-xl max-lg:mr-2 ${isActive ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]'}`}
+        className={`shrink-0 self-center text-center font-mono transition-colors w-8 text-sm max-lg:w-10 max-lg:text-xl max-lg:mr-2 ${isActive ? 'text-[#e87830] font-medium' : 'text-[#9a9894] font-medium hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >
@@ -137,7 +139,7 @@ export function CombatantRow({
       </button>
 
       {/* ── Content column ────────────────────────────────────────────────── */}
-      <div className={`flex-1 min-w-0 max-lg:pr-2 ${isDead ? 'opacity-40' : ''}`}>
+      <div className={`flex-1 min-w-0 max-lg:pr-2 ${isDead ? 'opacity-40' : ''} ${isLair ? 'self-center' : ''}`}>
 
         {/* ── Desktop layout (hidden on mobile) ─────────────────────────── */}
         <div className="max-lg:hidden">
@@ -179,15 +181,17 @@ export function CombatantRow({
                   </span>
                 )}
               </div>
-              {combatant.hp != null && (
-                <button
-                  className="shrink-0 btn-action"
-                  onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-                  title="Apply damage/healing (T)"
-                >
-                  Deal damage
-                </button>
-              )}
+              <div className="shrink-0" style={{ width: 96 }}>
+                {combatant.hp != null && (
+                  <button
+                    className="btn-action w-full"
+                    onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+                    title="Apply damage/healing (T)"
+                  >
+                    Deal damage
+                  </button>
+                )}
+              </div>
             </div>
             {!isLair && (
               <button
@@ -315,7 +319,7 @@ export function CombatantRow({
 
       {/* Remove */}
       <button
-        className="shrink-0 self-center text-[#5a5854] hover:text-red-400 transition-colors leading-none text-sm ml-0.5"
+        className="shrink-0 self-start btn-action !size-8 !p-0 flex items-center justify-center text-[#5a5854] hover:!text-red-400 transition-all"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >
