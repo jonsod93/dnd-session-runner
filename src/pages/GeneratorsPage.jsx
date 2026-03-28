@@ -24,7 +24,7 @@ export default function GeneratorsPage() {
       <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
         <h1 className="font-display text-lg font-semibold text-[#e6e6e6] mb-6">
-          Name Generators
+          Generators
         </h1>
 
         {/* Page-level session linker */}

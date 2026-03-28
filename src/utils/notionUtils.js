@@ -4,6 +4,7 @@ export const SESSIONS_DB_ID = '1372674d-44b5-8137-8898-f2d955405fd9'
 export const PEOPLE_DB_ID = '1372674d-44b5-81a5-a374-c0ee38a5ca16'
 export const ORGANIZATIONS_DB_ID = '1372674d-44b5-812d-9a5e-da895d041d0c'
 export const WORLD_MASTER_ID = '1382674d44b580d788daf4515b74772f'
+export const INGREDIENTS_DB_ID = '1b82674d-44b5-8029-adc7-ee083f2dc165'
 
 // Extract plain text from Notion rich_text array
 export function richTextToPlain(richText) {
@@ -239,6 +240,29 @@ export async function fetchFullPage(pageId) {
   }
 
   return { ...basic, relations }
+}
+
+// Fetch all ingredients from the Ingredients database
+export async function fetchIngredients() {
+  const res = await notionFetch(`v1/databases/${INGREDIENTS_DB_ID}/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      page_size: 100,
+      sorts: [{ property: 'Name', direction: 'ascending' }],
+    }),
+  })
+  if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
+  const data = await res.json()
+  return (data.results ?? []).map((page) => {
+    const props = page.properties ?? {}
+    return {
+      name: richTextToPlain(props.Name?.title) || 'Unknown',
+      rarity: props.Rarity?.select?.name || 'Common',
+      location: (props.Location?.multi_select ?? []).map(s => s.name),
+      description: richTextToPlain(props.Description?.rich_text) || '',
+    }
+  })
 }
 
 // ── Generators: session search, page creation, block append ──
