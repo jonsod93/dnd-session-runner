@@ -476,17 +476,32 @@ export default function CombatTracker() {
                     const conMod = abilityMod(target.statblock?.Abilities?.Con ?? 10)
                     const roll = d20()
                     const total = roll + conMod
-                    setConcCheck({
-                      combatantId: damageTargetId,
-                      combatantName: target.name,
-                      condId: concCond.id,
-                      dc,
-                      roll,
-                      conMod,
-                      total,
-                      success: total >= dc,
-                      spellName: concCond.spellName,
-                    })
+                    const success = total >= dc
+                    const modStr = conMod >= 0 ? `+${conMod}` : String(conMod)
+                    if (success) {
+                      // Show as a toast like dice rolls - non-blocking
+                      setRolls((prev) => [...prev, {
+                        id: uid(),
+                        context: 'Concentration maintained',
+                        combatantName: target.name,
+                        label: `DC ${dc}`,
+                        detail: `d20(${roll})${modStr}`,
+                        total,
+                        rollType: 'save',
+                      }])
+                    } else {
+                      setConcCheck({
+                        combatantId: damageTargetId,
+                        combatantName: target.name,
+                        condId: concCond.id,
+                        dc,
+                        roll,
+                        conMod,
+                        total,
+                        success: false,
+                        spellName: concCond.spellName,
+                      })
+                    }
                   }
                 }
               }
