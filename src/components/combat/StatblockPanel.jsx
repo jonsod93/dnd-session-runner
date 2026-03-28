@@ -362,7 +362,7 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
       <div className="sticky -top-3 z-10 bg-[var(--sb-bg)] -mx-4 px-4 pb-2">
         <hr className="border-white/[0.06] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400">{title}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-gold-400 section-title-glow">{title}</p>
           {legendaryPerRound != null && (
             <UsageBoxes
               trackKey={`__${title}`}
@@ -520,7 +520,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#1a1a1a]" style={{ '--sb-bg': '#1a1a1a' }}>
+      <div className="fixed inset-0 z-[2000] flex flex-col bg-surface-0" style={{ '--sb-bg': '#0d0d0d' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
@@ -560,7 +560,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   }
 
   return (
-    <div className="shrink-0 bg-[#1e1e1e] border-l border-white/[0.06] flex flex-col relative" style={{ width, '--sb-bg': '#1e1e1e' }}>
+    <div className="shrink-0 border-l border-white/[0.05] flex flex-col relative" style={{ width, '--sb-bg': '#111114', background: 'linear-gradient(180deg, #131316 0%, #111114 100%)' }}>
       {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}
@@ -637,7 +637,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
   }
 
   const statsHeader = (
-    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[#1e1e1e] border-b border-white/[0.06]'}>
+    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-surface-1 border-b border-white/[0.06]'}>
       {/* Type & CR */}
       <div className="flex items-baseline justify-between gap-2 mb-0.5">
         <p className="text-sm text-[#9a9894] italic">{sb.Type}</p>
@@ -683,7 +683,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
               return (
                 <button
                   key={a}
-                  className="flex flex-col items-center cursor-pointer rounded px-1 py-1 transition-colors hover:bg-white/[0.06]"
+                  className="flex flex-col items-center cursor-pointer rounded-lg px-1 py-1.5 transition-all stat-card hover:bg-white/[0.06]"
                   onClick={() => handleAbilityRoll(`${ABILITY_LABELS[a]} Check`, mod)}
                   title={`Roll ${ABILITY_LABELS[a]} Check ${formatMod(mod)}`}
                 >

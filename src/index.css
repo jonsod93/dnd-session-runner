@@ -1,3 +1,9 @@
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,28 +13,28 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a;
+    background-color: #0a0a0c;
     color: #e6e6e6;
   }
 
-  /* Near-invisible scrollbar — Notion style */
+  /* Near-invisible scrollbar */
   ::-webkit-scrollbar       { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
 }
 
 @layer components {
   /* Leaflet map background */
   .leaflet-container {
-    background-color: #1a1a1a !important;
+    background-color: #0a0a0c !important;
     width: 100%;
     height: 100%;
   }
 
-  /* Shared section label — used throughout */
+  /* Shared section label */
   .label-section {
-    @apply text-xs font-medium uppercase tracking-[0.12em] text-[#9a9894];
+    @apply text-xs font-medium uppercase tracking-[0.12em] text-[#8a8884];
   }
 
   /* Override Leaflet tooltip for dark POI popups */
@@ -57,11 +63,194 @@
 
   /* Leaflet zoom controls dark theme */
   .leaflet-control-zoom a {
-    background-color: #252525 !important;
+    background-color: #18181c !important;
     color: #e6e6e6 !important;
-    border-color: rgba(255,255,255,0.1) !important;
+    border-color: rgba(255,255,255,0.08) !important;
   }
   .leaflet-control-zoom a:hover {
-    background-color: #333 !important;
+    background-color: #222226 !important;
+  }
+
+  /* ── Glass panels ────────────────────────────────── */
+  .glass-panel {
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .glass-modal {
+    background: rgba(14,14,18,0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow:
+      0 24px 80px rgba(0,0,0,0.7),
+      0 0 1px rgba(255,255,255,0.08) inset;
+  }
+
+  /* ── Combat card (combatant rows) ──────────────────── */
+  .combat-card {
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.045) 0%,
+      rgba(255,255,255,0.012) 40%,
+      rgba(255,255,255,0.025) 100%
+    );
+  }
+
+  /* ── Library card (NPC/PC rows) ────────────────────── */
+  .library-card {
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.035) 0%,
+      rgba(255,255,255,0.01) 50%,
+      rgba(255,255,255,0.02) 100%
+    );
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+  }
+  .library-card:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.06) 0%,
+      rgba(255,255,255,0.02) 50%,
+      rgba(255,255,255,0.035) 100%
+    );
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  /* ── Statblock card sections ───────────────────────── */
+  .stat-card {
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.03) 0%,
+      rgba(255,255,255,0.008) 100%
+    );
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 0.75rem;
+  }
+
+  /* ── Animated borders ────────────────────────────── */
+  @keyframes border-rotate {
+    to { --border-angle: 360deg; }
+  }
+
+  .concentration-border {
+    --card-fill-top: rgba(12,12,20,1);
+    --card-fill-bot: rgba(8,8,14,1);
+    border: 2px solid transparent !important;
+    transition: box-shadow 0.3s ease, opacity 0.3s ease !important;
+    background:
+      linear-gradient(to bottom, var(--card-fill-top), var(--card-fill-bot)) padding-box,
+      conic-gradient(
+        from var(--border-angle),
+        #60a5fa 0%,
+        #60a5fa 40%,
+        rgba(255,255,255,0.85) 50%,
+        #60a5fa 60%,
+        #60a5fa 100%
+      ) border-box;
+    animation: border-rotate 3s linear infinite;
+    box-shadow: 0 0 14px rgba(96, 165, 250, 0.3), 0 0 4px rgba(96, 165, 250, 0.12);
+  }
+
+  .active-border {
+    --card-fill-top: rgba(18,14,10,1);
+    --card-fill-bot: rgba(12,10,8,1);
+    border: 2px solid transparent !important;
+    transition: box-shadow 0.3s ease, opacity 0.3s ease !important;
+    background:
+      linear-gradient(to bottom, var(--card-fill-top), var(--card-fill-bot)) padding-box,
+      conic-gradient(
+        from var(--border-angle),
+        #e87830 0%,
+        #e87830 40%,
+        rgba(255,255,255,0.85) 50%,
+        #e87830 60%,
+        #e87830 100%
+      ) border-box;
+    animation: border-rotate 3s linear infinite;
+    box-shadow: 0 0 14px rgba(232, 120, 48, 0.35), 0 0 4px rgba(232, 120, 48, 0.15);
+  }
+
+  /* Lighter fill when row is selected (clicked) */
+  .concentration-border.is-selected {
+    --card-fill-top: rgba(18,18,30,1);
+    --card-fill-bot: rgba(14,14,24,1);
+  }
+  .active-border.is-selected {
+    --card-fill-top: rgba(30,22,14,1);
+    --card-fill-bot: rgba(22,16,10,1);
+  }
+
+  /* ── Neon button base ────────────────────────────── */
+  .btn-neon {
+    @apply rounded-xl font-semibold text-sm transition-all;
+    position: relative;
+  }
+
+  .btn-neon-gold {
+    @apply btn-neon px-4 py-2 text-[#1a1a1a] font-bold;
+    background: linear-gradient(180deg, #ffb44a 0%, #e87830 100%);
+    box-shadow: 0 0 16px rgba(232,120,48,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .btn-neon-gold:hover {
+    background: linear-gradient(180deg, #ffc060 0%, #f08838 100%);
+    box-shadow: 0 0 28px rgba(232,120,48,0.55), 0 2px 12px rgba(0,0,0,0.4);
+    transform: translateY(-1px);
+  }
+  .btn-neon-gold:active {
+    transform: translateY(0);
+  }
+
+  .btn-outline {
+    @apply rounded-xl text-sm transition-all px-4 py-2;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #9a9894;
+  }
+  .btn-outline:hover {
+    border-color: rgba(255,255,255,0.16);
+    color: #e6e6e6;
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* ── Action buttons with subtle gradient ────────── */
+  .btn-action {
+    @apply text-xs px-2.5 py-1.5 rounded-lg transition-all;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #9a9894;
+  }
+  .btn-action:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%);
+    border-color: rgba(255,255,255,0.14);
+    color: #e6e6e6;
+  }
+
+  /* ── Nav glow on active tab ─────────────────────── */
+  .nav-active-glow {
+    box-shadow: 0 2px 8px rgba(232, 120, 48, 0.3);
+  }
+
+  /* ── Input field styling ────────────────────────── */
+  .input-field {
+    @apply w-full bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#5a5854] transition-all;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.02);
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: rgba(232, 120, 48, 0.4);
+    box-shadow: 0 0 8px rgba(232, 120, 48, 0.15);
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* ── Section divider with glow ──────────────────── */
+  .section-title-glow {
+    text-shadow: 0 0 12px rgba(232, 120, 48, 0.3);
   }
 }

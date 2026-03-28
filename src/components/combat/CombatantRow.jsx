@@ -6,6 +6,14 @@ import { CONDITIONS, uid } from '../../utils/combatUtils'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { DeathSaveTracker } from './DeathSaveTracker'
 
+function SkullIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" width="1em" height="1em">
+      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.5 2 2 6.5 2 12c0 3.5 1.8 6.5 4.5 8.3V22a1 1 0 001 1h9a1 1 0 001-1v-1.7C20.2 18.5 22 15.5 22 12c0-5.5-4.5-10-10-10zM9 13.5a2 2 0 100-4 2 2 0 000 4zm6 0a2 2 0 100-4 2 2 0 000 4zm-5 2.5a1 1 0 112 0 1 1 0 01-2 0zm3 0a1 1 0 112 0 1 1 0 01-2 0z"/>
+    </svg>
+  )
+}
+
 export function CombatantRow({
   combatant,
   isActive,
@@ -38,9 +46,9 @@ export function CombatantRow({
     disabled: isLair,
   })
 
-  const style = {
+  const sortableStyle = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition ?? undefined,
     zIndex: isDragging ? 10 : undefined,
   }
 
@@ -91,16 +99,16 @@ export function CombatantRow({
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={sortableStyle}
       data-combatant-id={combatant.id}
       className={[
-        'flex max-lg:items-center gap-2 px-4 py-3 border-b border-white/[0.08] border-l-2 transition-colors min-h-[52px] cursor-default',
+        'flex max-lg:items-center gap-2 px-4 py-3 rounded-xl min-h-[52px] cursor-default outline-none',
         isActive
-          ? 'border-l-gold-400 bg-white/[0.05]'
-          : 'border-l-transparent max-lg:hover:bg-transparent hover:bg-white/[0.03]',
-        isSelected && !isActive ? 'max-lg:bg-transparent bg-white/[0.05]' : '',
+          ? `active-border${isSelected ? ' is-selected' : ''}`
+          : isConcentrating && !isDragging
+            ? `concentration-border${isSelected ? ' is-selected' : ''}`
+            : `combat-card border border-white/[0.08] hover:border-white/[0.12]${isSelected ? ' border-white/[0.15] bg-white/[0.06]' : ''}`,
         isDragging ? 'opacity-40' : '',
-        isConcentrating ? 'ring-1 ring-blue-500/30' : '',
       ].join(' ')}
       {...(!isLair ? { ...attributes, ...listeners } : {})}
       onClick={() => onSelect(combatant)}
@@ -143,11 +151,11 @@ export function CombatantRow({
               </span>
               {isPC && (
                 <button
-                  className={`shrink-0 text-xs leading-none transition-colors ${combatant.deathSaves ? 'text-red-400' : 'text-white/20 hover:text-red-400/60'}`}
+                  className={`shrink-0 text-base leading-none transition-colors ${combatant.deathSaves ? 'text-red-500' : 'text-white/15 hover:text-red-500/60'}`}
                   onClick={(e) => { e.stopPropagation(); onToggleDeathSaves?.(combatant.id) }}
                   title={combatant.deathSaves ? 'Hide death saves' : 'Track death saves'}
                 >
-                  ☠
+                  <SkullIcon className="w-4 h-4" />
                 </button>
               )}
             </span>
@@ -173,7 +181,7 @@ export function CombatantRow({
               </div>
               {combatant.hp != null && (
                 <button
-                  className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12]"
+                  className="shrink-0 btn-action"
                   onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                   title="Apply damage/healing (T)"
                 >
@@ -183,7 +191,7 @@ export function CombatantRow({
             </div>
             {!isLair && (
               <button
-                className="shrink-0 text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] px-2 py-1 rounded transition-colors border border-white/[0.12]"
+                className="shrink-0 btn-action"
                 onClick={openConditions}
                 title="Add/manage conditions"
               >
@@ -234,17 +242,17 @@ export function CombatantRow({
                   </span>
                   {isPC && (
                     <button
-                      className={`shrink-0 text-xs leading-none transition-colors ${combatant.deathSaves ? 'text-red-400' : 'text-white/20 hover:text-red-400/60'}`}
+                      className={`shrink-0 text-base leading-none transition-colors ${combatant.deathSaves ? 'text-red-500' : 'text-white/15 hover:text-red-500/60'}`}
                       onClick={(e) => { e.stopPropagation(); onToggleDeathSaves?.(combatant.id) }}
                     >
-                      ☠
+                      💀
                     </button>
                   )}
                 </span>
 
                 {/* Row 1 col 2: Conditions button */}
                 <button
-                  className="w-full text-center text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
+                  className="w-full text-center btn-action"
                   onClick={openConditions}
                 >
                   Conditions
@@ -274,7 +282,7 @@ export function CombatantRow({
                 {/* Row 2 col 2: Deal damage button */}
                 {combatant.hp != null && (
                   <button
-                    className="w-full text-center text-xs text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04] px-2 py-1 rounded transition-colors border border-white/[0.12]"
+                    className="w-full text-center btn-action"
                     onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                   >
                     Deal damage
@@ -307,7 +315,7 @@ export function CombatantRow({
 
       {/* Remove */}
       <button
-        className="shrink-0 self-center text-[#9a9894] hover:text-red-400 transition-colors leading-none text-sm ml-0.5"
+        className="shrink-0 self-center text-[#5a5854] hover:text-red-400 transition-colors leading-none text-sm ml-0.5"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >
@@ -388,7 +396,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
         onClick={onClose}
       >
         <div
-          className="bg-[#252525] border border-white/[0.1] rounded-t-xl w-full overflow-hidden flex flex-col"
+          className="glass-modal rounded-t-xl w-full overflow-hidden flex flex-col"
           style={{ maxHeight: '80vh', boxShadow: '0 -4px 32px rgba(0,0,0,0.4)' }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -424,7 +432,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 {availableConditions.map((c) => (
                   <button
                     key={c.name}
-                    className="text-center px-3 py-2.5 text-sm text-[#e6e6e6] hover:bg-white/[0.08] border border-white/[0.12] rounded-lg transition-colors"
+                    className="text-center px-3 py-2.5 text-sm text-[#e6e6e6] library-card hover:!bg-white/[0.06]"
                     onClick={() => handleConditionClick(c)}
                     title={c.info || ''}
                   >
@@ -444,11 +452,11 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
                 placeholder="Custom condition..."
-                className="flex-1 bg-transparent border border-white/[0.12] rounded-lg px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#9a9894] transition-colors"
+                className="input-field flex-1"
               />
               <button
                 type="submit"
-                className="shrink-0 px-3 py-2 text-sm bg-gold-400/10 hover:bg-gold-400/20 text-gold-400 border border-gold-400/30 rounded-lg transition-colors"
+                className="shrink-0 px-3 py-2 text-sm bg-gold-400/10 hover:bg-gold-400/20 text-gold-400 border border-gold-400/30 rounded-xl transition-all hover:shadow-neon-gold"
               >
                 Add
               </button>
@@ -476,7 +484,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   return (
     <div
       ref={menuRef}
-      className="fixed z-[70] bg-[#252525] border border-white/[0.1] rounded-lg shadow-xl overflow-y-auto"
+      className="fixed z-[70] glass-modal rounded-xl overflow-y-auto"
       style={{ width: MENU_W, ...posStyle }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -502,7 +510,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               availableConditions.map((c) => (
                 <button
                   key={c.name}
-                  className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] transition-colors"
+                  className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] rounded-lg transition-all"
                   onClick={() => handleConditionClick(c)}
                   title={c.info || ''}
                 >
@@ -518,7 +526,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
                 placeholder="Custom condition..."
-                className="w-full bg-transparent border-b border-white/[0.1] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#9a9894] transition-colors"
+                className="w-full bg-transparent border-b border-white/[0.08] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#5a5854] transition-all"
               />
             </form>
           </div>
@@ -572,13 +580,13 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
           value={spellName}
           onChange={(e) => setSpellName(e.target.value)}
           placeholder="Spell name (optional)"
-          className={`w-full bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-blue-400 placeholder:text-[#787774] transition-colors`}
+          className="input-field !border-blue-400/20 focus:!border-blue-400/50"
           autoFocus={!mobile}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onConcentrationAdd() } }}
         />
         <button
           onClick={onConcentrationAdd}
-          className="w-full text-sm text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 rounded px-3 py-1.5 transition-colors"
+          className="w-full text-sm text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 rounded-xl px-3 py-1.5 transition-all hover:shadow-neon-blue"
         >
           Add Concentration
         </button>
@@ -645,7 +653,7 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
 
       <button
         onClick={handleDurationAdd}
-        className="w-full text-sm text-gold-400 border border-gold-400/30 hover:bg-gold-400/10 rounded px-3 py-1.5 transition-colors"
+        className="w-full text-sm text-gold-400 border border-gold-400/30 hover:bg-gold-400/10 rounded-xl px-3 py-1.5 transition-all hover:shadow-neon-gold"
       >
         Add {condition.name}
       </button>

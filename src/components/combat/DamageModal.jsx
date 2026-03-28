@@ -35,16 +35,15 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.5)' }}
+      style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={onClose}
     >
       <div
-        className="bg-[#252525] border border-white/[0.1] rounded-lg w-80 p-5"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+        className="glass-modal rounded-2xl w-80 p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-0.5">Apply Damage / Healing</h3>
-        <p className="text-xs text-[#9a9894] mb-4">
+        <p className="text-xs text-[#7a7874] mb-4">
           {combatant.name} -{' '}
           <span className="font-mono text-[#e6e6e6]">
             {combatant.hp?.current}/{combatant.hp?.max} HP
@@ -60,24 +59,24 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="e.g. 8 damage, -5 healing"
-            className="w-full bg-transparent border-b border-white/[0.12] py-2 text-sm font-mono text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+            className="input-field font-mono"
           />
           {value !== '' && !isNaN(parsed) && (
-            <p className={`text-xs mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#9a9894]'}`}>
+            <p className={`text-xs mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#7a7874]'}`}>
               {isDmg ? `${parsed} damage` : isHeal ? `${-parsed} healing` : 'no change'}
             </p>
           )}
           <div className="flex gap-2 mt-5">
             <button
               type="submit"
-              className="flex-1 bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2 transition-colors"
+              className="btn-neon-gold flex-1"
             >
               Apply
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 text-sm text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.06] rounded px-4 py-2 transition-colors border border-white/[0.1]"
+              className="btn-outline flex-1"
             >
               Cancel
             </button>
@@ -85,8 +84,8 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
         </form>
 
         {/* Temp HP section */}
-        <div className="mt-4 pt-4 border-t border-white/[0.06]">
-          <label className="text-xs text-[#9a9894] block mb-1.5">Temporary HP</label>
+        <div className="mt-4 pt-4 border-t border-white/[0.05]">
+          <label className="text-xs text-[#7a7874] block mb-1.5">Temporary HP</label>
           <div className="flex gap-2">
             <input
               type="number"
@@ -94,12 +93,12 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
               onChange={(e) => setTempHpValue(e.target.value)}
               placeholder={tempHp > 0 ? String(tempHp) : '0'}
               min="0"
-              className="flex-1 bg-transparent border-b border-white/[0.12] py-1.5 text-sm font-mono text-[#e6e6e6] focus:outline-none focus:border-blue-400 placeholder:text-[#787774] transition-colors"
+              className="input-field flex-1 font-mono !border-blue-400/20 focus:!border-blue-400/50"
             />
             <button
               type="button"
               onClick={handleSetTempHp}
-              className="shrink-0 text-xs text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 px-2.5 py-1 rounded transition-colors"
+              className="shrink-0 text-xs text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 px-2.5 py-1 rounded-lg transition-all hover:shadow-neon-blue"
             >
               Set
             </button>

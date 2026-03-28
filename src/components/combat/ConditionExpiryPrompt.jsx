@@ -5,9 +5,8 @@ const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
 
 export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
   const { condition } = expiry
-  const [rollResult, setRollResult] = useState(null) // { ability, roll, mod, total }
+  const [rollResult, setRollResult] = useState(null)
 
-  // Auto-dismiss for no-save expiries
   useEffect(() => {
     if (!condition.needsSave) {
       const t = setTimeout(onClear, 2500)
@@ -26,11 +25,10 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
   // No-save: auto-dismissing notification
   if (!condition.needsSave) {
     return (
-      <div
-        className="fixed inset-0 z-[65] flex items-center justify-center pointer-events-none"
-      >
+      <div className="fixed inset-0 z-[65] flex items-center justify-center pointer-events-none">
         <div
-          className="pointer-events-auto bg-[#252525] border border-amber-500/30 rounded-lg shadow-xl px-5 py-3 max-w-sm animate-fade-in"
+          className="pointer-events-auto glass-modal !border-amber-400/30 rounded-2xl px-5 py-3 max-w-sm animate-fade-in"
+          style={{ boxShadow: '0 0 20px rgba(251, 191, 36, 0.12)' }}
         >
           <p className="text-sm text-[#e6e6e6]">
             <span className="font-medium text-amber-400">{condition.name}</span> on{' '}
@@ -45,17 +43,16 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
   return (
     <div
       className="fixed inset-0 z-[65] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.5)' }}
+      style={{ background: 'rgba(0,0,0,0.6)' }}
     >
       <div
-        className="bg-[#252525] border border-white/[0.1] rounded-lg w-80 p-5"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+        className="glass-modal rounded-2xl w-80 p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-1">
           {combatant?.name ?? 'Unknown'} - Saving Throw
         </h3>
-        <p className="text-xs text-[#9a9894] mb-3">
+        <p className="text-xs text-[#7a7874] mb-3">
           <span className="text-amber-400">{combatant?.name ?? 'Unknown'}</span> must save to lose <span className="text-amber-400">{condition.name}</span>
         </p>
 
@@ -67,15 +64,15 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
             return (
               <button
                 key={ab}
-                className={`text-center px-2 py-2 text-xs rounded border transition-colors ${
+                className={`text-center px-2 py-2 text-xs rounded-lg border transition-all ${
                   rollResult?.ability === ab
-                    ? 'border-gold-400/40 bg-gold-400/10 text-gold-400'
-                    : 'border-white/[0.12] text-[#e6e6e6] hover:bg-white/[0.06]'
+                    ? 'border-gold-400/40 bg-gold-400/10 text-gold-400 shadow-neon-gold'
+                    : 'border-white/[0.08] text-[#e6e6e6] hover:bg-white/[0.06] stat-card'
                 }`}
                 onClick={() => handleRoll(ab)}
               >
                 <div className="font-medium">{ab}</div>
-                <div className="text-[10px] text-[#9a9894] font-mono">{formatMod(mod)}</div>
+                <div className="text-[10px] text-[#7a7874] font-mono">{formatMod(mod)}</div>
               </button>
             )
           })}
@@ -83,26 +80,26 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
 
         {/* Roll result */}
         {rollResult && (
-          <div className="text-center mb-3 py-2 bg-white/[0.03] rounded">
-            <div className="text-xs text-[#9a9894] mb-0.5">{rollResult.ability} Save</div>
+          <div className="text-center mb-3 py-2 stat-card rounded-lg">
+            <div className="text-xs text-[#7a7874] mb-0.5">{rollResult.ability} Save</div>
             <div className="text-xl font-bold font-mono text-gold-400">{rollResult.total}</div>
-            <div className="text-[10px] text-[#787774] font-mono">
+            <div className="text-[10px] text-[#5a5854] font-mono">
               d20({rollResult.roll}){formatMod(rollResult.mod)}
             </div>
           </div>
         )}
 
-        {/* Action buttons: Saved = remove condition, Failed = keep condition */}
+        {/* Action buttons */}
         <div className="flex gap-2">
           <button
             onClick={onClear}
-            className="flex-1 bg-emerald-600/80 hover:bg-emerald-600 text-white font-semibold text-sm rounded px-4 py-2 transition-colors"
+            className="flex-1 bg-green-400/80 hover:bg-green-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all hover:shadow-neon-green"
           >
             Saved
           </button>
           <button
             onClick={onKeep}
-            className="flex-1 bg-red-500/80 hover:bg-red-500 text-white font-semibold text-sm rounded px-4 py-2 transition-colors"
+            className="flex-1 bg-red-400/80 hover:bg-red-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all hover:shadow-neon-red"
           >
             Failed
           </button>

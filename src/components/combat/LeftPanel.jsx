@@ -75,7 +75,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col items-center pt-3">
+      <div className="w-10 shrink-0 bg-surface-1 border-r border-white/[0.06] flex flex-col items-center pt-3">
         <button
           onClick={onToggleCollapse}
           className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-white/[0.06]"
@@ -90,9 +90,9 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   }
 
   return (
-    <div className={`${isMobile ? 'w-full flex-1' : 'w-64 shrink-0'} bg-[#1e1e1e] border-r border-white/[0.06] flex flex-col`}>
+    <div className={`${isMobile ? 'w-full flex-1' : 'w-64 shrink-0'} bg-surface-1 border-r border-white/[0.05] flex flex-col`} style={{ background: 'linear-gradient(180deg, #131316 0%, #111114 100%)' }}>
       {/* Tabs + collapse button */}
-      <div className="flex border-b border-white/[0.06] shrink-0">
+      <div className="flex border-b border-white/[0.05] shrink-0">
         {[
           { key: 'npc',      label: 'NPC'       },
           { key: 'pc',       label: 'PC'        },
@@ -101,10 +101,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           <button
             key={key}
             className={[
-              'flex-1 py-3 text-sm border-b-2 transition-colors',
+              'flex-1 py-3 text-sm border-b-2 transition-all',
               tab === key
-                ? 'border-gold-400 text-[#e6e6e6]'
-                : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
+                ? 'border-gold-400 text-[#e6e6e6] nav-active-glow'
+                : 'border-transparent text-[#7a7874] hover:text-[#e6e6e6]',
             ].join(' ')}
             onClick={() => setTab(key)}
           >
@@ -113,7 +113,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         ))}
         <button
           onClick={onToggleCollapse}
-          className="max-lg:hidden px-2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors shrink-0"
+          className="max-lg:hidden px-2 text-[#7a7874] hover:text-[#e6e6e6] transition-colors shrink-0"
           title="Collapse library"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -125,30 +125,30 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── NPC Library ────────────────────────────────────────────────── */}
       {tab === 'npc' && (
         <>
-          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-2">
+          <div className="px-2.5 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-2">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search NPCs…"
-              className="flex-1 bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
+              className="input-field flex-1 !py-1.5 !text-xs"
             />
             <button
               onClick={() => onNewStatblock?.()}
-              className="shrink-0 text-xs text-[#9a9894] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-1.5 py-0.5 transition-colors"
+              className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
               title="Add new statblock from JSON"
             >
               + New
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-1.5">
             {filteredNPCs.length === 0 && (
-              <p className="text-[#b8b5b0] text-sm text-center py-6">No results</p>
+              <p className="text-[#7a7874] text-sm text-center py-6">No results</p>
             )}
             {filteredNPCs.map((entry) => (
               <div
                 key={entry._key ?? entry.Id ?? entry.Name}
-                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
+                className="w-full text-left px-3 py-2 flex items-center gap-2 library-card group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
                 onMouseEnter={(e) => {
                   if (isMobile || !(entry.HP || entry.AC || entry.Abilities)) return
@@ -163,23 +163,23 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                   {entry.Type && (
-                    <div className="text-xs text-[#9a9894] truncate mt-0.5">{entry.Type}</div>
+                    <div className="text-xs text-[#7a7874] truncate mt-0.5">{entry.Type}</div>
                   )}
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">
                   {entry.ChallengeRating && (
-                    <span className="text-xs text-[#9a9894]">CR {entry.ChallengeRating}</span>
+                    <span className="text-xs text-[#7a7874]">CR {entry.ChallengeRating}</span>
                   )}
                   <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
                     <button
-                      className="text-[#9a9894] hover:text-gold-400 text-xs"
+                      className="text-[#7a7874] hover:text-gold-400 text-xs"
                       onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
                       title="Edit statblock"
                     >
                       ✎
                     </button>
                     <button
-                      className="text-[#9a9894] hover:text-red-400 text-xs"
+                      className="text-[#7a7874] hover:text-red-400 text-xs"
                       onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc', key: entry._key }) }}
                       title="Delete statblock"
                     >
@@ -196,23 +196,23 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── PC Library ─────────────────────────────────────────────────── */}
       {tab === 'pc' && (
         <>
-          <div className="px-3 py-2 border-b border-white/[0.04] shrink-0">
+          <div className="px-2.5 py-2 border-b border-white/[0.04] shrink-0">
             <input
               type="text"
               value={pcQuery}
               onChange={(e) => setPcQuery(e.target.value)}
               placeholder="Search PCs…"
-              className="w-full bg-transparent text-sm text-[#e6e6e6] placeholder:text-[#787774] focus:outline-none py-1 border-b border-transparent focus:border-white/[0.2] transition-colors"
+              className="input-field !py-1.5 !text-xs"
             />
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-1.5">
             {filteredPCs.length === 0 && (
-              <p className="text-[#b8b5b0] text-sm text-center py-6">No results</p>
+              <p className="text-[#7a7874] text-sm text-center py-6">No results</p>
             )}
             {filteredPCs.map((entry) => (
               <div
                 key={entry._key ?? entry.Id ?? entry.Name}
-                className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-white/[0.04] transition-colors border-b border-white/[0.03] group cursor-pointer"
+                className="w-full text-left px-3 py-2 flex items-center gap-2 library-card group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
                 onMouseEnter={(e) => {
                   if (isMobile || !(entry.HP || entry.AC || entry.Abilities)) return
@@ -235,7 +235,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
 
       {/* ── Quick Add ───────────────────────────────────────────────────── */}
       {tab === 'quickadd' && (
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-3">
           <form onSubmit={handleQuickAdd} className="space-y-4">
             <div>
               <label className="label-section mb-2 block">Name</label>
@@ -244,7 +244,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 value={qaName}
                 onChange={(e) => setQaName(e.target.value)}
                 placeholder="Creature name…"
-                className="w-full bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                className="input-field"
               />
             </div>
             <div>
@@ -259,10 +259,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     type="button"
                     onClick={() => setQaType(val)}
                     className={[
-                      'flex-1 text-sm rounded px-2 py-1.5 border transition-colors',
+                      'flex-1 text-sm rounded-xl px-2 py-1.5 border transition-all',
                       qaType === val
-                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400'
-                        : 'border-white/[0.1] text-[#9a9894] hover:text-[#e6e6e6] hover:border-white/[0.2]',
+                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400 shadow-neon-gold'
+                        : 'border-white/[0.08] text-[#7a7874] hover:text-[#e6e6e6] hover:border-white/[0.15]',
                     ].join(' ')}
                   >
                     {label}
@@ -280,7 +280,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     onChange={(e) => setQaHp(e.target.value)}
                     placeholder="Hit Points"
                     min="1"
-                    className="w-full bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                    className="input-field"
                   />
                 </div>
                 <div className="flex-1">
@@ -291,7 +291,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     onChange={(e) => setQaAc(e.target.value)}
                     placeholder="Armor Class"
                     min="1"
-                    className="w-full bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                    className="input-field"
                   />
                 </div>
               </div>
@@ -299,13 +299,13 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             <button
               type="submit"
               disabled={!qaName.trim() && qaType !== 'lair'}
-              className="w-full text-sm text-[#e6e6e6] hover:bg-white/[0.06] disabled:opacity-30 rounded px-4 py-2 transition-colors border border-white/[0.1]"
+              className="btn-action w-full !text-sm !py-2 disabled:opacity-30"
             >
               Add to Tracker
             </button>
           </form>
-          <p className="mt-6 text-[#b8b5b0] text-xs leading-relaxed border-t border-white/[0.04] pt-4">
-            Quick add creates a combatant with no statblock — useful for improvised NPCs and summoned creatures.
+          <p className="mt-6 text-[#6a6864] text-xs leading-relaxed border-t border-white/[0.04] pt-4">
+            Quick add creates a combatant with no statblock - useful for improvised NPCs and summoned creatures.
           </p>
         </div>
       )}
@@ -318,18 +318,17 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           onClick={() => setDeleteConfirm(null)}
         >
           <div
-            className="bg-[#252525] border border-white/[0.1] rounded-lg w-full max-w-sm p-5"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+            className="glass-modal rounded-2xl w-full max-w-sm p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete Statblock</h3>
-            <p className="text-sm text-[#b8b5b0] mb-4">
+            <p className="text-sm text-[#8a8884] mb-4">
               Are you sure you want to delete <span className="text-[#e6e6e6] font-medium">{deleteConfirm.name}</span>? This action cannot be undone.
             </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="text-sm text-[#9a9894] hover:text-[#e6e6e6] border border-white/[0.1] hover:border-white/[0.2] rounded px-3 py-1.5 transition-colors"
+                className="btn-outline !py-1.5 !px-3"
               >
                 Cancel
               </button>
@@ -338,7 +337,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   onDeleteStatblock?.(deleteConfirm.name, deleteConfirm.type, deleteConfirm.key)
                   setDeleteConfirm(null)
                 }}
-                className="text-sm bg-red-500/80 hover:bg-red-500 text-white font-medium rounded px-3 py-1.5 transition-colors"
+                className="text-sm bg-red-400/80 hover:bg-red-400 text-white font-medium rounded-xl px-3 py-1.5 transition-all hover:shadow-neon-red"
               >
                 Delete
               </button>
@@ -356,8 +355,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           onClick={() => setMobileLibraryMenu(null)}
         >
           <div
-            className="bg-[#252525] border border-white/[0.1] rounded-xl w-full max-w-sm overflow-hidden"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+            className="glass-modal rounded-2xl w-full max-w-sm overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header — centered name/type, ✕ in top-right corner */}
@@ -428,13 +426,13 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Desktop: statblock hover preview (no modal, no backdrop) ───── */}
       {!isMobile && hoverPreviewEntry && createPortal(
         <div
-          className="fixed z-[2000] bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col overflow-hidden"
+          className="fixed z-[2000] glass-modal rounded-2xl flex flex-col overflow-hidden"
           style={{
             left: hoverPreviewEntry.rect.right + 8,
             top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
             width: 320,
             maxHeight: 'calc(100vh - 64px)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            '--sb-bg': '#0e0e12',
           }}
           onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
           onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
@@ -461,7 +459,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           onClick={() => setLibraryPreviewEntry(null)}
         >
           <div
-            className="bg-[#1e1e1e] border border-white/[0.1] w-full h-full flex flex-col overflow-hidden"
+            className="bg-surface-1 border border-white/[0.1] w-full h-full flex flex-col overflow-hidden"
+            style={{ '--sb-bg': '#111114' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">

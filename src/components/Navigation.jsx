@@ -31,7 +31,7 @@ export default function Navigation() {
   }, [menuOpen])
 
   return (
-    <nav className="h-12 bg-[#1a1a1a] border-b border-white/[0.06] flex items-stretch px-5 shrink-0 relative z-[1001]">
+    <nav className="h-12 bg-surface-1 border-b border-white/[0.05] flex items-stretch px-5 shrink-0 relative z-[1001]" style={{ background: 'linear-gradient(180deg, #141418 0%, #111114 100%)' }}>
       {/* App title */}
       <div className="flex items-center mr-7">
         <span className="font-display text-sm font-semibold tracking-[0.22em] text-gold-400 uppercase select-none">
@@ -85,7 +85,7 @@ export default function Navigation() {
 
         {/* Dropdown */}
         {menuOpen && (
-          <div className="absolute top-12 right-0 w-48 bg-[#1e1e1e] border border-white/[0.08] rounded-bl-xl shadow-xl z-50 overflow-hidden">
+          <div className="absolute top-12 right-0 w-48 bg-surface-2 border border-white/[0.08] rounded-bl-xl shadow-glass z-50 overflow-hidden">
             {tabs.map(({ label, to }) => (
               <NavLink
                 key={to}

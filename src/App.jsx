@@ -17,7 +17,7 @@ export default function App() {
   return (
     <AuthProvider>
       <AuthGate>
-        <div className="flex flex-col h-full bg-slate-950">
+        <div className="flex flex-col h-full bg-surface-0">
           <Navigation />
           <main className="flex-1 overflow-hidden">
             <Routes>

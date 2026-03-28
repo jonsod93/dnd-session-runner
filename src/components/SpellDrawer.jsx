@@ -73,8 +73,8 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
   }, [onClose])
 
   const drawerClass = isMobile
-    ? 'fixed inset-x-0 bottom-0 z-[2100] bg-[#1e1e1e] border-t border-white/[0.1] rounded-t-xl flex flex-col'
-    : 'fixed left-1/2 -translate-x-1/2 z-[2100] bg-[#1e1e1e] border border-white/[0.1] rounded-lg flex flex-col'
+    ? 'fixed inset-x-0 bottom-0 z-[2100] glass-modal !rounded-b-none !rounded-t-xl flex flex-col'
+    : 'fixed left-1/2 -translate-x-1/2 z-[2100] glass-modal !rounded-xl flex flex-col'
   const drawerStyle = isMobile
     ? { maxHeight: '55vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }
     : { bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }

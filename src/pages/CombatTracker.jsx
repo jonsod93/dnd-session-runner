@@ -167,7 +167,7 @@ export default function CombatTracker() {
   ]
 
   return (
-    <div className="flex bg-[#1a1a1a]" style={{ height: 'calc(100vh - 48px)' }}>
+    <div className="flex bg-surface-0" style={{ height: 'calc(100vh - 48px)' }}>
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <div className={isMobile && mobileTab === 'tracker' ? 'hidden' : 'contents'}>
@@ -217,10 +217,10 @@ export default function CombatTracker() {
           onCancel={() => setEditor(null)}
         />
       ) : (
-      <div className={`flex-1 flex flex-col min-w-0 bg-[#1a1a1a] ${isMobile && mobileTab === 'library' ? 'hidden' : ''}`}>
+      <div className={`flex-1 flex flex-col min-w-0 bg-surface-0 ${isMobile && mobileTab === 'library' ? 'hidden' : ''}`}>
 
         {/* Toolbar */}
-        <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.06] flex items-center gap-3 min-h-[48px]">
+        <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.05] flex items-center gap-3 min-h-[48px]">
           <button
             onClick={() => {
               // Play sound effect — silent if file missing or autoplay blocked
@@ -230,14 +230,14 @@ export default function CombatTracker() {
               if (uri) setTimeout(() => spotify.play(uri), 1000)
               setShowInitModal(true)
             }}
-            className="bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm px-3 py-1.5 rounded transition-colors"
+            className="btn-neon-gold"
           >
             Roll Initiative
           </button>
 
           <div className="flex-1" />
 
-          <span className="text-xs text-[#9a9894] font-mono">
+          <span className="text-xs text-[#6a6864] font-mono">
             {combat.combatants.filter((c) => c.type !== 'lair').length} combatants
           </span>
 
@@ -246,7 +246,7 @@ export default function CombatTracker() {
             spotify.isConnected ? (
               <button
                 onClick={spotify.disconnect}
-                className="text-xs text-[#9a9894]/50 hover:text-[#9a9894] transition-colors"
+                className="text-xs text-[#5a5854] hover:text-[#9a9894] transition-colors"
                 title="Spotify connected — click to disconnect"
               >
                 ♫
@@ -254,7 +254,7 @@ export default function CombatTracker() {
             ) : (
               <button
                 onClick={spotify.connect}
-                className="text-xs text-[#9a9894]/40 hover:text-[#9a9894] transition-colors"
+                className="text-xs text-[#4a4844] hover:text-[#9a9894] transition-colors"
                 title="Connect Spotify"
               >
                 Connect Spotify
@@ -264,7 +264,7 @@ export default function CombatTracker() {
 
           {showClearConfirm ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-[#9a9894]">Clear all?</span>
+              <span className="text-sm text-[#7a7874]">Clear all?</span>
               <button
                 onClick={() => { combat.clear(); setShowClearConfirm(false); setSelectedId(null) }}
                 className="text-sm text-red-400/80 hover:text-red-400 transition-colors"
@@ -290,7 +290,7 @@ export default function CombatTracker() {
 
         {/* Header row — desktop only, not needed for mobile 2-line layout */}
         {combat.combatants.length > 0 && (
-          <div className="max-lg:hidden shrink-0 flex items-center gap-2 px-4 py-1.5 border-b border-white/[0.08] text-xs text-[#9a9894] uppercase tracking-wider font-medium">
+          <div className="max-lg:hidden shrink-0 flex items-center gap-2 mx-3 px-4 py-1.5 border-b border-white/[0.05] text-xs text-[#6a6864] uppercase tracking-wider font-medium">
             {/* Drag handle spacer */}
             <div className="w-[10px] shrink-0" />
             {/* Active arrow spacer */}
@@ -322,7 +322,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-44">
+        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-44 flex flex-col gap-2 p-3">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
@@ -420,7 +420,7 @@ export default function CombatTracker() {
         <div className="fixed bottom-14 left-0 right-0 z-40 px-3 py-2 pointer-events-none">
           <button
             onClick={combat.nextTurn}
-            className="pointer-events-auto w-full py-3.5 bg-[#2a2a2a] hover:bg-[#323232] active:bg-[#3a3a3a] border border-white/[0.12] text-[#e6e6e6] font-semibold text-base rounded-xl transition-colors"
+            className="pointer-events-auto w-full py-3.5 bg-surface-3 hover:bg-surface-4 active:bg-white/[0.08] border border-white/[0.08] text-[#e6e6e6] font-semibold text-base rounded-2xl transition-all hover:shadow-neon-gold"
           >
             Next Turn
           </button>
@@ -429,7 +429,7 @@ export default function CombatTracker() {
 
       {/* ── Mobile: bottom tab bar ───────────────────────────────────────── */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-[#1e1e1e] border-t border-white/[0.06]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-surface-1 border-t border-white/[0.06]">
           {[
             { key: 'tracker', label: 'Tracker' },
             { key: 'library', label: 'Library' },
