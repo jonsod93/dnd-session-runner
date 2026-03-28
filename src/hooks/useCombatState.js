@@ -3,7 +3,7 @@ import { uid, rollInitiative } from '../utils/combatUtils'
 
 const STORAGE_KEY = 'mythranos-combat-v1'
 
-const init = { combatants: [], activeTurnId: null }
+const init = { combatants: [], activeTurnId: null, roundCount: 0, pendingExpiries: [] }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 export function sortByInitiative(list) {
@@ -43,7 +43,36 @@ function reducer(state, action) {
       const { combatants, activeTurnId } = state
       if (!combatants.length) return state
       const idx = combatants.findIndex((c) => c.id === activeTurnId)
-      const nextId = combatants[(idx + 1) % combatants.length].id
+      const nextIdx = (idx + 1) % combatants.length
+      const nextId = combatants[nextIdx].id
+
+      // Increment round count when wrapping past last combatant
+      const roundCount = state.roundCount ?? 0
+      const newRoundCount = nextIdx === 0 && activeTurnId != null ? roundCount + 1 : roundCount
+
+      // Collect expiring conditions
+      const pendingExpiries = []
+
+      // End of outgoing combatant's turn
+      if (activeTurnId) {
+        combatants.forEach((c) => {
+          c.conditions.forEach((cond) => {
+            if (cond.expiry?.type === 'end_of_turn' && cond.expiry.targetId === activeTurnId) {
+              pendingExpiries.push({ combatantId: c.id, condition: cond })
+            }
+          })
+        })
+      }
+
+      // Start of incoming combatant's turn
+      combatants.forEach((c) => {
+        c.conditions.forEach((cond) => {
+          if (cond.expiry?.type === 'start_of_turn' && cond.expiry.targetId === nextId) {
+            pendingExpiries.push({ combatantId: c.id, condition: cond })
+          }
+        })
+      })
+
       // Auto-clear legendary action usage for the combatant whose turn starts
       const updated = combatants.map((c) => {
         if (c.id !== nextId) return c
@@ -52,39 +81,105 @@ function reducer(state, action) {
         delete newUsage['__Legendary Actions']
         return { ...c, usage: newUsage }
       })
-      return { ...state, combatants: updated, activeTurnId: nextId }
+      return { ...state, combatants: updated, activeTurnId: nextId, roundCount: newRoundCount, pendingExpiries }
     }
-    case 'DAMAGE':
+    case 'DAMAGE': {
       return {
         ...state,
-        combatants: state.combatants.map((c) =>
-          c.id === action.id && c.hp
-            ? { ...c, hp: { ...c.hp, current: Math.max(0, c.hp.current - action.amount) } }
-            : c
-        ),
+        combatants: state.combatants.map((c) => {
+          if (c.id !== action.id) return c
+          let remaining = action.amount
+          let newTempHp = c.tempHp ?? 0
+          if (newTempHp > 0) {
+            const absorbed = Math.min(newTempHp, remaining)
+            newTempHp -= absorbed
+            remaining -= absorbed
+          }
+          if (!c.hp) return { ...c, tempHp: newTempHp }
+          const newCurrent = Math.max(0, c.hp.current - remaining)
+          const autoDeathSaves = newCurrent === 0 && c.hp.current > 0 && c.type !== 'lair' && c.type !== 'pc'
+            ? { successes: 0, failures: 0 }
+            : (c.deathSaves ?? null)
+          return {
+            ...c,
+            tempHp: newTempHp,
+            hp: { ...c.hp, current: newCurrent },
+            deathSaves: autoDeathSaves,
+          }
+        }),
       }
+    }
     case 'HEAL':
       return {
         ...state,
-        combatants: state.combatants.map((c) =>
-          c.id === action.id && c.hp
-            ? { ...c, hp: { ...c.hp, current: Math.min(c.hp.max, c.hp.current + action.amount) } }
-            : c
-        ),
+        combatants: state.combatants.map((c) => {
+          if (c.id !== action.id || !c.hp) return c
+          const newCurrent = Math.min(c.hp.max, c.hp.current + action.amount)
+          const newDeathSaves = c.hp.current === 0 && newCurrent > 0 ? null : (c.deathSaves ?? null)
+          return { ...c, hp: { ...c.hp, current: newCurrent }, deathSaves: newDeathSaves }
+        }),
       }
-    case 'ADD_CONDITION':
+    case 'ADD_CONDITION': {
+      // Auto-stamp inflicterId from current active turn
+      const condition = { ...action.condition, inflicterId: action.condition.inflicterId ?? state.activeTurnId }
       return {
         ...state,
-        combatants: state.combatants.map((c) =>
-          c.id === action.id ? { ...c, conditions: [...c.conditions, action.condition] } : c
-        ),
+        combatants: state.combatants.map((c) => {
+          if (c.id !== action.id) return c
+          let conditions = c.conditions
+          // If adding Concentration, remove existing Concentration first
+          if (condition.name === 'Concentration') {
+            conditions = conditions.filter((x) => x.name !== 'Concentration')
+          }
+          return { ...c, conditions: [...conditions, condition] }
+        }),
       }
+    }
     case 'REMOVE_CONDITION':
       return {
         ...state,
         combatants: state.combatants.map((c) =>
           c.id === action.id
             ? { ...c, conditions: c.conditions.filter((x) => x.id !== action.condId) }
+            : c
+        ),
+      }
+    case 'RESOLVE_EXPIRY': {
+      const newPending = (state.pendingExpiries ?? []).filter(
+        (e) => !(e.combatantId === action.combatantId && e.condition.id === action.condId)
+      )
+      const newCombatants = action.keep
+        ? state.combatants
+        : state.combatants.map((c) =>
+            c.id === action.combatantId
+              ? { ...c, conditions: c.conditions.filter((x) => x.id !== action.condId) }
+              : c
+          )
+      return { ...state, combatants: newCombatants, pendingExpiries: newPending }
+    }
+    case 'SET_TEMP_HP':
+      return {
+        ...state,
+        combatants: state.combatants.map((c) =>
+          c.id === action.id ? { ...c, tempHp: Math.max(0, action.amount) } : c
+        ),
+      }
+    case 'SET_DEATH_SAVES': {
+      const { id, successes, failures } = action
+      const deathSaves = successes >= 3 || failures >= 3 ? null : { successes, failures }
+      return {
+        ...state,
+        combatants: state.combatants.map((c) =>
+          c.id === id ? { ...c, deathSaves } : c
+        ),
+      }
+    }
+    case 'TOGGLE_DEATH_SAVES':
+      return {
+        ...state,
+        combatants: state.combatants.map((c) =>
+          c.id === action.id
+            ? { ...c, deathSaves: c.deathSaves ? null : { successes: 0, failures: 0 } }
             : c
         ),
       }
@@ -118,7 +213,20 @@ export function useCombatState() {
   const [state, dispatch] = useReducer(reducer, init, (base) => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      return saved ? JSON.parse(saved) : base
+      if (!saved) return base
+      const parsed = JSON.parse(saved)
+      // Normalize for backwards compatibility
+      return {
+        ...base,
+        ...parsed,
+        roundCount: parsed.roundCount ?? 0,
+        pendingExpiries: parsed.pendingExpiries ?? [],
+        combatants: (parsed.combatants ?? []).map((c) => ({
+          ...c,
+          tempHp: c.tempHp ?? 0,
+          deathSaves: c.deathSaves ?? null,
+        })),
+      }
     } catch {
       return base
     }
@@ -198,6 +306,8 @@ export function useCombatState() {
       conditions: [],
       statblock: entry.statblock ?? null,
       usage: {},
+      tempHp: 0,
+      deathSaves: null,
     }
     dispatch({ type: 'ADD', payload: c })
     return c
@@ -218,10 +328,18 @@ export function useCombatState() {
     else             dispatch({ type: 'HEAL',   id, amount: -amount })
   }
 
+  const setTempHp        = (id, amount)                => dispatch({ type: 'SET_TEMP_HP', id, amount })
+  const setDeathSaves    = (id, successes, failures)   => dispatch({ type: 'SET_DEATH_SAVES', id, successes, failures })
+  const toggleDeathSaves = (id)                        => dispatch({ type: 'TOGGLE_DEATH_SAVES', id })
+  const resolveExpiry    = (combatantId, condId, keep) => dispatch({ type: 'RESOLVE_EXPIRY', combatantId, condId, keep })
+
   return {
     combatants: state.combatants,
     activeTurnId: state.activeTurnId,
+    roundCount: state.roundCount ?? 0,
+    pendingExpiries: state.pendingExpiries ?? [],
     add, remove, setInitiatives, setActive, nextTurn,
     applyDamage, addCondition, removeCondition, reorder, clear, updateUsage,
+    setTempHp, setDeathSaves, toggleDeathSaves, resolveExpiry,
   }
 }

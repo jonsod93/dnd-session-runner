@@ -25,10 +25,12 @@ import { StatblockPanel }  from '../components/combat/StatblockPanel'
 import { StatblockEditor } from '../components/combat/StatblockEditor'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
 import { DamageModal }     from '../components/combat/DamageModal'
+import { ConcentrationPrompt } from '../components/combat/ConcentrationPrompt'
+import { ConditionExpiryPrompt } from '../components/combat/ConditionExpiryPrompt'
 import { DiceRollToast }   from '../components/DiceRollToast'
 import { NotificationToast, useNotifications } from '../components/NotificationToast'
 import { SpellDrawer }     from '../components/SpellDrawer'
-import { uid }             from '../utils/combatUtils'
+import { uid, d20, abilityMod } from '../utils/combatUtils'
 
 export default function CombatTracker() {
   const combat = useCombatState()
@@ -48,6 +50,7 @@ export default function CombatTracker() {
   const [activeSpell,       setActiveSpell]       = useState(null)
   const [leftCollapsed,     setLeftCollapsed]     = useState(false)
   const [customLairActions, setCustomLairActions] = useState([])
+  const [concCheck,         setConcCheck]         = useState(null) // pending concentration check
 
   const mobileStatblockCombatant = combat.combatants.find((c) => c.id === mobileStatblockId) ?? null
 
@@ -109,6 +112,23 @@ export default function CombatTracker() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [combat, selectedId])
+
+  // ── Auto-process no-save condition expiries ─────────────────────────────
+  useEffect(() => {
+    const expiries = combat.pendingExpiries ?? []
+    if (!expiries.length) return
+    // Auto-resolve no-save expiries with a notification
+    expiries.forEach((e) => {
+      if (!e.condition.needsSave) {
+        const c = combat.combatants.find((x) => x.id === e.combatantId)
+        notifications.notify(`${e.condition.name} on ${c?.name ?? 'unknown'} has expired`, 'info')
+        combat.resolveExpiry(e.combatantId, e.condition.id, false)
+      }
+    })
+  }, [combat.pendingExpiries])
+
+  // Save-required expiries that need modal prompts
+  const saveExpiries = (combat.pendingExpiries ?? []).filter((e) => e.condition.needsSave)
 
   // ── Drag & drop ──────────────────────────────────────────────────────────
   const sensors = useSensors(
@@ -341,6 +361,19 @@ export default function CombatTracker() {
                     setSelectedId(newId)
                     if (isMobile && combatant.statblock) setMobileStatblockId(combatant.id)
                   }}
+                  onSetDeathSaves={combat.setDeathSaves}
+                  onToggleDeathSaves={combat.toggleDeathSaves}
+                  onNat20Heal={(id, isPC) => {
+                    if (isPC) {
+                      combat.setDeathSaves(id, 0, 0)
+                      // Clear after brief delay to show the reset
+                      setTimeout(() => combat.toggleDeathSaves(id), 100)
+                    } else {
+                      combat.applyDamage(id, -1)
+                    }
+                  }}
+                  combatants={combat.combatants}
+                  activeTurnId={combat.activeTurnId}
                 />
               ))}
             </SortableContext>
@@ -429,10 +462,70 @@ export default function CombatTracker() {
       {damageTarget && (
         <DamageModal
           combatant={damageTarget}
-          onConfirm={(amount) => { combat.applyDamage(damageTargetId, amount); setDamageTargetId(null) }}
+          onConfirm={(amount) => {
+            // Check for concentration before applying damage
+            if (amount > 0) {
+              const target = combat.combatants.find((c) => c.id === damageTargetId)
+              if (target) {
+                const concCond = target.conditions.find((c) => c.name === 'Concentration')
+                if (concCond) {
+                  const tempHp = target.tempHp ?? 0
+                  const damageToHp = Math.max(0, amount - tempHp)
+                  if (damageToHp > 0) {
+                    const dc = Math.max(10, Math.floor(damageToHp / 2))
+                    const conMod = abilityMod(target.statblock?.Abilities?.Con ?? 10)
+                    const roll = d20()
+                    const total = roll + conMod
+                    setConcCheck({
+                      combatantId: damageTargetId,
+                      combatantName: target.name,
+                      condId: concCond.id,
+                      dc,
+                      roll,
+                      conMod,
+                      total,
+                      success: total >= dc,
+                      spellName: concCond.spellName,
+                    })
+                  }
+                }
+              }
+            }
+            combat.applyDamage(damageTargetId, amount)
+            setDamageTargetId(null)
+          }}
           onClose={() => setDamageTargetId(null)}
+          onSetTempHp={combat.setTempHp}
         />
       )}
+
+      {/* Concentration check prompt */}
+      {concCheck && (
+        <ConcentrationPrompt
+          check={concCheck}
+          combatantName={concCheck.combatantName}
+          onKeep={() => setConcCheck(null)}
+          onDrop={() => {
+            combat.removeCondition(concCheck.combatantId, concCheck.condId)
+            setConcCheck(null)
+          }}
+          onClose={() => setConcCheck(null)}
+        />
+      )}
+
+      {/* ── Condition expiry prompts (save-required) ────────────────────── */}
+      {saveExpiries.length > 0 && (() => {
+        const e = saveExpiries[0]
+        const c = combat.combatants.find((x) => x.id === e.combatantId)
+        return (
+          <ConditionExpiryPrompt
+            expiry={e}
+            combatant={c}
+            onKeep={() => combat.resolveExpiry(e.combatantId, e.condition.id, true)}
+            onClear={() => combat.resolveExpiry(e.combatantId, e.condition.id, false)}
+          />
+        )
+      })()}
 
       {/* ── Dice roll toast ──────────────────────────────────────────────── */}
       {rolls.length > 0 && (

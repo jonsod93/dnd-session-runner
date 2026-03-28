@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 
-export function DamageModal({ combatant, onConfirm, onClose }) {
+export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
   const [value, setValue] = useState('')
+  const [tempHpValue, setTempHpValue] = useState('')
   const inputRef = useRef(null)
+
+  const tempHp = combatant.tempHp ?? 0
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -15,6 +18,14 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
     e.preventDefault()
     const amount = parseInt(value, 10)
     if (!isNaN(amount)) onConfirm(amount)
+  }
+
+  const handleSetTempHp = () => {
+    const amount = parseInt(tempHpValue, 10)
+    if (!isNaN(amount) && amount >= 0) {
+      onSetTempHp?.(combatant.id, amount)
+      setTempHpValue('')
+    }
   }
 
   const parsed  = parseInt(value, 10)
@@ -34,10 +45,13 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-0.5">Apply Damage / Healing</h3>
         <p className="text-xs text-[#9a9894] mb-4">
-          {combatant.name} —{' '}
+          {combatant.name} -{' '}
           <span className="font-mono text-[#e6e6e6]">
             {combatant.hp?.current}/{combatant.hp?.max} HP
           </span>
+          {tempHp > 0 && (
+            <span className="font-mono text-blue-400 ml-1">(+{tempHp} temp)</span>
+          )}
         </p>
         <form onSubmit={handleSubmit}>
           <input
@@ -45,7 +59,7 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
             type="number"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="e.g. 8 damage, −5 healing"
+            placeholder="e.g. 8 damage, -5 healing"
             className="w-full bg-transparent border-b border-white/[0.12] py-2 text-sm font-mono text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
           />
           {value !== '' && !isNaN(parsed) && (
@@ -69,6 +83,28 @@ export function DamageModal({ combatant, onConfirm, onClose }) {
             </button>
           </div>
         </form>
+
+        {/* Temp HP section */}
+        <div className="mt-4 pt-4 border-t border-white/[0.06]">
+          <label className="text-xs text-[#9a9894] block mb-1.5">Temporary HP</label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              value={tempHpValue}
+              onChange={(e) => setTempHpValue(e.target.value)}
+              placeholder={tempHp > 0 ? String(tempHp) : '0'}
+              min="0"
+              className="flex-1 bg-transparent border-b border-white/[0.12] py-1.5 text-sm font-mono text-[#e6e6e6] focus:outline-none focus:border-blue-400 placeholder:text-[#787774] transition-colors"
+            />
+            <button
+              type="button"
+              onClick={handleSetTempHp}
+              className="shrink-0 text-xs text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 px-2.5 py-1 rounded transition-colors"
+            >
+              Set
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

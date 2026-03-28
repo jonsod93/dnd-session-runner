@@ -11,6 +11,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   const [pcQuery, setPcQuery] = useState('')
   const [qaName, setQaName] = useState('')
   const [qaType, setQaType] = useState('quick')
+  const [qaHp, setQaHp]     = useState('')
+  const [qaAc, setQaAc]     = useState('')
   const [deleteConfirm,      setDeleteConfirm]      = useState(null) // { name, type, key }
   const [mobileLibraryMenu,  setMobileLibraryMenu]  = useState(null) // { entry }
   const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null) // mobile modal
@@ -56,9 +58,19 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
     if (qaType === 'lair') {
       onAdd({ type: 'lair', name: 'Lair Action', ac: null, hp: null, statblock: null })
     } else {
-      onAdd({ type: 'quick', name, ac: null, hp: null, statblock: null })
+      const parsedHp = parseInt(qaHp, 10)
+      const parsedAc = parseInt(qaAc, 10)
+      onAdd({
+        type: 'quick',
+        name,
+        ac: isNaN(parsedAc) ? null : parsedAc,
+        hp: isNaN(parsedHp) ? null : { current: parsedHp, max: parsedHp },
+        statblock: null,
+      })
     }
     setQaName('')
+    setQaHp('')
+    setQaAc('')
   }
 
   if (collapsed) {
@@ -258,6 +270,32 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 ))}
               </div>
             </div>
+            {qaType === 'quick' && (
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="label-section mb-1.5 block">HP</label>
+                  <input
+                    type="number"
+                    value={qaHp}
+                    onChange={(e) => setQaHp(e.target.value)}
+                    placeholder="Hit Points"
+                    min="1"
+                    className="w-full bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="label-section mb-1.5 block">AC</label>
+                  <input
+                    type="number"
+                    value={qaAc}
+                    onChange={(e) => setQaAc(e.target.value)}
+                    placeholder="Armor Class"
+                    min="1"
+                    className="w-full bg-transparent border-b border-white/[0.12] py-1.5 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#787774] transition-colors"
+                  />
+                </div>
+              </div>
+            )}
             <button
               type="submit"
               disabled={!qaName.trim() && qaType !== 'lair'}
