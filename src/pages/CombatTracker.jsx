@@ -167,7 +167,7 @@ export default function CombatTracker() {
   ]
 
   return (
-    <div className="flex bg-surface-0" style={{ height: 'calc(100vh - 48px)' }}>
+    <div className="flex neumorphic" style={{ height: 'calc(100vh - 48px)' }}>
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <div className={isMobile && mobileTab === 'tracker' ? 'hidden' : 'contents'}>
@@ -217,10 +217,10 @@ export default function CombatTracker() {
           onCancel={() => setEditor(null)}
         />
       ) : (
-      <div className={`flex-1 flex flex-col min-w-0 bg-surface-0 ${isMobile && mobileTab === 'library' ? 'hidden' : ''}`}>
+      <div className={`flex-1 flex flex-col min-w-0 ${isMobile && mobileTab === 'library' ? 'hidden' : ''}`}>
 
         {/* Toolbar */}
-        <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.05] flex items-center gap-3 min-h-[48px]">
+        <div className="shrink-0 px-5 py-2.5 border-b border-black/[0.15] flex items-center gap-3 min-h-[48px]">
           <button
             onClick={() => {
               // Play sound effect — silent if file missing or autoplay blocked
@@ -290,7 +290,7 @@ export default function CombatTracker() {
 
         {/* Header row — desktop only, not needed for mobile 2-line layout */}
         {combat.combatants.length > 0 && (
-          <div className="max-lg:hidden shrink-0 flex items-center gap-2 mx-3 px-4 py-1.5 border-b border-white/[0.05] text-xs text-[#6a6864] uppercase tracking-wider font-medium">
+          <div className="max-lg:hidden shrink-0 flex items-center gap-2 mx-3 px-4 py-1.5 border-b border-black/[0.15] text-xs text-[#6a6864] uppercase tracking-wider font-medium">
             {/* Drag handle spacer */}
             <div className="w-[10px] shrink-0" />
             {/* Active arrow spacer */}
@@ -420,7 +420,7 @@ export default function CombatTracker() {
         <div className="fixed bottom-14 left-0 right-0 z-40 px-3 py-2 pointer-events-none">
           <button
             onClick={combat.nextTurn}
-            className="pointer-events-auto w-full py-3.5 bg-surface-3 hover:bg-surface-4 active:bg-white/[0.08] border border-white/[0.08] text-[#e6e6e6] font-semibold text-base rounded-2xl transition-all hover:shadow-neon-gold"
+            className="pointer-events-auto w-full py-3.5 bg-[#202226] hover:bg-[#252729] active:shadow-neu-pressed text-[#e6e6e6] font-semibold text-base rounded-2xl transition-all shadow-neu-raised-sm"
           >
             Next Turn
           </button>
@@ -429,7 +429,7 @@ export default function CombatTracker() {
 
       {/* ── Mobile: bottom tab bar ───────────────────────────────────────── */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-surface-1 border-t border-white/[0.06]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-[#181a1d] border-t border-black/[0.15]">
           {[
             { key: 'tracker', label: 'Tracker' },
             { key: 'library', label: 'Library' },

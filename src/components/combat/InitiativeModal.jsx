@@ -80,7 +80,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{ background: 'rgba(5,7,10,0.5)' }}
       onClick={onClose}
     >
       <div
@@ -88,7 +88,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.15]">
           <div>
             <h2 className="text-sm font-medium text-[#e6e6e6]">Roll Initiative</h2>
             <p className="text-xs text-[#7a7874] mt-0.5">Edit any value before confirming</p>
@@ -148,7 +148,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                 value={values[c.id] ?? ''}
                 onChange={(e) => setValues((prev) => ({ ...prev, [c.id]: e.target.value }))}
                 placeholder="--"
-                className="w-14 bg-white/[0.03] border border-white/[0.08] rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/50 focus:shadow-neon-gold placeholder:text-[#5a5854] transition-all"
+                className="w-14 bg-[#131517] border-none rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none shadow-neu-pressed focus:shadow-[inset_2px_2px_5px_rgba(5,7,10,0.5),inset_-2px_-2px_5px_rgba(45,50,60,0.3),0_0_0_2px_rgba(255,107,53,0.3)] placeholder:text-[#5a5854] transition-all"
               />
             </div>
           ))}
@@ -158,7 +158,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-white/[0.05]">
+        <div className="px-5 py-4 border-t border-black/[0.15]">
           <button
             onClick={handleConfirm}
             className="btn-neon-gold w-full py-2.5"

@@ -107,7 +107,7 @@ export function CombatantRow({
           ? `active-border${isSelected ? ' is-selected' : ''}`
           : isConcentrating && !isDragging
             ? `concentration-border${isSelected ? ' is-selected' : ''}`
-            : `combat-card border border-white/[0.08] hover:border-white/[0.12]${isSelected ? ' border-white/[0.15] bg-white/[0.06]' : ''}`,
+            : `combat-card${isSelected ? ' is-selected' : ''}`,
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
       {...(!isLair ? { ...attributes, ...listeners } : {})}
@@ -375,7 +375,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   const handleCustomSubmit = (e) => {
     e.preventDefault()
     const t = custom.trim()
-    if (t) onAdd({ name: t, color: 'bg-white/[0.08] text-[#e6e6e6]' })
+    if (t) onAdd({ name: t, color: 'bg-[#202226] text-[#e6e6e6]' })
     setCustom('')
   }
 
@@ -391,17 +391,17 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   if (isMobile) {
     return createPortal(
       <div
-        className="fixed inset-0 z-[70] flex items-end justify-center"
+        className="fixed inset-0 z-[70] flex items-end justify-center neumorphic"
         style={{ background: 'rgba(0,0,0,0.5)' }}
         onClick={onClose}
       >
         <div
           className="glass-modal rounded-t-xl w-full overflow-hidden flex flex-col"
-          style={{ maxHeight: '80vh', boxShadow: '0 -4px 32px rgba(0,0,0,0.4)' }}
+          style={{ maxHeight: '80vh' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="relative shrink-0 px-10 py-3 border-b border-white/[0.06] text-center">
+          <div className="relative shrink-0 px-10 py-3 border-b border-black/[0.15] text-center">
             <p className="text-sm font-medium text-[#e6e6e6]">Add Condition</p>
             <button
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
@@ -432,7 +432,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 {availableConditions.map((c) => (
                   <button
                     key={c.name}
-                    className="text-center px-3 py-2.5 text-sm text-[#e6e6e6] library-card hover:!bg-white/[0.06]"
+                    className="text-center px-3 py-2.5 text-sm text-[#e6e6e6] library-card hover:!bg-[#202226]"
                     onClick={() => handleConditionClick(c)}
                     title={c.info || ''}
                   >
@@ -445,7 +445,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
 
           {/* Custom condition — no autoFocus so the keyboard doesn't jump up */}
           {!selectedCondition && (
-          <div className="shrink-0 border-t border-white/[0.06] px-3 py-3">
+          <div className="shrink-0 border-t border-black/[0.15] px-3 py-3">
             <form onSubmit={handleCustomSubmit} className="flex gap-2">
               <input
                 type="text"
@@ -484,7 +484,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   return (
     <div
       ref={menuRef}
-      className="fixed z-[70] glass-modal rounded-xl overflow-y-auto"
+      className="fixed z-[70] glass-modal rounded-xl overflow-y-auto neumorphic"
       style={{ width: MENU_W, ...posStyle }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -510,7 +510,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               availableConditions.map((c) => (
                 <button
                   key={c.name}
-                  className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-white/[0.06] rounded-lg transition-all"
+                  className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-[#202226] rounded-lg transition-all"
                   onClick={() => handleConditionClick(c)}
                   title={c.info || ''}
                 >
@@ -519,14 +519,14 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               ))
             )}
           </div>
-          <div className="border-t border-white/[0.06] px-2 py-2">
+          <div className="border-t border-black/[0.15] px-2 py-2">
             <form onSubmit={handleCustomSubmit}>
               <input
                 type="text"
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
                 placeholder="Custom condition..."
-                className="w-full bg-transparent border-b border-white/[0.08] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#5a5854] transition-all"
+                className="w-full bg-transparent border-b border-black/[0.2] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#5a5854] transition-all"
               />
             </form>
           </div>
@@ -620,8 +620,8 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
             key={val}
             className={`w-full text-left px-2 py-1 text-xs rounded transition-colors ${
               expiryType === val
-                ? 'bg-gold-400/10 text-gold-400 border border-gold-400/30'
-                : 'text-[#e6e6e6] hover:bg-white/[0.04] border border-transparent'
+                ? 'bg-gold-400/10 text-gold-400 shadow-neu-pressed border border-gold-400/30'
+                : 'text-[#e6e6e6] hover:bg-[#202226] border border-transparent'
             }`}
             onClick={() => setExpiryType(val)}
           >

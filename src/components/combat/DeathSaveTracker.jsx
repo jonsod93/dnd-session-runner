@@ -28,7 +28,7 @@ export function DeathSaveTracker({ deathSaves, onUpdate, onNat20, onNat1, isPC }
             key={`s${i}`}
             className={`w-3.5 h-3.5 rounded-full border-[1.5px] transition-all ${
               i < successes
-                ? 'bg-green-500 border-green-500 shadow-neon-green'
+                ? 'bg-green-500 border-green-500 shadow-neu-glow-green'
                 : 'border-white/20 hover:border-green-400/50'
             }`}
             onClick={(e) => { e.stopPropagation(); handleSuccess(i) }}
@@ -45,7 +45,7 @@ export function DeathSaveTracker({ deathSaves, onUpdate, onNat20, onNat1, isPC }
             key={`f${i}`}
             className={`w-3.5 h-3.5 rounded-full border-[1.5px] transition-all ${
               i < failures
-                ? 'bg-red-500 border-red-500 shadow-neon-red'
+                ? 'bg-red-500 border-red-500 shadow-neu-glow-red'
                 : 'border-white/20 hover:border-red-400/50'
             }`}
             onClick={(e) => { e.stopPropagation(); handleFailure(i) }}
@@ -57,14 +57,14 @@ export function DeathSaveTracker({ deathSaves, onUpdate, onNat20, onNat1, isPC }
       {/* Nat 20 / Nat 1 buttons */}
       <div className="flex items-center gap-1 ml-1">
         <button
-          className="text-[10px] px-1.5 py-0.5 rounded-lg border border-green-400/30 text-green-400 hover:bg-green-400/10 transition-all hover:shadow-neon-green"
+          className="text-[10px] px-1.5 py-0.5 rounded-lg text-green-400 hover:bg-green-400/10 transition-all shadow-neu-flat hover:shadow-neu-glow-green active:shadow-neu-pressed"
           onClick={(e) => { e.stopPropagation(); onNat20() }}
           title={isPC ? 'Nat 20: Stabilize' : 'Nat 20: Regain 1 HP and stabilize'}
         >
           20
         </button>
         <button
-          className="text-[10px] px-1.5 py-0.5 rounded-lg border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-all hover:shadow-neon-red"
+          className="text-[10px] px-1.5 py-0.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-all shadow-neu-flat hover:shadow-neu-glow-red active:shadow-neu-pressed"
           onClick={(e) => { e.stopPropagation(); handleNat1() }}
           title="Nat 1: 2 death save failures"
         >

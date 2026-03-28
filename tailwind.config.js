@@ -13,11 +13,21 @@ export default {
       },
       animation: {
         'fade-in': 'fadeIn 0.4s ease-out',
+        'pulse-glow-orange': 'pulseGlowOrange 2.5s ease-in-out infinite',
+        'pulse-glow-blue': 'pulseGlowBlue 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        pulseGlowOrange: {
+          '0%, 100%': { boxShadow: 'inset 0 0 8px rgba(255,107,53,0.2), 6px 6px 12px rgba(16,18,22,0.9), -6px -6px 12px rgba(55,60,72,0.7)' },
+          '50%': { boxShadow: 'inset 0 0 18px rgba(255,107,53,0.45), 6px 6px 12px rgba(16,18,22,0.9), -6px -6px 12px rgba(55,60,72,0.7)' },
+        },
+        pulseGlowBlue: {
+          '0%, 100%': { boxShadow: 'inset 0 0 8px rgba(96,165,250,0.15), 6px 6px 12px rgba(16,18,22,0.9), -6px -6px 12px rgba(55,60,72,0.7)' },
+          '50%': { boxShadow: 'inset 0 0 16px rgba(96,165,250,0.35), 6px 6px 12px rgba(16,18,22,0.9), -6px -6px 12px rgba(55,60,72,0.7)' },
         },
       },
       colors: {
@@ -54,6 +64,16 @@ export default {
         'neon-green': '0 0 12px rgba(74, 222, 128, 0.3), 0 0 4px rgba(74, 222, 128, 0.15)',
         'glass': '0 8px 32px rgba(0,0,0,0.5), 0 0 1px rgba(255,255,255,0.08) inset',
         'glass-lg': '0 24px 80px rgba(0,0,0,0.7), 0 0 1px rgba(255,255,255,0.08) inset',
+        // Neumorphic shadows
+        'neu-raised': '4px 4px 8px rgba(5,7,10,0.5), -4px -4px 8px rgba(45,50,60,0.35)',
+        'neu-raised-sm': '2px 2px 5px rgba(5,7,10,0.45), -2px -2px 5px rgba(45,50,60,0.3)',
+        'neu-pressed': 'inset 2px 2px 5px rgba(5,7,10,0.5), inset -2px -2px 5px rgba(45,50,60,0.3)',
+        'neu-pressed-deep': 'inset 3px 3px 6px rgba(5,7,10,0.5), inset -3px -3px 6px rgba(45,50,60,0.35)',
+        'neu-flat': '1px 1px 3px rgba(5,7,10,0.4), -1px -1px 3px rgba(45,50,60,0.25)',
+        'neu-glow-orange': 'inset 0 0 8px rgba(255,107,53,0.2), 4px 4px 8px rgba(5,7,10,0.5), -4px -4px 8px rgba(45,50,60,0.35)',
+        'neu-glow-blue': 'inset 0 0 8px rgba(96,165,250,0.2), 4px 4px 8px rgba(5,7,10,0.5), -4px -4px 8px rgba(45,50,60,0.35)',
+        'neu-glow-red': 'inset 0 0 8px rgba(248,113,113,0.15), 2px 2px 5px rgba(5,7,10,0.45), -2px -2px 5px rgba(45,50,60,0.3)',
+        'neu-glow-green': 'inset 0 0 8px rgba(74,222,128,0.15), 2px 2px 5px rgba(5,7,10,0.45), -2px -2px 5px rgba(45,50,60,0.3)',
       },
     },
   },

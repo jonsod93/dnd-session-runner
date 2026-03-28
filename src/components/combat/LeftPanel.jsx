@@ -75,10 +75,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 bg-surface-1 border-r border-white/[0.06] flex flex-col items-center pt-3">
+      <div className="w-10 shrink-0 bg-[#181a1d] border-r border-black/[0.15] flex flex-col items-center pt-3">
         <button
           onClick={onToggleCollapse}
-          className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-white/[0.06]"
+          className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-[#202226]"
           title="Show library"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -90,9 +90,9 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   }
 
   return (
-    <div className={`${isMobile ? 'w-full flex-1' : 'w-64 shrink-0'} bg-surface-1 border-r border-white/[0.05] flex flex-col`} style={{ background: 'linear-gradient(180deg, #131316 0%, #111114 100%)' }}>
+    <div className={`${isMobile ? 'w-full flex-1' : 'w-64 shrink-0'} bg-[#181a1d] border-r border-black/[0.15] flex flex-col`}>
       {/* Tabs + collapse button */}
-      <div className="flex border-b border-white/[0.05] shrink-0">
+      <div className="flex border-b border-black/[0.15] shrink-0">
         {[
           { key: 'npc',      label: 'NPC'       },
           { key: 'pc',       label: 'PC'        },
@@ -125,7 +125,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── NPC Library ────────────────────────────────────────────────── */}
       {tab === 'npc' && (
         <>
-          <div className="px-2.5 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-2">
+          <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0 flex items-center gap-2">
             <input
               type="text"
               value={query}
@@ -196,7 +196,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── PC Library ─────────────────────────────────────────────────── */}
       {tab === 'pc' && (
         <>
-          <div className="px-2.5 py-2 border-b border-white/[0.04] shrink-0">
+          <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0">
             <input
               type="text"
               value={pcQuery}
@@ -261,8 +261,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     className={[
                       'flex-1 text-sm rounded-xl px-2 py-1.5 border transition-all',
                       qaType === val
-                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400 shadow-neon-gold'
-                        : 'border-white/[0.08] text-[#7a7874] hover:text-[#e6e6e6] hover:border-white/[0.15]',
+                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400 shadow-neu-pressed'
+                        : 'border-transparent text-[#7a7874] hover:text-[#e6e6e6] shadow-neu-flat',
                     ].join(' ')}
                   >
                     {label}
@@ -304,7 +304,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               Add to Tracker
             </button>
           </form>
-          <p className="mt-6 text-[#6a6864] text-xs leading-relaxed border-t border-white/[0.04] pt-4">
+          <p className="mt-6 text-[#6a6864] text-xs leading-relaxed border-t border-black/[0.15] pt-4">
             Quick add creates a combatant with no statblock - useful for improvised NPCs and summoned creatures.
           </p>
         </div>
@@ -313,7 +313,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Delete confirmation modal ───────────────────────────────────── */}
       {deleteConfirm && createPortal(
         <div
-          className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[2000] flex items-center justify-center p-4 neumorphic"
           style={{ background: 'rgba(0,0,0,0.5)' }}
           onClick={() => setDeleteConfirm(null)}
         >
@@ -350,7 +350,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Mobile library entry popup ───────────────────────────────────── */}
       {mobileLibraryMenu && createPortal(
         <div
-          className="fixed inset-0 z-[2000] flex items-end justify-center p-4 pb-20"
+          className="fixed inset-0 z-[2000] flex items-end justify-center p-4 pb-20 neumorphic"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setMobileLibraryMenu(null)}
         >
@@ -359,7 +359,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header — centered name/type, ✕ in top-right corner */}
-            <div className="relative px-10 py-3 border-b border-white/[0.06] text-center">
+            <div className="relative px-10 py-3 border-b border-black/[0.15] text-center">
               <p className="text-sm font-medium text-[#e6e6e6]">{mobileLibraryMenu.entry.Name}</p>
               {mobileLibraryMenu.entry.Type && (
                 <p className="text-xs text-[#9a9894] mt-0.5">{mobileLibraryMenu.entry.Type}</p>
@@ -375,14 +375,14 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             {/* Action buttons — outlined, centered text, with gaps */}
             <div className="p-3 flex flex-col gap-2">
               <button
-                className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-[#202226] rounded-lg transition-colors shadow-neu-flat"
                 onClick={() => { handleLibraryAdd(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
               >
                 Add combatant to combat
               </button>
               {(mobileLibraryMenu.entry.HP || mobileLibraryMenu.entry.AC || mobileLibraryMenu.entry.Abilities) && (
                 <button
-                  className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                  className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-[#202226] rounded-lg transition-colors shadow-neu-flat"
                   onClick={() => { setLibraryPreviewEntry(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
                 >
                   View statblock
@@ -391,13 +391,13 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               {mobileLibraryMenu.entry._libType !== 'pc' && (
                 <>
                   <button
-                    className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-white/[0.06] border border-white/[0.15] rounded-lg transition-colors"
+                    className="w-full text-center px-4 py-3 text-sm text-[#e6e6e6] hover:bg-[#202226] rounded-lg transition-colors shadow-neu-flat"
                     onClick={() => { onEditStatblock?.(mobileLibraryMenu.entry); setMobileLibraryMenu(null) }}
                   >
                     Edit statblock
                   </button>
                   <button
-                    className="w-full text-center px-4 py-3 text-sm text-red-400 hover:bg-white/[0.06] border border-red-400/[0.25] rounded-lg transition-colors"
+                    className="w-full text-center px-4 py-3 text-sm text-red-400 hover:bg-[#202226] rounded-lg transition-colors shadow-neu-flat"
                     onClick={() => {
                       setDeleteConfirm({ name: mobileLibraryMenu.entry.Name, type: 'npc', key: mobileLibraryMenu.entry._key })
                       setMobileLibraryMenu(null)
@@ -410,7 +410,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             </div>
 
             {/* Cancel — plain text, no outline */}
-            <div className="border-t border-white/[0.06] px-4 py-3">
+            <div className="border-t border-black/[0.15] px-4 py-3">
               <button
                 className="w-full text-center text-sm text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
                 onClick={() => setMobileLibraryMenu(null)}
@@ -426,18 +426,18 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Desktop: statblock hover preview (no modal, no backdrop) ───── */}
       {!isMobile && hoverPreviewEntry && createPortal(
         <div
-          className="fixed z-[2000] glass-modal rounded-2xl flex flex-col overflow-hidden"
+          className="fixed z-[2000] glass-modal rounded-2xl flex flex-col overflow-hidden neumorphic"
           style={{
             left: hoverPreviewEntry.rect.right + 8,
             top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
             width: 320,
             maxHeight: 'calc(100vh - 64px)',
-            '--sb-bg': '#0e0e12',
+            '--sb-bg': '#131517',
           }}
           onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
           onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
         >
-          <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+          <div className="shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center justify-between">
             <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{hoverPreviewEntry.entry.Name}</p>
             <button
               onClick={() => setHoverPreviewEntry(null)}
@@ -454,16 +454,16 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Mobile: statblock preview modal ─────────────────────────────── */}
       {isMobile && libraryPreviewEntry && createPortal(
         <div
-          className="fixed inset-0 z-[2000] flex items-end justify-center"
+          className="fixed inset-0 z-[2000] flex items-end justify-center neumorphic"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setLibraryPreviewEntry(null)}
         >
           <div
-            className="bg-surface-1 border border-white/[0.1] w-full h-full flex flex-col overflow-hidden"
-            style={{ '--sb-bg': '#111114' }}
+            className="bg-[#181a1d] w-full h-full flex flex-col overflow-hidden"
+            style={{ '--sb-bg': '#131517' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+            <div className="shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center justify-between">
               <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{libraryPreviewEntry.Name}</p>
               <button
                 onClick={() => setLibraryPreviewEntry(null)}

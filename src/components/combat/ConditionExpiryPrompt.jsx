@@ -27,8 +27,8 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
     return (
       <div className="fixed inset-0 z-[65] flex items-center justify-center pointer-events-none">
         <div
-          className="pointer-events-auto glass-modal !border-amber-400/30 rounded-2xl px-5 py-3 max-w-sm animate-fade-in"
-          style={{ boxShadow: '0 0 20px rgba(251, 191, 36, 0.12)' }}
+          className="pointer-events-auto glass-modal rounded-2xl px-5 py-3 max-w-sm animate-fade-in"
+          style={{ boxShadow: 'inset 0 0 10px rgba(251,191,36,0.15), 4px 4px 8px rgba(5,7,10,0.45), -4px -4px 8px rgba(45,50,60,0.3)' }}
         >
           <p className="text-sm text-[#e6e6e6]">
             <span className="font-medium text-amber-400">{condition.name}</span> on{' '}
@@ -66,8 +66,8 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
                 key={ab}
                 className={`text-center px-2 py-2 text-xs rounded-lg border transition-all ${
                   rollResult?.ability === ab
-                    ? 'border-gold-400/40 bg-gold-400/10 text-gold-400 shadow-neon-gold'
-                    : 'border-white/[0.08] text-[#e6e6e6] hover:bg-white/[0.06] stat-card'
+                    ? 'border-gold-400/40 bg-gold-400/10 text-gold-400 shadow-neu-pressed'
+                    : 'text-[#e6e6e6] hover:bg-[#202226] stat-card'
                 }`}
                 onClick={() => handleRoll(ab)}
               >
@@ -93,13 +93,13 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
         <div className="flex gap-2">
           <button
             onClick={onClear}
-            className="flex-1 bg-green-400/80 hover:bg-green-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all hover:shadow-neon-green"
+            className="flex-1 bg-green-400/80 hover:bg-green-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all shadow-neu-raised-sm hover:shadow-neu-glow-green active:shadow-neu-pressed"
           >
             Saved
           </button>
           <button
             onClick={onKeep}
-            className="flex-1 bg-red-400/80 hover:bg-red-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all hover:shadow-neon-red"
+            className="flex-1 bg-red-400/80 hover:bg-red-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all shadow-neu-raised-sm hover:shadow-neu-glow-red active:shadow-neu-pressed"
           >
             Failed
           </button>

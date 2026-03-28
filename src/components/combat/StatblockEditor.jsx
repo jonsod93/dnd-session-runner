@@ -56,9 +56,9 @@ export function StatblockEditor({ initial, onSave, onCancel, title }) {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-surface-0">
+    <div className="flex-1 flex flex-col min-w-0">
       {/* Header */}
-      <div className="shrink-0 px-5 py-2.5 border-b border-white/[0.05] flex items-center gap-3 min-h-[48px]">
+      <div className="shrink-0 px-5 py-2.5 border-b border-black/[0.15] flex items-center gap-3 min-h-[48px]">
         <h2 className="text-sm font-medium text-[#e6e6e6]">{title ?? 'Edit Statblock'}</h2>
         <div className="flex-1" />
         <button
@@ -88,7 +88,7 @@ export function StatblockEditor({ initial, onSave, onCancel, title }) {
           value={json}
           onChange={(e) => setJson(e.target.value)}
           spellCheck={false}
-          className="w-full h-full bg-surface-2 border border-white/[0.06] rounded-2xl p-4 font-mono text-xs text-[#e6e6e6] focus:outline-none focus:border-gold-400/40 focus:shadow-neon-gold resize-none leading-relaxed transition-all"
+          className="w-full h-full bg-[#131517] border-none rounded-2xl p-4 font-mono text-xs text-[#e6e6e6] focus:outline-none shadow-neu-pressed focus:shadow-[inset_2px_2px_5px_rgba(5,7,10,0.5),inset_-2px_-2px_5px_rgba(45,50,60,0.3),0_0_0_2px_rgba(255,107,53,0.3)] resize-none leading-relaxed transition-all"
           placeholder="Paste statblock JSON here..."
         />
       </div>

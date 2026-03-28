@@ -17,8 +17,8 @@ export function ConcentrationPrompt({ check, combatantName, onKeep, onDrop, onCl
       style={{ background: 'rgba(0,0,0,0.6)' }}
     >
       <div
-        className="glass-modal rounded-2xl w-80 p-5 !border-red-400/30"
-        style={{ boxShadow: '0 0 24px rgba(248, 113, 113, 0.15), 0 24px 80px rgba(0,0,0,0.7)' }}
+        className="glass-modal rounded-2xl w-80 p-5"
+        style={{ boxShadow: 'inset 0 0 12px rgba(248,113,113,0.25), 5px 5px 10px rgba(5,7,10,0.45), -5px -5px 10px rgba(45,50,60,0.3)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-1">
@@ -56,7 +56,7 @@ export function ConcentrationPrompt({ check, combatantName, onKeep, onDrop, onCl
           </button>
           <button
             onClick={onDrop}
-            className="flex-1 bg-red-400/80 hover:bg-red-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all hover:shadow-neon-red"
+            className="flex-1 bg-red-400/80 hover:bg-red-400 text-white font-semibold text-sm rounded-xl px-4 py-2 transition-all shadow-neu-raised-sm hover:shadow-neu-glow-red active:shadow-neu-pressed"
           >
             Drop
           </button>

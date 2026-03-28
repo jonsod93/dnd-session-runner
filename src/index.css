@@ -253,4 +253,228 @@
   .section-title-glow {
     text-shadow: 0 0 12px rgba(232, 120, 48, 0.3);
   }
+
+  /* ══════════════════════════════════════════════════
+     Neumorphic overrides — scoped to .neumorphic
+     Only affects the combat tracker page
+     ══════════════════════════════════════════════════ */
+
+  .neumorphic {
+    --neu-bg: #131517;
+    --neu-bg-raised: #181a1d;
+    --neu-bg-elevated: #1c1e22;
+    --neu-bg-button: #202226;
+    --neu-shadow-dark: rgba(5, 7, 10, 0.5);
+    --neu-shadow-light: rgba(45, 50, 60, 0.35);
+    --neu-border-light: rgba(45, 50, 60, 0.4);
+    --neu-border-dark: rgba(5, 7, 10, 0.4);
+    background-color: var(--neu-bg) !important;
+  }
+
+  /* When combat tracker is active, match the nav bar to neumorphic palette */
+  :has(> main .neumorphic) > nav {
+    background: #101214 !important;
+    border-bottom-color: rgba(0,0,0,0.4) !important;
+  }
+  :has(> main .neumorphic) {
+    background-color: #131517 !important;
+  }
+
+  .neumorphic .glass-panel {
+    background: var(--neu-bg-raised);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 1rem;
+    border: 2px solid;
+    border-top-color: var(--neu-border-light);
+    border-left-color: var(--neu-border-light);
+    border-bottom-color: var(--neu-border-dark);
+    border-right-color: var(--neu-border-dark);
+    box-shadow: 4px 4px 8px var(--neu-shadow-dark), -4px -4px 8px var(--neu-shadow-light);
+  }
+
+  .neumorphic .glass-modal {
+    background: var(--neu-bg-raised);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 1rem;
+    border: 2px solid;
+    border-top-color: var(--neu-border-light);
+    border-left-color: var(--neu-border-light);
+    border-bottom-color: var(--neu-border-dark);
+    border-right-color: var(--neu-border-dark);
+    box-shadow: 6px 6px 12px rgba(5,7,10,0.5), -6px -6px 12px rgba(45,50,60,0.35);
+  }
+
+  .neumorphic .combat-card {
+    background: var(--neu-bg-raised);
+    border-radius: 0.75rem;
+    border: 2px solid;
+    border-top-color: var(--neu-border-light);
+    border-left-color: var(--neu-border-light);
+    border-bottom-color: var(--neu-border-dark);
+    border-right-color: var(--neu-border-dark);
+    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+  }
+  .neumorphic .combat-card.is-selected {
+    background: #101214;
+    border: none;
+    box-shadow:
+      inset 2px 2px 0 var(--neu-border-dark),
+      inset -2px -2px 0 var(--neu-border-light);
+  }
+
+  .neumorphic .library-card {
+    background: var(--neu-bg-raised);
+    border-radius: 0.75rem;
+    border: 2px solid;
+    border-top-color: var(--neu-border-light);
+    border-left-color: var(--neu-border-light);
+    border-bottom-color: var(--neu-border-dark);
+    border-right-color: var(--neu-border-dark);
+    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+    transition: all 0.2s ease;
+  }
+  .neumorphic .library-card:hover {
+    background: var(--neu-bg-elevated);
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  }
+
+  .neumorphic .stat-card {
+    background: var(--neu-bg-raised);
+    border: 2px solid;
+    border-top-color: var(--neu-border-light);
+    border-left-color: var(--neu-border-light);
+    border-bottom-color: var(--neu-border-dark);
+    border-right-color: var(--neu-border-dark);
+    border-radius: 0.75rem;
+    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+  }
+
+  /* Active turn: raised card with orange left accent + side borders */
+  .neumorphic .active-border {
+    background: var(--neu-bg-raised) !important;
+    border: 2px solid !important;
+    border-top-color: var(--neu-border-light) !important;
+    border-right-color: var(--neu-border-dark) !important;
+    border-bottom-color: var(--neu-border-dark) !important;
+    border-left: 3px solid #ff6b35 !important;
+    border-radius: 0.75rem;
+    animation: none;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  }
+  .neumorphic .active-border.is-selected {
+    background: #101214 !important;
+    border: none !important;
+    border-left: 3px solid #ff6b35 !important;
+    box-shadow:
+      inset 2px 2px 0 var(--neu-border-dark),
+      inset -2px -2px 0 var(--neu-border-light);
+  }
+
+  /* Concentration: raised card with blue left accent + side borders */
+  .neumorphic .concentration-border {
+    background: var(--neu-bg-raised) !important;
+    border: 2px solid !important;
+    border-top-color: var(--neu-border-light) !important;
+    border-right-color: var(--neu-border-dark) !important;
+    border-bottom-color: var(--neu-border-dark) !important;
+    border-left: 3px solid #60a5fa !important;
+    border-radius: 0.75rem;
+    animation: none;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  }
+  .neumorphic .concentration-border.is-selected {
+    background: #101214 !important;
+    border: none !important;
+    border-left: 3px solid #60a5fa !important;
+    box-shadow:
+      inset 2px 2px 0 var(--neu-border-dark),
+      inset -2px -2px 0 var(--neu-border-light);
+  }
+
+  /* ── Neumorphic buttons ──────────────────────────── */
+  .neumorphic .btn-neon-gold {
+    background: linear-gradient(145deg, #e8501e, #c43a10);
+    color: #ffffff;
+    border: 2px solid;
+    border-top-color: rgba(255, 130, 70, 0.6);
+    border-left-color: rgba(255, 130, 70, 0.6);
+    border-bottom-color: rgba(140, 35, 5, 0.7);
+    border-right-color: rgba(140, 35, 5, 0.7);
+    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px rgba(230, 80, 30, 0.25);
+  }
+  .neumorphic .btn-neon-gold:hover {
+    background: linear-gradient(145deg, #f05a28, #d44518);
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px rgba(230, 80, 30, 0.35);
+    transform: translateY(-1px);
+  }
+  .neumorphic .btn-neon-gold:active {
+    box-shadow: inset 2px 2px 4px rgba(100, 25, 5, 0.6), inset -2px -2px 4px rgba(255, 130, 70, 0.2);
+    transform: translateY(0);
+  }
+
+  .neumorphic .btn-outline {
+    background: var(--neu-bg-raised);
+    border: 2px solid;
+    border-top-color: var(--neu-border-light);
+    border-left-color: var(--neu-border-light);
+    border-bottom-color: var(--neu-border-dark);
+    border-right-color: var(--neu-border-dark);
+    color: #9a9894;
+    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+  }
+  .neumorphic .btn-outline:hover {
+    color: #e6e6e6;
+    background: var(--neu-bg-elevated);
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+  }
+  .neumorphic .btn-outline:active {
+    box-shadow: inset 2px 2px 4px var(--neu-shadow-dark), inset -2px -2px 4px var(--neu-shadow-light);
+    background: var(--neu-bg-raised);
+  }
+
+  .neumorphic .btn-action {
+    background: var(--neu-bg-raised);
+    border: 2px solid;
+    border-top-color: var(--neu-border-light);
+    border-left-color: var(--neu-border-light);
+    border-bottom-color: var(--neu-border-dark);
+    border-right-color: var(--neu-border-dark);
+    color: #9a9894;
+    box-shadow: 1px 1px 3px var(--neu-shadow-dark), -1px -1px 3px var(--neu-shadow-light);
+  }
+  .neumorphic .btn-action:hover {
+    background: var(--neu-bg-elevated);
+    color: #e6e6e6;
+    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+  }
+  .neumorphic .btn-action:active {
+    box-shadow: inset 2px 2px 4px var(--neu-shadow-dark), inset -2px -2px 4px var(--neu-shadow-light);
+    background: var(--neu-bg-raised);
+  }
+
+  /* ── Neumorphic inputs (pressed-in well) ─────────── */
+  .neumorphic .input-field {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light);
+  }
+  .neumorphic .input-field:focus {
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light), 0 0 0 2px rgba(255,107,53,0.3);
+    border: none;
+  }
+
+  /* ── Neumorphic nav glow ─────────────────────────── */
+  .neumorphic .nav-active-glow {
+    box-shadow: none;
+  }
+
+  .neumorphic .section-title-glow {
+    text-shadow: 0 0 12px rgba(255, 107, 53, 0.3);
+  }
+
+  /* ── Neumorphic scrollbar ────────────────────────── */
+  .neumorphic ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
+  .neumorphic ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
 }

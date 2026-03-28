@@ -84,7 +84,7 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
         </form>
 
         {/* Temp HP section */}
-        <div className="mt-4 pt-4 border-t border-white/[0.05]">
+        <div className="mt-4 pt-4 border-t border-black/[0.15]">
           <label className="text-xs text-[#7a7874] block mb-1.5">Temporary HP</label>
           <div className="flex gap-2">
             <input
