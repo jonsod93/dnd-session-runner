@@ -33,7 +33,7 @@ function segmentDist(a, b) {
 if (typeof document !== 'undefined' && !document.getElementById('measurement-label-style')) {
   const style = document.createElement('style')
   style.id = 'measurement-label-style'
-  style.textContent = `.measurement-label{background:none!important;border:none!important;width:auto!important;height:auto!important;}`
+  style.textContent = `.measurement-label{background:none!important;border:none!important;width:auto!important;height:auto!important;overflow:visible!important;}`
   document.head.appendChild(style)
 }
 
