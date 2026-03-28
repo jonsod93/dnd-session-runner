@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import useSessionLink from '../../hooks/useSessionLink'
 import SessionLinker from './SessionLinker'
 import { generateNPCName } from '../../utils/nameGenerators'
@@ -8,17 +8,33 @@ import {
   buildPersonProperties,
   buildLocationProperties,
   buildOrgProperties,
+  fetchIngredients,
   PEOPLE_DB_ID,
   LOCATIONS_DB_ID,
   ORGANIZATIONS_DB_ID,
 } from '../../utils/notionUtils'
 
 export default function GeneratorModal({ generator, initialSession, onClose, onSaved }) {
+  const isContentGenerator = !!generator.options
+
+  // ── Content generator state ──
+  const [selectedOptions, setSelectedOptions] = useState(() => {
+    if (!generator.options) return {}
+    const defaults = {}
+    generator.options.forEach(opt => { defaults[opt.key] = opt.default || opt.choices[0] })
+    return defaults
+  })
+  const [output, setOutput] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [notionIngredients, setNotionIngredients] = useState(null)
+  const [ingredientsLoading, setIngredientsLoading] = useState(false)
+  const ingredientsFetched = useRef(false)
+
+  // ── Name generator state ──
   const subtypes = generator.subtypes ?? null
   const [activeSubtype, setActiveSubtype] = useState(subtypes?.[0] ?? null)
-
   const currentGenerate = activeSubtype?.generate ?? generator.generate
-  const [name, setName] = useState(() => currentGenerate())
+  const [name, setName] = useState(() => isContentGenerator ? '' : currentGenerate())
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -44,6 +60,59 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
     return () => window.removeEventListener('keydown', h)
   }, [onClose, saving])
 
+  // Fetch Notion ingredients once when shop generator opens
+  useEffect(() => {
+    if (generator.key !== 'shop' || ingredientsFetched.current) return
+    ingredientsFetched.current = true
+    setIngredientsLoading(true)
+    fetchIngredients()
+      .then(items => setNotionIngredients(items))
+      .catch(() => setNotionIngredients(null))
+      .finally(() => setIngredientsLoading(false))
+  }, [generator.key])
+
+  // Generate content on mount and when options change
+  useEffect(() => {
+    if (!isContentGenerator) return
+    const opts = { ...selectedOptions }
+    if (generator.key === 'shop' && opts.shopType === 'Ingredients' && notionIngredients) {
+      opts.notionIngredients = notionIngredients
+    }
+    setOutput(generator.generate(opts))
+  }, [selectedOptions, notionIngredients]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleOptionChange = (key, value) => {
+    setSelectedOptions(prev => ({ ...prev, [key]: value }))
+  }
+
+  const regenerateContent = () => {
+    const opts = { ...selectedOptions }
+    if (generator.key === 'shop' && opts.shopType === 'Ingredients' && notionIngredients) {
+      opts.notionIngredients = notionIngredients
+    }
+    setOutput(generator.generate(opts))
+  }
+
+  // Convert structured output to plain text for clipboard
+  const outputText = Array.isArray(output)
+    ? output.map(l => l.text).join('\n')
+    : output
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(outputText)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* clipboard may not be available */ }
+  }
+
+  // Color map for structured output lines
+  const LINE_COLORS = {
+    green: 'text-emerald-400',
+    blue: 'text-sky-400',
+  }
+
+  // ── Name generator handlers ──
   const regenerate = () => {
     const gen = activeSubtype?.generate ?? generator.generate
     setName(gen())
@@ -56,7 +125,6 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
 
   const handleToggleNpc = () => {
     if (!npcEnabled) {
-      // Generate a name when first enabling
       if (!npcName) setNpcName(generateNPCName())
       setNpcEnabled(true)
     } else {
@@ -70,7 +138,6 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
     setError(null)
 
     try {
-      // Build properties and determine target DB
       let dbId, properties
       const trimmedName = name.trim()
       const desc = description.trim() || undefined
@@ -92,13 +159,9 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
           throw new Error(`Unknown target: ${generator.notionTarget}`)
       }
 
-      // Create the main entity in Notion
       const created = await createNotionPage(dbId, properties)
-
-      // Append mention to the linked session
       await appendSessionBlock(modal.linkedSession.id, created.id)
 
-      // If NPC is enabled, create the NPC and link it
       let npcCreated = null
       if (hasNpc && npcEnabled && npcName.trim()) {
         const npcBlurb = npcDescription.trim() || undefined
@@ -111,8 +174,6 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
 
         const npcProps = buildPersonProperties(npcName.trim(), npcBlurb, relations)
         npcCreated = await createNotionPage(PEOPLE_DB_ID, npcProps)
-
-        // Also append NPC mention to the session
         await appendSessionBlock(modal.linkedSession.id, npcCreated.id)
       }
 
@@ -126,6 +187,118 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
     }
   }
 
+  // ── Content generator modal ──
+  if (isContentGenerator) {
+    const isIngredients = generator.key === 'shop' && selectedOptions.shopType === 'Ingredients'
+    const usingNotion = isIngredients && notionIngredients && notionIngredients.length > 0
+
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: 'rgba(0,0,0,0.5)' }}
+        onClick={onClose}
+      >
+        <div
+          className="bg-[#252525] border border-white/[0.1] rounded-lg w-full max-w-md flex flex-col max-h-[85vh]"
+          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+            <h2 className="text-sm font-medium text-[#e6e6e6]">
+              Generate {generator.label}
+            </h2>
+            <button
+              className="text-[#787774] hover:text-[#e6e6e6] text-base leading-none transition-colors"
+              onClick={onClose}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+            {/* Option selectors */}
+            {generator.options
+              .filter(opt => {
+                if (!opt.showWhen) return true
+                return Object.entries(opt.showWhen).every(([k, v]) => selectedOptions[k] === v)
+              })
+              .map(opt => (
+              <div key={opt.key}>
+                <label className="block text-xs text-[#787774] mb-1.5">{opt.label}</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {opt.choices.map(choice => (
+                    <button
+                      key={choice}
+                      type="button"
+                      onClick={() => handleOptionChange(opt.key, choice)}
+                      className={[
+                        'text-xs rounded px-2.5 py-1 border transition-colors',
+                        selectedOptions[opt.key] === choice
+                          ? 'border-gold-400/60 bg-gold-400/10 text-gold-400'
+                          : 'border-white/[0.1] text-[#787774] hover:text-[#e6e6e6] hover:border-white/[0.2]',
+                      ].join(' ')}
+                    >
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Notion status indicator for ingredients */}
+            {isIngredients && (
+              <div className="text-[10px] text-[#787774]">
+                {ingredientsLoading ? 'Loading ingredients from Notion...' :
+                 usingNotion ? `Using ${notionIngredients.length} ingredients from Notion` :
+                 'Using random ingredients (Notion unavailable)'}
+              </div>
+            )}
+
+            {/* Output block */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs text-[#787774]">Result</label>
+                <button
+                  type="button"
+                  onClick={regenerateContent}
+                  className="text-xs text-[#787774] hover:text-gold-400 border border-white/[0.1] hover:border-gold-400/40 rounded px-2 py-1 transition-colors"
+                >
+                  Re-generate
+                </button>
+              </div>
+              {Array.isArray(output) ? (
+                <div className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-3 text-sm font-mono leading-relaxed min-h-[120px] max-h-[300px] overflow-y-auto">
+                  {output.map((line, i) => (
+                    <div key={i} className={line.color ? LINE_COLORS[line.color] : 'text-[#e6e6e6]'}>
+                      {line.text || '\u00A0'}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <pre className="w-full bg-[#1e1e1e] border border-white/[0.1] rounded px-3 py-3 text-sm text-[#e6e6e6] font-mono whitespace-pre-wrap leading-relaxed min-h-[120px] max-h-[300px] overflow-y-auto">
+                  {output}
+                </pre>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="px-5 py-4 border-t border-white/[0.06]">
+            <button
+              onClick={handleCopy}
+              className="w-full bg-gold-400 hover:bg-gold-300 text-[#1a1a1a] font-semibold text-sm rounded px-4 py-2.5 transition-colors"
+            >
+              {copied ? 'Copied!' : 'Copy to Clipboard'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Name generator modal (existing behavior) ──
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
