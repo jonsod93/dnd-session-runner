@@ -9,6 +9,7 @@ import {
   buildLocationProperties,
   buildOrgProperties,
   fetchIngredients,
+  fetchTradeItems,
   PEOPLE_DB_ID,
   LOCATIONS_DB_ID,
   ORGANIZATIONS_DB_ID,
@@ -29,6 +30,9 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
   const [notionIngredients, setNotionIngredients] = useState(null)
   const [ingredientsLoading, setIngredientsLoading] = useState(false)
   const ingredientsFetched = useRef(false)
+  const [notionTradeItems, setNotionTradeItems] = useState(null)
+  const [tradeItemsLoading, setTradeItemsLoading] = useState(false)
+  const tradeItemsFetched = useRef(false)
 
   // ── Name generator state ──
   const subtypes = generator.subtypes ?? null
@@ -60,26 +64,37 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
     return () => window.removeEventListener('keydown', h)
   }, [onClose, saving])
 
-  // Fetch Notion ingredients once when shop generator opens
+  // Fetch Notion data once when shop generator opens
   useEffect(() => {
-    if (generator.key !== 'shop' || ingredientsFetched.current) return
-    ingredientsFetched.current = true
-    setIngredientsLoading(true)
-    fetchIngredients()
-      .then(items => setNotionIngredients(items))
-      .catch(() => setNotionIngredients(null))
-      .finally(() => setIngredientsLoading(false))
+    if (generator.key !== 'shop') return
+    if (!ingredientsFetched.current) {
+      ingredientsFetched.current = true
+      setIngredientsLoading(true)
+      fetchIngredients()
+        .then(items => setNotionIngredients(items))
+        .catch(() => setNotionIngredients(null))
+        .finally(() => setIngredientsLoading(false))
+    }
+    if (!tradeItemsFetched.current) {
+      tradeItemsFetched.current = true
+      setTradeItemsLoading(true)
+      fetchTradeItems()
+        .then(items => setNotionTradeItems(items))
+        .catch(() => setNotionTradeItems(null))
+        .finally(() => setTradeItemsLoading(false))
+    }
   }, [generator.key])
 
   // Generate content on mount and when options change
   useEffect(() => {
     if (!isContentGenerator) return
     const opts = { ...selectedOptions }
-    if (generator.key === 'shop' && opts.shopType === 'Ingredients' && notionIngredients) {
-      opts.notionIngredients = notionIngredients
+    if (generator.key === 'shop') {
+      if (opts.shopType === 'Ingredients' && notionIngredients) opts.notionIngredients = notionIngredients
+      if (opts.shopType === 'Magical Items' && notionTradeItems) opts.notionTradeItems = notionTradeItems
     }
     setOutput(generator.generate(opts))
-  }, [selectedOptions, notionIngredients]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedOptions, notionIngredients, notionTradeItems]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOptionChange = (key, value) => {
     setSelectedOptions(prev => ({ ...prev, [key]: value }))
@@ -87,8 +102,9 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
 
   const regenerateContent = () => {
     const opts = { ...selectedOptions }
-    if (generator.key === 'shop' && opts.shopType === 'Ingredients' && notionIngredients) {
-      opts.notionIngredients = notionIngredients
+    if (generator.key === 'shop') {
+      if (opts.shopType === 'Ingredients' && notionIngredients) opts.notionIngredients = notionIngredients
+      if (opts.shopType === 'Magical Items' && notionTradeItems) opts.notionTradeItems = notionTradeItems
     }
     setOutput(generator.generate(opts))
   }
@@ -190,7 +206,9 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
   // ── Content generator modal ──
   if (isContentGenerator) {
     const isIngredients = generator.key === 'shop' && selectedOptions.shopType === 'Ingredients'
-    const usingNotion = isIngredients && notionIngredients && notionIngredients.length > 0
+    const isMagical = generator.key === 'shop' && selectedOptions.shopType === 'Magical Items'
+    const usingNotionIngredients = isIngredients && notionIngredients && notionIngredients.length > 0
+    const usingNotionTradeItems = isMagical && notionTradeItems && notionTradeItems.length > 0
 
     return (
       <div
@@ -247,12 +265,19 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
               </div>
             ))}
 
-            {/* Notion status indicator for ingredients */}
+            {/* Notion status indicator */}
             {isIngredients && (
               <div className="text-[10px] text-[#787774]">
                 {ingredientsLoading ? 'Loading ingredients from Notion...' :
-                 usingNotion ? `Using ${notionIngredients.length} ingredients from Notion` :
+                 usingNotionIngredients ? `Using ${notionIngredients.length} ingredients from Notion` :
                  'Using random ingredients (Notion unavailable)'}
+              </div>
+            )}
+            {isMagical && (
+              <div className="text-[10px] text-[#787774]">
+                {tradeItemsLoading ? 'Loading items from Notion...' :
+                 usingNotionTradeItems ? `Using ${notionTradeItems.length} items from Notion` :
+                 'Using random items (Notion unavailable)'}
               </div>
             )}
 

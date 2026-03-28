@@ -5,6 +5,7 @@ export const PEOPLE_DB_ID = '1372674d-44b5-81a5-a374-c0ee38a5ca16'
 export const ORGANIZATIONS_DB_ID = '1372674d-44b5-812d-9a5e-da895d041d0c'
 export const WORLD_MASTER_ID = '1382674d44b580d788daf4515b74772f'
 export const INGREDIENTS_DB_ID = '1b82674d-44b5-8029-adc7-ee083f2dc165'
+export const TRADE_ITEMS_DB_ID = '3312674d-44b5-80bf-bb57-cea20b6fc2f5'
 
 // Extract plain text from Notion rich_text array
 export function richTextToPlain(richText) {
@@ -243,7 +244,43 @@ export async function fetchFullPage(pageId) {
 }
 
 // Fetch all ingredients from the Ingredients database
+// ── Cached Notion DB helpers for generators ──
+// Cache TTL: 10 minutes. Serves from localStorage while fresh, then refreshes in background.
+const CACHE_TTL = 10 * 60 * 1000
+
+function getCached(key) {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+    const { data, ts } = JSON.parse(raw)
+    if (!data) return null
+    return { data, fresh: Date.now() - ts < CACHE_TTL }
+  } catch { return null }
+}
+
+function setCache(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }))
+  } catch { /* storage full, ignore */ }
+}
+
 export async function fetchIngredients() {
+  const CACHE_KEY = 'gen-ingredients-v1'
+  const cached = getCached(CACHE_KEY)
+
+  // Return stale cache immediately but refresh in background
+  if (cached && !cached.fresh) {
+    fetchIngredientsFromNotion().then(items => setCache(CACHE_KEY, items)).catch(() => {})
+    return cached.data
+  }
+  if (cached?.fresh) return cached.data
+
+  const items = await fetchIngredientsFromNotion()
+  setCache(CACHE_KEY, items)
+  return items
+}
+
+async function fetchIngredientsFromNotion() {
   const res = await notionFetch(`v1/databases/${INGREDIENTS_DB_ID}/query`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -260,6 +297,45 @@ export async function fetchIngredients() {
       name: richTextToPlain(props.Name?.title) || 'Unknown',
       rarity: props.Rarity?.select?.name || 'Common',
       location: (props.Location?.multi_select ?? []).map(s => s.name),
+      description: richTextToPlain(props.Description?.rich_text) || '',
+    }
+  })
+}
+
+export async function fetchTradeItems() {
+  const CACHE_KEY = 'gen-trade-items-v1'
+  const cached = getCached(CACHE_KEY)
+
+  if (cached && !cached.fresh) {
+    fetchTradeItemsFromNotion().then(items => setCache(CACHE_KEY, items)).catch(() => {})
+    return cached.data
+  }
+  if (cached?.fresh) return cached.data
+
+  const items = await fetchTradeItemsFromNotion()
+  setCache(CACHE_KEY, items)
+  return items
+}
+
+async function fetchTradeItemsFromNotion() {
+  const res = await notionFetch(`v1/databases/${TRADE_ITEMS_DB_ID}/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      page_size: 100,
+      sorts: [{ property: 'Name', direction: 'ascending' }],
+    }),
+  })
+  if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
+  const data = await res.json()
+  return (data.results ?? []).map((page) => {
+    const props = page.properties ?? {}
+    return {
+      name: richTextToPlain(props.Name?.title) || 'Unknown',
+      rarity: props.Rarity?.select?.name || 'Uncommon',
+      type: props.Type?.select?.name || '',
+      price: props['Price (gp)']?.number ?? 0,
+      attunement: props.Attunement?.checkbox ?? false,
       description: richTextToPlain(props.Description?.rich_text) || '',
     }
   })
