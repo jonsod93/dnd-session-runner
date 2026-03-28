@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { MapContainer, ImageOverlay, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -9,6 +9,8 @@ import { POIEditor } from '../components/map/POIEditor'
 import { TravelPath } from '../components/map/TravelPath'
 import { JourneyPlayback } from '../components/map/JourneyPlayback'
 import { TravelPathEditor } from '../components/map/TravelPathEditor'
+import { MeasurementOverlay } from '../components/map/MeasurementOverlay'
+import { ScaleBar } from '../components/map/ScaleBar'
 
 // ─── Fix Leaflet's default marker icon path issue with Vite ────────────────
 delete L.Icon.Default.prototype._getIconUrl
@@ -32,6 +34,7 @@ const MAP_CONFIG = {
   zoom: -3,
   minZoom: -4,
   maxZoom: 0,
+  pixelsPerMile: 6.533,
 }
 
 // ─── Right-click handler component ──────────────────────────────────────────
@@ -85,6 +88,8 @@ export default function MapPage() {
   const [editingPath, setEditingPath] = useState(false)
   const [showPathEditor, setShowPathEditor] = useState(false)
   const [journeyPlaying, setJourneyPlaying] = useState(false)
+  const [measuring, setMeasuring] = useState(false)
+  const measureRef = useRef(null)
 
   const handleRightClick = useCallback((position) => {
     if (editingPath) {
@@ -161,6 +166,16 @@ export default function MapPage() {
           onStop={handleStopJourney}
           pois={pois}
         />
+
+        {/* Measurement overlay */}
+        <MeasurementOverlay
+          ref={measureRef}
+          active={measuring}
+          pixelsPerMile={MAP_CONFIG.pixelsPerMile}
+        />
+
+        {/* Scale bar (visible when measuring) */}
+        {measuring && <ScaleBar pixelsPerMile={MAP_CONFIG.pixelsPerMile} />}
       </MapContainer>
 
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
@@ -222,6 +237,28 @@ export default function MapPage() {
                 ) : <span />}
               </div>
             )}
+          </div>
+
+          {/* Measurement controls */}
+          <div className="bg-[#252525]/90 rounded-lg border border-white/[0.1] shadow-lg overflow-hidden">
+            <div className="grid grid-cols-2">
+              <button
+                onClick={() => setMeasuring(!measuring)}
+                className={[
+                  'text-xs px-3 py-1.5 transition-colors text-left',
+                  measuring ? 'text-gold-400' : 'text-[#9a9894] hover:text-[#e6e6e6]',
+                ].join(' ')}
+              >
+                {measuring ? '◉' : '○'} Measure
+              </button>
+              <button
+                onClick={() => measureRef.current?.clear()}
+                disabled={!measuring}
+                className="text-xs px-3 py-1.5 text-[#9a9894] hover:text-[#e6e6e6] disabled:opacity-30 transition-colors text-left border-l border-white/[0.06]"
+              >
+                ✕ Clear
+              </button>
+            </div>
           </div>
         </div>
       )}
