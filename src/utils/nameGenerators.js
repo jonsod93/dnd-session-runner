@@ -457,7 +457,21 @@ export function generateShopInventory(options = {}) {
   }
 
   if (shopType === 'Magical Items') {
+    const notionItems = options.notionTradeItems
     const itemCount = roll(4, 8)
+
+    if (notionItems && notionItems.length > 0) {
+      const selected = pickN(notionItems, itemCount)
+      const lines = ['Magical Items for Sale (from Notion):', '']
+      selected.forEach(item => {
+        const attuneTag = item.attunement ? ' (A)' : ''
+        const priceStr = item.price ? `${item.price} gp` : 'Price TBD'
+        lines.push(`  ${item.name}${attuneTag}  (${item.rarity})  -  ${priceStr}`)
+      })
+      return lines.join('\n')
+    }
+
+    // Fallback: use hardcoded items
     const selected = pickN(MAGIC_SHOP_ITEMS, itemCount)
     const lines = ['Magical Items for Sale:', '']
     selected.forEach(item => {
