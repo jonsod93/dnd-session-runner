@@ -314,15 +314,6 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 key={entry._key ?? entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2 flex items-center gap-2 library-card group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
-                onMouseEnter={(e) => {
-                  if (isMobile || !(entry.HP || entry.AC || entry.Abilities)) return
-                  if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
-                  setHoverPreviewEntry({ entry, rect: e.currentTarget.getBoundingClientRect() })
-                }}
-                onMouseLeave={() => {
-                  if (isMobile) return
-                  hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200)
-                }}
               >
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>

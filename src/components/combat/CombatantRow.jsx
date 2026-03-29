@@ -455,6 +455,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 type="text"
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
                 placeholder="Custom condition..."
                 className="input-field flex-1"
               />
@@ -529,6 +530,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 type="text"
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
                 placeholder="Custom..."
                 className="flex-1 min-w-0 bg-transparent border-b border-black/[0.2] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#5a5854] transition-all"
               />
