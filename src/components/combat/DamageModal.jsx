@@ -97,7 +97,7 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
           {/* Apply button */}
           <button
             type="submit"
-            className="btn-action w-full mt-5 !text-sm !px-4 !py-2 !text-[#e87830]"
+            className="btn-action w-full mt-5 !text-sm !px-4 !py-2 !text-white !font-semibold"
           >
             Apply
           </button>

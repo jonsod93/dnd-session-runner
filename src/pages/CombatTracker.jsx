@@ -290,7 +290,7 @@ export default function CombatTracker() {
           ) : (
             <button
               onClick={() => setShowClearConfirm(true)}
-              className="text-sm text-[#9a9894]/50 hover:text-[#9a9894] transition-colors"
+              className="text-sm text-[#908e8a] hover:text-[#e6e6e6] transition-colors"
             >
               Clear all
             </button>
@@ -336,7 +336,7 @@ export default function CombatTracker() {
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
-              <p className="text-[#b8b5b0]/50 text-sm">
+              <p className="text-[#908e8a] text-sm">
                 Add from the library or use Quick Add on the left.
               </p>
             </div>
@@ -439,7 +439,7 @@ export default function CombatTracker() {
 
       {/* ── Mobile: bottom tab bar ───────────────────────────────────────── */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-[#181a1d] border-t border-black/[0.15]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex h-14 bg-[#2a2a2a] border-t border-black/[0.15]">
           {[
             { key: 'tracker', label: 'Tracker' },
             { key: 'library', label: 'Library' },

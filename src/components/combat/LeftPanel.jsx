@@ -118,7 +118,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 bg-[#181a1d] neu-panel-left flex flex-col items-center pt-3">
+      <div className="w-10 shrink-0 bg-[#323232] neu-panel-left flex flex-col items-center pt-3">
         <button
           onClick={onToggleCollapse}
           className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-[#202226]"
@@ -133,7 +133,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   }
 
   return (
-    <div className={`${isMobile ? 'w-full flex-1' : 'shrink-0'} bg-[#181a1d] neu-panel-left flex flex-col relative`} style={isMobile ? undefined : { width: panelWidth }}>
+    <div className={`${isMobile ? 'w-full flex-1' : 'shrink-0'} bg-[#323232] neu-panel-left flex flex-col relative`} style={isMobile ? undefined : { width: panelWidth }}>
       {/* Resize handle */}
       {!isMobile && (
         <div
@@ -383,11 +383,18 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                     type="button"
                     onClick={() => setQaType(val)}
                     className={[
-                      'flex-1 text-sm rounded-xl px-2 py-1.5 border transition-all',
+                      'flex-1 text-sm rounded-xl px-2 py-1.5 transition-all',
                       qaType === val
-                        ? 'border-gold-400/60 bg-gold-400/10 text-gold-400 shadow-neu-pressed'
-                        : 'border-transparent text-[#7a7874] hover:text-[#e6e6e6] shadow-neu-flat',
+                        ? 'text-[#e6e6e6]'
+                        : 'text-[#7a7874] hover:text-[#e6e6e6]',
                     ].join(' ')}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      boxShadow: qaType === val
+                        ? '0px 0px 0px #0e0e0e, 0px 0px 0px rgba(95,94,94,0.25), inset 3px 3px 4px #0e0e0e, inset -3px -3px 4px #5f5e5e'
+                        : '2px 2px 4px #0e0e0e, -2px -2px 4px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e',
+                    }}
                   >
                     {label}
                   </button>
@@ -560,7 +567,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
             width: 320,
             maxHeight: 'calc(100vh - 64px)',
-            '--sb-bg': '#181a1d',
+            '--sb-bg': '#323232',
           }}
           onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
           onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
@@ -587,8 +594,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           onClick={() => setLibraryPreviewEntry(null)}
         >
           <div
-            className="bg-[#181a1d] w-full h-full flex flex-col overflow-hidden"
-            style={{ '--sb-bg': '#181a1d' }}
+            className="bg-[#323232] w-full h-full flex flex-col overflow-hidden"
+            style={{ '--sb-bg': '#323232' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center justify-between">

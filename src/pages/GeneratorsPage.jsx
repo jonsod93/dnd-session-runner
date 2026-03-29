@@ -49,9 +49,9 @@ export default function GeneratorsPage() {
             <button
               key={gen.key}
               onClick={() => setActiveGenerator(gen)}
-              className="flex flex-col items-center gap-2 px-4 py-5 rounded-xl library-card transition-colors group cursor-pointer"
+              className="flex flex-col items-center gap-2 px-4 py-5 rounded-xl btn-outline transition-all cursor-pointer"
             >
-              <span className="text-sm text-[#e6e6e6] group-hover:text-gold-400 transition-colors">
+              <span className="text-sm text-[#e6e6e6] transition-colors">
                 {gen.label}
               </span>
             </button>

@@ -520,7 +520,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#131517]" style={{ '--sb-bg': '#181a1d' }}>
+      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#2e2e2e]" style={{ '--sb-bg': '#323232' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.15] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
@@ -560,7 +560,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   }
 
   return (
-    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[#181a1d]" style={{ width, '--sb-bg': '#181a1d' }}>
+    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[#323232]" style={{ width, '--sb-bg': '#323232' }}>
       {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}
@@ -637,7 +637,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
   }
 
   const statsHeader = (
-    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[#181a1d] border-b border-black/[0.15]'}>
+    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[#323232] border-b border-black/[0.15]'}>
       {/* Type & CR */}
       <div className="flex items-baseline justify-between gap-2 mb-0.5">
         <p className="text-sm text-[#9a9894] italic">{sb.Type}</p>
@@ -646,7 +646,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
         )}
       </div>
       {sb.Source && (
-        <p className="text-xs text-[#787774]/60 mb-3">Source: {sb.Source}</p>
+        <p className="text-xs text-[#908e8a] mb-3">Source: {sb.Source}</p>
       )}
 
       {/* Core stats */}
@@ -683,7 +683,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
               return (
                 <button
                   key={a}
-                  className="flex flex-col items-center cursor-pointer rounded-lg px-1 py-1.5 transition-all stat-card hover:bg-[#202226]"
+                  className="flex flex-col items-center cursor-pointer rounded-lg px-1 py-1.5 transition-all stat-card hover:bg-[var(--neu-bg-elevated)]"
                   onClick={() => handleAbilityRoll(`${ABILITY_LABELS[a]} Check`, mod)}
                   title={`Roll ${ABILITY_LABELS[a]} Check ${formatMod(mod)}`}
                 >

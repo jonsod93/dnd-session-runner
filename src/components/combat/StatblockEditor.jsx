@@ -88,7 +88,7 @@ export function StatblockEditor({ initial, onSave, onCancel, title }) {
           value={json}
           onChange={(e) => setJson(e.target.value)}
           spellCheck={false}
-          className="w-full h-full bg-[#131517] border-none rounded-2xl p-4 font-mono text-xs text-[#e6e6e6] focus:outline-none shadow-neu-pressed focus:shadow-[inset_2px_2px_5px_rgba(5,7,10,0.5),inset_-2px_-2px_5px_rgba(45,50,60,0.3),0_0_0_2px_rgba(255,107,53,0.3)] resize-none leading-relaxed transition-all"
+          className="w-full h-full bg-[#2a2a2a] border-none rounded-2xl p-4 font-mono text-xs text-[#e6e6e6] focus:outline-none shadow-neu-pressed focus:shadow-[inset_2px_2px_5px_rgba(5,7,10,0.5),inset_-2px_-2px_5px_rgba(45,50,60,0.3)] resize-none leading-relaxed transition-all"
           placeholder="Paste statblock JSON here..."
         />
       </div>

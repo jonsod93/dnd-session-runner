@@ -146,7 +146,7 @@ export function CombatantRow({
           <div className="flex items-center min-w-0">
             <span className="w-36 shrink-0 flex items-center gap-1">
               <span
-                className={`text-sm font-medium truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
+                className={`text-sm font-semibold truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
                 title={combatant.name}
               >
                 {combatant.name}
@@ -225,7 +225,7 @@ export function CombatantRow({
         {/* ── Mobile layout (hidden on desktop) ─────────────────────────── */}
         <div className="lg:hidden">
           {isLair ? (
-            <span className={`text-sm font-medium ${nameColor}`}>{combatant.name}</span>
+            <span className={`text-sm font-semibold ${nameColor}`}>{combatant.name}</span>
           ) : (
             <>
               {/*
@@ -239,7 +239,7 @@ export function CombatantRow({
                 {/* Row 1 col 1: Name */}
                 <span className="flex items-center gap-1 min-w-0">
                   <span
-                    className={`text-sm font-medium truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
+                    className={`text-sm font-semibold truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
                     title={combatant.name}
                   >
                     {combatant.name}
