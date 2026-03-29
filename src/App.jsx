@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Navigation from './components/Navigation.jsx'
 import CombatTracker from './pages/CombatTracker.jsx'
@@ -6,6 +7,7 @@ import GeneratorsPage from './pages/GeneratorsPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import SpotifyCallback from './pages/SpotifyCallback.jsx'
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
+import { useGsapHover } from './hooks/useGsapHover.js'
 
 function AuthGate({ children }) {
   const { authed } = useAuth()
@@ -14,10 +16,13 @@ function AuthGate({ children }) {
 }
 
 export default function App() {
+  const appRef = useRef(null)
+  useGsapHover(appRef)
+
   return (
     <AuthProvider>
       <AuthGate>
-        <div className="flex flex-col h-full bg-surface-0">
+        <div ref={appRef} className="flex flex-col h-full bg-surface-0">
           <Navigation />
           <main className="flex-1 overflow-hidden">
             <Routes>

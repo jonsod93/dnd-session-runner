@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { rollInitiative } from '../../utils/combatUtils'
+import { useGsapEntrance } from '../../hooks/useGsapEntrance'
 
 function isMinion(statblock) {
   if (!statblock?.Traits) return false
@@ -14,6 +15,7 @@ function getMinionBaseName(name) {
 }
 
 export function InitiativeModal({ combatants, onConfirm, onClose }) {
+  const panelRef = useGsapEntrance()
   const { displayRows, minionGroups } = useMemo(() => {
     const groups = {}
     const display = []
@@ -84,6 +86,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         className="glass-toast rounded-2xl w-full max-w-md flex flex-col max-h-[80vh]"
         style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}

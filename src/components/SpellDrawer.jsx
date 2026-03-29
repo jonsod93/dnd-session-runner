@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { spellNameToSlug } from '../data/srdSpellNames'
 import { HighlightedText, RichContent } from './combat/StatblockPanel'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useGsapEntrance } from '../hooks/useGsapEntrance'
 
 const CACHE_PREFIX = 'mythranos-spell-v2-'
 
@@ -72,6 +73,8 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
     return () => window.removeEventListener('keydown', h)
   }, [onClose])
 
+  const drawerRef = useGsapEntrance({ y: 20, duration: 0.22, ease: 'expo.out' })
+
   const drawerClass = isMobile
     ? 'fixed inset-x-0 bottom-0 z-[2100] glass-toast !rounded-b-none !rounded-t-xl flex flex-col'
     : 'fixed left-1/2 -translate-x-1/2 z-[2100] glass-toast !rounded-xl flex flex-col'
@@ -80,7 +83,7 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
     : { bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)', background: 'rgba(62, 62, 62, 0.65)' }
 
   return (
-    <div className={drawerClass} style={drawerStyle}>
+    <div ref={drawerRef} className={drawerClass} style={drawerStyle}>
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]" style={{ background: 'rgba(62, 62, 62, 0.75)' }}>
         <div className="flex items-center gap-3">

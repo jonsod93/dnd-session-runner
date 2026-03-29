@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useGsapEntrance } from '../hooks/useGsapEntrance'
 
 const DURATION = 5000
 
@@ -30,10 +31,9 @@ export function NotificationToast({ items, onExpire }) {
 }
 
 function ToastItem({ item, onExpire }) {
-  const [visible, setVisible] = useState(false)
+  const toastRef = useGsapEntrance({ y: -8, duration: 0.2, ease: 'expo.out' })
 
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true))
     const t = setTimeout(() => onExpire(item.id), DURATION)
     return () => clearTimeout(t)
   }, [item.id, onExpire])
@@ -58,10 +58,10 @@ function ToastItem({ item, onExpire }) {
 
   return (
     <div
+      ref={toastRef}
       className={[
-        'pointer-events-auto border rounded-lg shadow-xl px-4 py-2.5 max-w-sm transition-all duration-300',
+        'pointer-events-auto border rounded-lg shadow-xl px-4 py-2.5 max-w-sm',
         colors[item.type] || colors.info,
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2',
       ].join(' ')}
     >
       <div className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useGsapEntrance } from '../../hooks/useGsapEntrance'
 import { d20, abilityMod, formatMod } from '../../utils/combatUtils'
 
 const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
@@ -18,6 +19,7 @@ function getSaveMod(statblock, ability) {
 export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
   const { condition } = expiry
   const [rollResult, setRollResult] = useState(null)
+  const panelRef = useGsapEntrance()
 
   useEffect(() => {
     if (!condition.needsSave) {
@@ -38,6 +40,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
     return (
       <div className="fixed inset-0 z-[65] flex items-center justify-center pointer-events-none">
         <div
+          ref={panelRef}
           className="pointer-events-auto glass-toast rounded-2xl px-5 py-3 max-w-sm animate-fade-in"
           style={{ background: 'rgba(62, 62, 62, 0.65)', boxShadow: 'inset 0 0 10px rgba(251,191,36,0.15), inset 1px 1px 4px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4)' }}
         >
@@ -57,6 +60,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
       style={{ background: 'rgba(0,0,0,0.6)' }}
     >
       <div
+        ref={panelRef}
         className="glass-toast rounded-2xl w-80 p-5"
         style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}

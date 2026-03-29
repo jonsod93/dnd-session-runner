@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
+import { useGsapEntrance } from '../../hooks/useGsapEntrance'
 
 export function AbilityModal({ title, content, onClose }) {
+  const panelRef = useGsapEntrance()
+
   useEffect(() => {
     const h = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', h)
@@ -13,6 +16,7 @@ export function AbilityModal({ title, content, onClose }) {
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         className="glass-toast rounded-xl w-full max-w-lg max-h-[70vh] flex flex-col"
         style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}

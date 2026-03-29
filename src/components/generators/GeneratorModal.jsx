@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useGsapEntrance } from '../../hooks/useGsapEntrance'
 import useSessionLink from '../../hooks/useSessionLink'
 import SessionLinker from './SessionLinker'
 import { generateNPCName } from '../../utils/nameGenerators'
@@ -52,6 +53,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
 
   // Modal-level session (independent from page)
   const modal = useSessionLink()
+  const panelRef = useGsapEntrance()
 
   // Initialize modal session from page-level session
   useEffect(() => {
@@ -218,6 +220,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
         onClick={onClose}
       >
         <div
+          ref={panelRef}
           className="glass-modal rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]"
           onClick={(e) => e.stopPropagation()}
         >
@@ -332,6 +335,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
       onClick={() => !saving && onClose()}
     >
       <div
+        ref={panelRef}
         className="glass-modal rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >

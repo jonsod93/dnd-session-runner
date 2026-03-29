@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
+import { useGsapEntrance } from '../../hooks/useGsapEntrance'
 
 export function ConcentrationPrompt({ check, combatantName, onKeep, onDrop, onClose }) {
+  const panelRef = useGsapEntrance()
   const { dc, roll, conMod, total, spellName } = check
 
   useEffect(() => {
@@ -17,6 +19,7 @@ export function ConcentrationPrompt({ check, combatantName, onKeep, onDrop, onCl
       style={{ background: 'rgba(0,0,0,0.6)' }}
     >
       <div
+        ref={panelRef}
         className="glass-toast rounded-2xl w-80 p-5"
         style={{ background: 'rgba(62, 62, 62, 0.65)', boxShadow: 'inset 0 0 12px rgba(248,113,113,0.25), inset 1px 1px 4px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4)' }}
         onClick={(e) => e.stopPropagation()}

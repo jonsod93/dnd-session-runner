@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useGsapEntrance } from '../hooks/useGsapEntrance'
 
 const DURATION = 4500
 
@@ -14,6 +15,8 @@ export function DiceRollToast({ rolls, onExpire, spellDrawerOpen }) {
 }
 
 function ToastItem({ roll, onExpire }) {
+  const toastRef = useGsapEntrance({ y: 8, duration: 0.2, ease: 'expo.out' })
+
   useEffect(() => {
     if (roll.hasDamage) return // no auto-dismiss for combined attack+damage rolls
     const t = setTimeout(() => onExpire(roll.id), DURATION)
@@ -28,6 +31,7 @@ function ToastItem({ roll, onExpire }) {
 
   return (
     <div
+      ref={toastRef}
       className={`pointer-events-auto glass-toast ${roll.hasDamage ? 'pl-4 pr-8 py-3 min-w-[280px]' : 'px-4 py-2.5 min-w-[240px]'} max-w-[420px] relative`}
       style={isCrit
         ? { background: 'rgba(34, 80, 50, 0.2)', boxShadow: 'inset 0 0 12px rgba(74, 222, 128, 0.12), inset 1px 1px 4px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(74, 222, 128, 0.25)', borderColor: 'rgba(74, 222, 128, 0.35)' }

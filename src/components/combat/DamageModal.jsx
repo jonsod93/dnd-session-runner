@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { useGsapEntrance } from '../../hooks/useGsapEntrance'
 
 export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
   const [value, setValue] = useState('')
   const [tempHpValue, setTempHpValue] = useState('')
   const inputRef = useRef(null)
+  const panelRef = useGsapEntrance()
 
   const tempHp = combatant.tempHp ?? 0
 
@@ -41,6 +43,7 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         className="glass-toast rounded-2xl w-80 p-5 relative"
         style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}
