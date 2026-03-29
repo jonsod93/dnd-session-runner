@@ -310,43 +310,82 @@
   .neumorphic .combat-card {
     background: var(--neu-bg-raised);
     border-radius: 0.75rem;
-    border: 2px solid;
-    border-top-color: var(--neu-border-light);
-    border-left-color: var(--neu-border-light);
-    border-bottom-color: var(--neu-border-dark);
-    border-right-color: var(--neu-border-dark);
-    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+    border: 2px solid transparent;
+    box-shadow: none;
+    position: relative;
   }
   .neumorphic .combat-card.is-selected {
-    background: #101214;
+    background: #151719;
     border: none;
     box-shadow:
-      inset 2px 2px 0 var(--neu-border-dark),
-      inset -2px -2px 0 var(--neu-border-light);
+      inset 3px 3px 6px var(--neu-shadow-dark),
+      inset -3px -3px 6px var(--neu-shadow-light);
+  }
+
+  /* Subtle separator lines between combatant rows (pseudo-element, inset from corners) */
+  .neumorphic .combat-card:not(.is-selected):not(:last-child)::after,
+  .neumorphic .lair-border:not(.is-selected):not(:last-child)::after,
+  .neumorphic .concentration-border:not(.is-selected):not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+  }
+  /* Hide separator on row before active or selected */
+  .neumorphic :has(+ .active-border)::after,
+  .neumorphic :has(+ .is-selected)::after {
+    display: none !important;
   }
 
   .neumorphic .library-card {
     background: var(--neu-bg-raised);
     border-radius: 0.75rem;
-    border: 2px solid;
-    border-top-color: var(--neu-border-light);
-    border-left-color: var(--neu-border-light);
-    border-bottom-color: var(--neu-border-dark);
-    border-right-color: var(--neu-border-dark);
-    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
-    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    box-shadow: none;
+    transition: all 0.15s ease;
+    position: relative;
+    z-index: 0;
+  }
+  /* Separator line between library cards */
+  .neumorphic .library-card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: none;
   }
   .neumorphic .library-card:hover {
-    background: var(--neu-bg-elevated);
-    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+    background: var(--neu-bg-raised);
+    border-top-color: rgba(45, 50, 60, 0.4);
+    border-left-color: rgba(45, 50, 60, 0.4);
+    border-bottom-color: rgba(10, 13, 18, 0.35);
+    border-right-color: rgba(10, 13, 18, 0.35);
+    box-shadow: 6px 6px 16px rgba(10, 13, 18, 0.35), -6px -6px 16px rgba(45, 50, 60, 0.4);
+    z-index: 1;
+  }
+  /* Hide separator on hovered card and the one before it */
+  .neumorphic .library-card:hover::after,
+  .neumorphic .library-card:has(+ .library-card:hover)::after {
+    display: none;
   }
   .neumorphic .library-card:active {
-    background: #101214;
-    border-top-color: var(--neu-border-dark);
-    border-left-color: var(--neu-border-dark);
-    border-bottom-color: var(--neu-border-light);
-    border-right-color: var(--neu-border-light);
-    box-shadow: none;
+    background: #151719;
+    border-color: transparent;
+    box-shadow:
+      inset 3px 3px 6px var(--neu-shadow-dark),
+      inset -3px -3px 6px var(--neu-shadow-light);
+    z-index: 1;
+  }
+  .neumorphic .library-card:active::after,
+  .neumorphic .library-card:has(+ .library-card:active)::after {
+    display: none;
   }
 
   .neumorphic .stat-card {
@@ -360,7 +399,7 @@
     box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
   }
   .neumorphic .stat-card:active {
-    background: #101214;
+    background: #151719;
     border-top-color: var(--neu-border-dark);
     border-left-color: var(--neu-border-dark);
     border-bottom-color: var(--neu-border-light);
@@ -383,62 +422,61 @@
   .neumorphic .active-border {
     background: var(--neu-bg-raised) !important;
     border: 2px solid !important;
-    border-top-color: var(--neu-border-light) !important;
-    border-right-color: var(--neu-border-dark) !important;
-    border-bottom-color: var(--neu-border-dark) !important;
+    z-index: 1;
+    border-top-color: rgba(45, 50, 60, 0.4) !important;
+    border-right-color: rgba(10, 13, 18, 0.35) !important;
+    border-bottom-color: rgba(10, 13, 18, 0.35) !important;
     border-left: 3px solid #e87830 !important;
     border-radius: 0.75rem;
     animation: none;
-    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+    box-shadow:
+      6px 6px 16px rgba(10, 13, 18, 0.35),
+      -6px -6px 16px rgba(45, 50, 60, 0.4);
   }
   .neumorphic .active-border.is-selected {
     background: #101214 !important;
     border: none !important;
     border-left: 3px solid #e87830 !important;
     box-shadow:
-      inset 2px 2px 0 var(--neu-border-dark),
-      inset -2px -2px 0 var(--neu-border-light);
+      inset 3px 3px 6px var(--neu-shadow-dark),
+      inset -3px -3px 6px var(--neu-shadow-light);
   }
 
   /* Concentration: raised card with blue left accent + side borders */
   .neumorphic .lair-border {
     background: var(--neu-bg-raised) !important;
-    border: 2px solid !important;
-    border-top-color: var(--neu-border-light) !important;
-    border-right-color: var(--neu-border-dark) !important;
-    border-bottom-color: var(--neu-border-dark) !important;
+    border: 2px solid transparent !important;
     border-left: 3px solid rgb(255, 90, 90) !important;
     border-radius: 0.75rem;
     animation: none;
-    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+    box-shadow: none;
+    position: relative;
   }
   .neumorphic .lair-border.is-selected {
     background: #101214 !important;
     border: none !important;
     border-left: 3px solid rgb(255, 90, 90) !important;
     box-shadow:
-      inset 2px 2px 0 var(--neu-border-dark),
-      inset -2px -2px 0 var(--neu-border-light);
+      inset 3px 3px 6px var(--neu-shadow-dark),
+      inset -3px -3px 6px var(--neu-shadow-light);
   }
 
   .neumorphic .concentration-border {
     background: var(--neu-bg-raised) !important;
-    border: 2px solid !important;
-    border-top-color: var(--neu-border-light) !important;
-    border-right-color: var(--neu-border-dark) !important;
-    border-bottom-color: var(--neu-border-dark) !important;
+    border: 2px solid transparent !important;
     border-left: 3px solid #60a5fa !important;
     border-radius: 0.75rem;
     animation: none;
-    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+    box-shadow: none;
+    position: relative;
   }
   .neumorphic .concentration-border.is-selected {
     background: #101214 !important;
     border: none !important;
     border-left: 3px solid #60a5fa !important;
     box-shadow:
-      inset 2px 2px 0 var(--neu-border-dark),
-      inset -2px -2px 0 var(--neu-border-light);
+      inset 3px 3px 6px var(--neu-shadow-dark),
+      inset -3px -3px 6px var(--neu-shadow-light);
   }
 
   /* ── Neumorphic buttons ──────────────────────────── */
@@ -480,10 +518,9 @@
   .neumorphic .btn-outline:hover {
     color: #e6e6e6;
     background: var(--neu-bg-elevated);
-    box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
   }
   .neumorphic .btn-outline:active {
-    background: #101214;
+    background: #151719;
     border-top-color: var(--neu-border-dark);
     border-left-color: var(--neu-border-dark);
     border-bottom-color: var(--neu-border-light);
@@ -504,10 +541,9 @@
   .neumorphic .btn-action:hover {
     background: var(--neu-bg-elevated);
     color: #e6e6e6;
-    box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
   }
   .neumorphic .btn-action:active {
-    background: #101214;
+    background: #151719;
     border-top-color: var(--neu-border-dark);
     border-left-color: var(--neu-border-dark);
     border-bottom-color: var(--neu-border-light);

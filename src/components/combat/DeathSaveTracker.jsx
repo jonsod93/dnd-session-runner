@@ -1,4 +1,4 @@
-export function DeathSaveTracker({ deathSaves, onUpdate, onNat20, onNat1, isPC }) {
+export function DeathSaveTracker({ deathSaves, onUpdate }) {
   if (!deathSaves) return null
 
   const { successes, failures } = deathSaves
@@ -13,10 +13,6 @@ export function DeathSaveTracker({ deathSaves, onUpdate, onNat20, onNat1, isPC }
     onUpdate(successes, newVal)
   }
 
-  const handleNat1 = () => {
-    const newFailures = Math.min(3, failures + 2)
-    onNat1 ? onNat1() : onUpdate(successes, newFailures)
-  }
 
   return (
     <div className="flex items-center gap-3 py-1">
@@ -54,23 +50,6 @@ export function DeathSaveTracker({ deathSaves, onUpdate, onNat20, onNat1, isPC }
         ))}
       </div>
 
-      {/* Nat 20 / Nat 1 buttons */}
-      <div className="flex items-center gap-1 ml-1">
-        <button
-          className="text-[10px] px-1.5 py-0.5 rounded-lg text-green-400 hover:bg-green-400/10 transition-all shadow-neu-flat hover:shadow-neu-glow-green active:shadow-neu-pressed"
-          onClick={(e) => { e.stopPropagation(); onNat20() }}
-          title={isPC ? 'Nat 20: Stabilize' : 'Nat 20: Regain 1 HP and stabilize'}
-        >
-          20
-        </button>
-        <button
-          className="text-[10px] px-1.5 py-0.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-all shadow-neu-flat hover:shadow-neu-glow-red active:shadow-neu-pressed"
-          onClick={(e) => { e.stopPropagation(); handleNat1() }}
-          title="Nat 1: 2 death save failures"
-        >
-          1
-        </button>
-      </div>
     </div>
   )
 }

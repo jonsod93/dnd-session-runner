@@ -148,7 +148,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                 value={values[c.id] ?? ''}
                 onChange={(e) => setValues((prev) => ({ ...prev, [c.id]: e.target.value }))}
                 placeholder="--"
-                className="w-14 bg-[#131517] border-none rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none shadow-neu-pressed focus:shadow-[inset_2px_2px_5px_rgba(5,7,10,0.5),inset_-2px_-2px_5px_rgba(45,50,60,0.3),0_0_0_2px_rgba(255,107,53,0.3)] placeholder:text-[#5a5854] transition-all"
+                className="w-14 bg-[#131517] border-none rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none shadow-[inset_2px_2px_5px_rgba(5,7,10,0.5),inset_-2px_-2px_5px_rgba(45,50,60,0.15)] focus:shadow-[inset_2px_2px_5px_rgba(5,7,10,0.5),inset_-2px_-2px_5px_rgba(45,50,60,0.15),0_0_0_2px_rgba(255,107,53,0.3)] placeholder:text-[#5a5854] transition-all"
               />
             </div>
           ))}

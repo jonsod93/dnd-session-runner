@@ -63,8 +63,9 @@ export default function CombatTracker() {
     if (el) {
       const containerRect = listRef.current.getBoundingClientRect()
       const elRect = el.getBoundingClientRect()
-      const newScrollTop = listRef.current.scrollTop + (elRect.top - containerRect.top)
-      listRef.current.scrollTo({ top: newScrollTop, behavior: 'smooth' })
+      const shadowOffset = 22 // account for neumorphic shadow above the active row
+      const newScrollTop = listRef.current.scrollTop + (elRect.top - containerRect.top) - shadowOffset
+      listRef.current.scrollTo({ top: Math.max(0, newScrollTop), behavior: 'smooth' })
     }
   }, [combat.activeTurnId])
 
@@ -228,7 +229,7 @@ export default function CombatTracker() {
       <div className={`flex-1 flex flex-col min-w-0 ${isMobile && mobileTab === 'library' ? 'hidden' : ''}`}>
 
         {/* Toolbar */}
-        <div className="shrink-0 px-5 py-2.5 border-b border-black/[0.15] flex items-center gap-3 min-h-[48px]">
+        <div className="shrink-0 px-5 py-2.5 border-b border-black/[0.15] flex items-center gap-3 min-h-[48px] bg-[var(--neu-bg-raised)]">
           <button
             onClick={() => {
               // Play sound effect — silent if file missing or autoplay blocked
@@ -298,7 +299,7 @@ export default function CombatTracker() {
 
         {/* Header row — desktop only, not needed for mobile 2-line layout */}
         {combat.combatants.length > 0 && (
-          <div className="max-lg:hidden shrink-0 flex items-center gap-2 mx-3 px-4 py-1.5 border-b border-black/[0.15] text-xs text-[#6a6864] uppercase tracking-wider font-medium">
+          <div className="max-lg:hidden shrink-0 flex items-center gap-2 mx-3 px-4 py-1.5 border-b border-black/[0.15] text-xs text-[#6a6864] uppercase tracking-wider font-medium bg-[var(--neu-bg-raised)]">
             {/* Drag handle spacer */}
             <div className="w-[10px] shrink-0" />
             {/* Active arrow spacer */}
@@ -331,7 +332,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-44 flex flex-col gap-2 p-3">
+        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-44 flex flex-col gap-2 p-3 bg-[var(--neu-bg-raised)]">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
