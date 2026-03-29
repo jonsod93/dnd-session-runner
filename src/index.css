@@ -137,24 +137,6 @@
     to { --border-angle: 360deg; }
   }
 
-  .concentration-border {
-    --card-fill-top: rgba(12,12,20,1);
-    --card-fill-bot: rgba(8,8,14,1);
-    border: 2px solid transparent !important;
-    transition: box-shadow 0.3s ease, opacity 0.3s ease !important;
-    background:
-      linear-gradient(to bottom, var(--card-fill-top), var(--card-fill-bot)) padding-box,
-      conic-gradient(
-        from var(--border-angle),
-        #60a5fa 0%,
-        #60a5fa 40%,
-        rgba(255,255,255,0.85) 50%,
-        #60a5fa 60%,
-        #60a5fa 100%
-      ) border-box;
-    animation: border-rotate 3s linear infinite;
-    box-shadow: 0 0 14px rgba(96, 165, 250, 0.3), 0 0 4px rgba(96, 165, 250, 0.12);
-  }
 
   .active-border {
     --card-fill-top: rgba(18,14,10,1);
@@ -176,10 +158,6 @@
   }
 
   /* Lighter fill when row is selected (clicked) */
-  .concentration-border.is-selected {
-    --card-fill-top: rgba(18,18,30,1);
-    --card-fill-bot: rgba(14,14,24,1);
-  }
   .active-border.is-selected {
     --card-fill-top: rgba(30,22,14,1);
     --card-fill-bot: rgba(22,16,10,1);
@@ -432,28 +410,6 @@
       inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
-  .neumorphic .concentration-border {
-    background: var(--neu-bg-raised) !important;
-    border: none !important;
-    border-left: 3px solid #60a5fa !important;
-    border-radius: 0.75rem;
-    animation: none;
-    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
-    transition: background 0.15s ease;
-  }
-  .neumorphic .concentration-border:hover {
-    background: var(--neu-bg-elevated) !important;
-  }
-  .neumorphic .concentration-border.is-selected {
-    background: #2c2c2c !important;
-    border: none !important;
-    border-left: 3px solid #60a5fa !important;
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
-  }
 
   /* ── Neumorphic buttons ──────────────────────────── */
   .neumorphic .btn-neon-gold {

@@ -37,7 +37,6 @@ export function CombatantRow({
   const isDead = combatant.hp?.current === 0
   const showDeathSaves = combatant.deathSaves != null && !isLair
   const tempHp = combatant.tempHp ?? 0
-  const isConcentrating = combatant.conditions.some((c) => c.name === 'Concentration')
 
   const isMobile = useIsMobile()
 
@@ -107,9 +106,7 @@ export function CombatantRow({
           ? `active-border${isSelected ? ' is-selected' : ''}`
           : isLair
             ? `lair-border${isSelected ? ' is-selected' : ''}`
-            : isConcentrating && !isDragging
-              ? `concentration-border${isSelected ? ' is-selected' : ''}`
-              : `combat-card${isSelected ? ' is-selected' : ''}`,
+            : `combat-card${isSelected ? ' is-selected' : ''}`,
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
       {...(!isLair ? { ...attributes, ...listeners } : {})}

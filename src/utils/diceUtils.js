@@ -46,6 +46,35 @@ export function evalDiceExpr(exprRaw) {
   return null
 }
 
+// Roll a damage dice expression with optional critical hit doubling.
+// When crit=true, dice count is doubled but modifier stays the same.
+// Returns { label, detail, total, baseCount, sides, mod } or null.
+export function rollDamageExpr(exprRaw, { crit = false } = {}) {
+  const expr = exprRaw.trim().toLowerCase().replace(/l/g, '1')
+  const m = expr.match(/^(\d+)d(\d+)\s*([+-]\s*\d+)?$/)
+  if (!m) return null
+
+  const baseCount = parseInt(m[1])
+  const sides     = parseInt(m[2])
+  const mod       = m[3] ? parseInt(m[3].replace(/\s+/g, '')) : 0
+  const count     = crit ? baseCount * 2 : baseCount
+  const rolls     = Array.from({ length: count }, () => rollDie(sides))
+  const sum       = rolls.reduce((a, b) => a + b, 0)
+  const total     = sum + mod
+
+  const modStr  = mod > 0 ? `+${mod}` : mod < 0 ? `${mod}` : ''
+  const rollStr = count > 1 ? `[${rolls.join('+')}]` : `[${rolls[0]}]`
+
+  return {
+    label:     `${count}d${sides}${modStr}`,
+    detail:    `${rollStr}${modStr} = ${total}`,
+    total,
+    baseCount,
+    sides,
+    mod,
+  }
+}
+
 // Parse text into segments for rich rendering.
 // Segments: { type: 'text', text }
 //         | { type: 'roll', text, expr }

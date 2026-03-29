@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { abilityMod, formatMod, getDamageTypeColor, d20 } from '../../utils/combatUtils'
-import { parseRichText, evalDiceExpr } from '../../utils/diceUtils'
+import { parseRichText, evalDiceExpr, rollDamageExpr } from '../../utils/diceUtils'
 import { SPELL_REGEX } from '../../data/srdSpellNames'
 
 const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
@@ -228,14 +228,61 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName, enable
               onClick={(e) => {
                 e.stopPropagation()
                 const result = evalDiceExpr(seg.expr)
-                if (result && onRoll) {
-                  onRoll({
-                    ...result,
-                    context: attackType || actionName || null,
-                    damageType: seg.expr.startsWith('d20') ? null : damageType,
-                    damageTypeColor: seg.expr.startsWith('d20') ? null : color,
-                  })
+                if (!result || !onRoll) return
+
+                // Non-d20 roll (clicking damage dice directly) - pass through as-is
+                if (!seg.expr.startsWith('d20')) {
+                  onRoll({ ...result, context: attackType || actionName || null, damageType, damageTypeColor: color })
+                  return
                 }
+
+                const base = { ...result, context: attackType || actionName || null, damageType: null, damageTypeColor: null }
+
+                // Gather sibling damage dice from the same action text
+                const damageDice = []
+                for (let j = 0; j < segments.length; j++) {
+                  if (j === i || segments[j].type !== 'roll' || segments[j].expr.startsWith('d20')) continue
+                  const rc = rollColors[j]
+                  damageDice.push({ expr: segments[j].expr, damageType: rc?.damageType, color: rc?.color })
+                }
+
+                // No damage dice found (e.g. spellcasting) - attack-only
+                if (damageDice.length === 0) { onRoll(base); return }
+
+                // Nat 1 - critical miss, skip damage
+                if (result.naturalRoll === 1) { onRoll(base); return }
+
+                const isCrit = result.naturalRoll === 20
+                const damageRolls = []
+                let damageTotal = 0
+                let critMinTotal = 0
+
+                for (const dd of damageDice) {
+                  const dr = rollDamageExpr(dd.expr, { crit: isCrit })
+                  if (!dr) continue
+                  damageRolls.push({
+                    label: dr.label, detail: dr.detail, total: dr.total,
+                    damageType: dd.damageType, damageTypeColor: dd.color,
+                  })
+                  damageTotal += dr.total
+                  if (isCrit) critMinTotal += dr.baseCount * dr.sides + dr.mod
+                }
+
+                // Crit minimum: rolled damage must be >= max normal damage
+                let critMinApplied = false
+                if (isCrit && damageTotal < critMinTotal) {
+                  damageTotal = critMinTotal
+                  critMinApplied = true
+                }
+
+                onRoll({
+                  ...base,
+                  hasDamage: true,
+                  damageRolls,
+                  damageTotal,
+                  critMinApplied,
+                  critMinTotal: isCrit ? critMinTotal : undefined,
+                })
               }}
               title={`Roll ${seg.expr}`}
             >
