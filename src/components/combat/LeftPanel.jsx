@@ -146,7 +146,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         {[
           { key: 'npc',      label: 'NPC'       },
           { key: 'pc',       label: 'PC'        },
-          { key: 'quickadd', label: 'Quick Add'  },
+          { key: 'quickadd', label: 'Other'  },
         ].map(({ key, label }) => (
           <button
             key={key}
@@ -392,8 +392,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                       background: 'transparent',
                       border: 'none',
                       boxShadow: qaType === val
-                        ? '0px 0px 0px #0e0e0e, 0px 0px 0px rgba(95,94,94,0.25), inset 3px 3px 4px #0e0e0e, inset -3px -3px 4px #5f5e5e'
-                        : '2px 2px 4px #0e0e0e, -2px -2px 4px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e',
+                        ? '0px 0px 0px #0e0e0e, 0px 0px 0px rgba(95,94,94,0.25), inset 2px 2px 3px #0e0e0e, inset -2px -2px 3px rgba(95, 94, 94, 0.4)'
+                        : '1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4)',
                     }}
                   >
                     {label}
@@ -449,7 +449,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           onClick={() => setDeleteConfirm(null)}
         >
           <div
-            className="glass-modal rounded-2xl w-full max-w-sm p-5"
+            className="glass-toast rounded-2xl w-full max-w-sm p-5"
+            style={{ background: 'rgba(62, 62, 62, 0.65)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete {deleteConfirm.type === 'pc' ? 'PC' : 'Statblock'}</h3>
@@ -490,7 +491,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           onClick={() => setMobileLibraryMenu(null)}
         >
           <div
-            className="glass-modal rounded-2xl w-full max-w-sm overflow-hidden"
+            className="glass-toast rounded-2xl w-full max-w-sm overflow-hidden"
+            style={{ background: 'rgba(62, 62, 62, 0.65)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header — centered name/type, ✕ in top-right corner */}
@@ -561,19 +563,20 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Desktop: statblock hover preview (no modal, no backdrop) ───── */}
       {!isMobile && hoverPreviewEntry && createPortal(
         <div
-          className="fixed z-[2000] glass-modal rounded-2xl flex flex-col overflow-hidden neumorphic"
+          className="fixed z-[2000] glass-toast rounded-2xl flex flex-col overflow-hidden"
           style={{
             left: hoverPreviewEntry.rect.right + 8,
             top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
             width: 320,
             maxHeight: 'calc(100vh - 64px)',
-            '--sb-bg': '#323232',
+            '--sb-bg': 'transparent',
+            background: 'rgba(62, 62, 62, 0.65)',
           }}
           onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
           onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
         >
-          <div className="shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center justify-between">
-            <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{hoverPreviewEntry.entry.Name}</p>
+          <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between" style={{ background: 'rgba(62, 62, 62, 0.75)' }}>
+            <p className="text-sm font-semibold text-[#e6e6e6] truncate pr-2">{hoverPreviewEntry.entry.Name}</p>
             <button
               onClick={() => setHoverPreviewEntry(null)}
               className="shrink-0 text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"

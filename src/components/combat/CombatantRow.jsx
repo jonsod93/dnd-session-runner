@@ -102,7 +102,7 @@ export function CombatantRow({
       style={sortableStyle}
       data-combatant-id={combatant.id}
       className={[
-        'flex max-lg:items-center gap-2 px-4 py-3 rounded-xl min-h-[52px] shrink-0 cursor-default outline-none',
+        'flex items-start max-lg:items-center gap-2 px-4 py-4 rounded-xl min-h-[56px] shrink-0 cursor-default outline-none',
         isActive
           ? `active-border${isSelected ? ' is-selected' : ''}`
           : isLair
@@ -319,7 +319,7 @@ export function CombatantRow({
 
       {/* Remove */}
       <button
-        className="shrink-0 self-start btn-action !size-8 !p-0 flex items-center justify-center text-[#5a5854] hover:!text-red-400 transition-all"
+        className="shrink-0 self-start btn-action !w-7 !h-7 !p-0 flex items-center justify-center text-[9px] text-[#5a5854] hover:!text-red-400 transition-all"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >
@@ -400,8 +400,8 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
         onClick={onClose}
       >
         <div
-          className="glass-modal rounded-t-xl w-full overflow-hidden flex flex-col"
-          style={{ maxHeight: '80vh' }}
+          className="glass-toast rounded-t-xl w-full overflow-hidden flex flex-col"
+          style={{ maxHeight: '80vh', background: 'rgba(62, 62, 62, 0.65)' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -460,7 +460,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               />
               <button
                 type="submit"
-                className="shrink-0 px-3 py-2 text-sm bg-gold-400/10 hover:bg-gold-400/20 text-gold-400 border border-gold-400/30 rounded-xl transition-all hover:shadow-neon-gold"
+                className="shrink-0 btn-action !text-sm !px-3 !py-2 !text-white !font-semibold"
               >
                 Add
               </button>
@@ -488,8 +488,8 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   return (
     <div
       ref={menuRef}
-      className="fixed z-[70] glass-modal rounded-xl overflow-y-auto neumorphic"
-      style={{ width: MENU_W, ...posStyle }}
+      className="fixed z-[70] glass-toast rounded-xl overflow-y-auto neumorphic"
+      style={{ width: MENU_W, ...posStyle, background: 'rgba(62, 62, 62, 0.65)' }}
       onClick={(e) => e.stopPropagation()}
     >
       {selectedCondition ? (
@@ -523,15 +523,21 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               ))
             )}
           </div>
-          <div className="border-t border-black/[0.15] px-2 py-2">
-            <form onSubmit={handleCustomSubmit}>
+          <div className="border-t border-black/[0.15] px-3 py-2">
+            <form onSubmit={handleCustomSubmit} className="flex gap-1.5 items-center">
               <input
                 type="text"
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
-                placeholder="Custom condition..."
-                className="w-full bg-transparent border-b border-black/[0.2] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#5a5854] transition-all"
+                placeholder="Custom..."
+                className="flex-1 min-w-0 bg-transparent border-b border-black/[0.2] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#5a5854] transition-all"
               />
+              <button
+                type="submit"
+                className="shrink-0 btn-action !text-xs !px-2.5 !py-1 !text-white !font-semibold"
+              >
+                Add
+              </button>
             </form>
           </div>
         </>

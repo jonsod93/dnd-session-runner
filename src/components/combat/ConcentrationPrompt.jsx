@@ -17,8 +17,8 @@ export function ConcentrationPrompt({ check, combatantName, onKeep, onDrop, onCl
       style={{ background: 'rgba(0,0,0,0.6)' }}
     >
       <div
-        className="glass-modal rounded-2xl w-80 p-5"
-        style={{ boxShadow: 'inset 0 0 12px rgba(248,113,113,0.25), 5px 5px 10px rgba(5,7,10,0.45), -5px -5px 10px rgba(45,50,60,0.3)' }}
+        className="glass-toast rounded-2xl w-80 p-5"
+        style={{ background: 'rgba(62, 62, 62, 0.65)', boxShadow: 'inset 0 0 12px rgba(248,113,113,0.25), inset 1px 1px 4px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-1">

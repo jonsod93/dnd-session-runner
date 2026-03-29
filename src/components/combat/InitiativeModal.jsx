@@ -84,7 +84,8 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
       onClick={onClose}
     >
       <div
-        className="glass-modal rounded-2xl w-full max-w-md flex flex-col max-h-[80vh]"
+        className="glass-toast rounded-2xl w-full max-w-md flex flex-col max-h-[80vh]"
+        style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -148,7 +149,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                 value={values[c.id] ?? ''}
                 onChange={(e) => setValues((prev) => ({ ...prev, [c.id]: e.target.value }))}
                 placeholder="--"
-                className="w-14 bg-[#2e2e2e] border-none rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none shadow-[inset_1.5px_1.5px_3px_#0e0e0e,inset_-1.5px_-1.5px_3px_#5f5e5e] focus:shadow-[inset_3px_3px_4px_#0e0e0e,inset_-3px_-3px_4px_#5f5e5e] placeholder:text-[#5a5854] transition-all"
+                className="w-14 bg-[#2e2e2e] border-none rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none shadow-[inset_1.5px_1.5px_3px_#0e0e0e,inset_-1.5px_-1.5px_3px_rgba(95,94,94,0.4)] focus:shadow-[inset_2px_2px_3px_#0e0e0e,inset_-2px_-2px_3px_rgba(95,94,94,0.4)] placeholder:text-[#5a5854] transition-all"
               />
             </div>
           ))}

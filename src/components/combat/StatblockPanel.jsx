@@ -355,11 +355,11 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
   )
 }
 
-function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll, onSpellClick }) {
+function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll, onSpellClick, compact }) {
   if (!items?.length) return null
   return (
     <div className="mb-1">
-      <div className="sticky -top-3 z-10 bg-[var(--sb-bg)] -mx-4 px-4 pb-2">
+      <div className={`${compact ? '' : 'sticky -top-3 z-10'} bg-[var(--sb-bg)] -mx-4 px-4 pb-2`}>
         <hr className="border-black/[0.15] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
           <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-[#e87830] section-title-glow">{title}</p>
@@ -620,7 +620,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, compact }) {
   const legendaryPerRound = sb.LegendaryActions?.length ? (sb.LegendaryActionsCount ?? 3) : null
 
-  const sectionProps = { usage, onUsageChange, onRoll, onSpellClick }
+  const sectionProps = { usage, onUsageChange, onRoll, onSpellClick, compact }
 
   const handleAbilityRoll = (label, mod) => {
     if (!onRoll) return

@@ -268,7 +268,7 @@
     --neu-shadow-light: rgba(95, 94, 94, 0.25);
     --neu-border-light: rgba(95, 94, 94, 0.3);
     --neu-border-dark: rgba(14, 14, 14, 0.5);
-    background-color: var(--neu-bg) !important;
+    background-color: var(--neu-bg);
   }
 
   /* ── WCAG contrast fixes for lighter neumorphic background ─── */
@@ -297,7 +297,7 @@
     border-left-color: var(--neu-border-light);
     border-bottom-color: var(--neu-border-dark);
     border-right-color: var(--neu-border-dark);
-    box-shadow: 3px 3px 6px #0e0e0e, -3px -3px 6px #5f5e5e;
+    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px rgba(95, 94, 94, 0.4);
   }
 
   .neumorphic .glass-modal,
@@ -311,67 +311,46 @@
     border-left-color: var(--neu-border-light);
     border-bottom-color: var(--neu-border-dark);
     border-right-color: var(--neu-border-dark);
-    box-shadow: 3px 3px 6px #0e0e0e, -3px -3px 6px #5f5e5e;
+    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px rgba(95, 94, 94, 0.4);
   }
 
   .neumorphic .combat-card {
     background: var(--neu-bg-raised);
     border-radius: 0.75rem;
-    border: 2px solid transparent;
-    box-shadow: none;
-    position: relative;
+    border: none;
+    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    transition: background 0.15s ease;
+  }
+  .neumorphic .combat-card:hover {
+    background: var(--neu-bg-elevated);
   }
   .neumorphic .combat-card.is-selected {
-    background: var(--neu-bg-raised);
-    border: 2px solid transparent;
+    background: #2c2c2c;
+    border: none;
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
-  }
-
-  /* Subtle separator lines between combatant rows (pseudo-element, inset from corners) */
-  .neumorphic .combat-card:not(.is-selected):not(:last-child)::after,
-  .neumorphic .lair-border:not(.is-selected):not(:last-child)::after,
-  .neumorphic .concentration-border:not(.is-selected):not(:last-child)::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0.75rem;
-    right: 0.75rem;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.04);
-    pointer-events: none;
-  }
-  /* Hide separator on row before active or selected */
-  .neumorphic :has(+ .active-border)::after,
-  .neumorphic :has(+ .is-selected)::after {
-    display: none !important;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
   .neumorphic .library-card {
     background: var(--neu-bg-raised);
     border-radius: 0.75rem;
-    border: 2px solid transparent;
-    box-shadow: none;
-    transition: all 0.15s ease;
-    position: relative;
-    z-index: 0;
+    border: none;
+    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    transition: background 0.15s ease;
   }
-  /* Separator line between library cards (disabled) */
   .neumorphic .library-card:hover {
-    background: var(--neu-bg-raised);
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e;
-    z-index: 1;
+    background: var(--neu-bg-elevated);
   }
   .neumorphic .library-card:active {
-    background: var(--neu-bg-raised);
+    background: #2c2c2c;
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
     z-index: 1;
   }
 
@@ -379,7 +358,7 @@
     background: var(--neu-bg-raised);
     border: none;
     border-radius: 0.75rem;
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e;
+    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
   }
   .neumorphic .stat-card:hover {
     background: var(--neu-bg-elevated);
@@ -389,15 +368,19 @@
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
   /* Condition badges — neumorphic raised pills */
   .neumorphic .condition-badge {
     background: var(--neu-bg-raised) !important;
     border: none;
-    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e;
+    box-shadow: 1px 1px 2px #0e0e0e, -1px -1px 2px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    transition: background 0.15s ease;
+  }
+  .neumorphic .condition-badge:hover {
+    background: var(--neu-bg-elevated) !important;
   }
 
   /* Active turn: raised card with orange left accent + side borders */
@@ -409,61 +392,67 @@
     border-radius: 0.75rem;
     animation: none;
     box-shadow:
-      3px 3px 6px #0e0e0e,
-      -3px -3px 6px #5f5e5e,
+      2px 2px 4px #0e0e0e,
+      -2px -2px 4px rgba(95, 94, 94, 0.4),
       inset 0px 0px 0px #0e0e0e,
-      inset 0px 0px 0px #5f5e5e;
+      inset 0px 0px 0px rgba(95, 94, 94, 0.4);
   }
   .neumorphic .active-border.is-selected {
-    background: var(--neu-bg-raised) !important;
+    background: #2c2c2c !important;
     border: none !important;
     border-left: 3px solid #e87830 !important;
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
   /* Concentration: raised card with blue left accent + side borders */
   .neumorphic .lair-border {
     background: var(--neu-bg-raised) !important;
-    border: 2px solid transparent !important;
+    border: none !important;
     border-left: 3px solid rgb(255, 90, 90) !important;
     border-radius: 0.75rem;
     animation: none;
-    box-shadow: none;
-    position: relative;
+    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    transition: background 0.15s ease;
+  }
+  .neumorphic .lair-border:hover {
+    background: var(--neu-bg-elevated) !important;
   }
   .neumorphic .lair-border.is-selected {
-    background: var(--neu-bg-raised) !important;
-    border: 2px solid transparent !important;
+    background: #2c2c2c !important;
+    border: none !important;
     border-left: 3px solid rgb(255, 90, 90) !important;
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
   .neumorphic .concentration-border {
     background: var(--neu-bg-raised) !important;
-    border: 2px solid transparent !important;
+    border: none !important;
     border-left: 3px solid #60a5fa !important;
     border-radius: 0.75rem;
     animation: none;
-    box-shadow: none;
-    position: relative;
+    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    transition: background 0.15s ease;
+  }
+  .neumorphic .concentration-border:hover {
+    background: var(--neu-bg-elevated) !important;
   }
   .neumorphic .concentration-border.is-selected {
-    background: var(--neu-bg-raised) !important;
-    border: 2px solid transparent !important;
+    background: #2c2c2c !important;
+    border: none !important;
     border-left: 3px solid #60a5fa !important;
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
   /* ── Neumorphic buttons ──────────────────────────── */
@@ -472,11 +461,11 @@
     color: #ffffff;
     border: none;
     outline: none;
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e;
+    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
   }
   .neumorphic .btn-neon-gold:hover {
     background: linear-gradient(145deg, #f05a28, #d44518);
-    box-shadow: 3px 3px 6px #0e0e0e, -3px -3px 6px rgba(230, 80, 30, 0.35), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e;
+    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px rgba(230, 80, 30, 0.35), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
     transform: translateY(-1px);
   }
   .neumorphic .btn-neon-gold:active {
@@ -484,17 +473,17 @@
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
     transform: translateY(0);
   }
 
   .neumorphic .btn-outline {
-    background: transparent;
+    background: var(--neu-bg-raised);
     border: none;
     outline: none;
     color: #b0aeaa;
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e;
+    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
   }
   .neumorphic .btn-outline:hover {
     color: #e6e6e6;
@@ -505,16 +494,16 @@
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
   .neumorphic .btn-action {
-    background: transparent;
+    background: var(--neu-bg-raised);
     border: none;
     outline: none;
     color: #b0aeaa;
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px #5f5e5e, inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px #5f5e5e;
+    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
   }
   .neumorphic .btn-action:hover {
     background: var(--neu-bg-elevated);
@@ -525,20 +514,45 @@
     box-shadow:
       0px 0px 0px #0e0e0e,
       0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 3px 3px 4px #0e0e0e,
-      inset -3px -3px 4px #5f5e5e;
+      inset 2px 2px 3px #0e0e0e,
+      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
   /* ── Neumorphic inputs (pressed-in well) ─────────── */
   .neumorphic .input-field {
     background: var(--neu-bg);
     border: none;
-    box-shadow: inset 1.5px 1.5px 3px #0e0e0e, inset -1.5px -1.5px 3px #5f5e5e;
+    box-shadow: inset 1.5px 1.5px 3px #0e0e0e, inset -1.5px -1.5px 3px rgba(95, 94, 94, 0.4);
   }
   .neumorphic .input-field:focus {
-    box-shadow: inset 3px 3px 4px #0e0e0e, inset -3px -3px 4px #5f5e5e;
+    box-shadow: inset 2px 2px 3px #0e0e0e, inset -2px -2px 3px rgba(95, 94, 94, 0.4);
     border: none;
   }
+
+  /* Elements inside glass overlays: transparent backgrounds */
+  .glass-toast .input-field {
+    background: rgba(0, 0, 0, 0.25) !important;
+    border: none !important;
+    box-shadow: inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.5), inset -1.5px -1.5px 3px rgba(255, 255, 255, 0.06) !important;
+  }
+  .glass-toast .input-field:focus {
+    box-shadow: inset 3px 3px 4px rgba(0, 0, 0, 0.5), inset -3px -3px 4px rgba(255, 255, 255, 0.08) !important;
+    border: none !important;
+  }
+  /* Buttons inside glass overlays: use base gradient style, not neumorphic raised */
+  .glass-toast .btn-action {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: none !important;
+  }
+  .glass-toast .btn-action:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%) !important;
+    border-color: rgba(255,255,255,0.14) !important;
+  }
+  .glass-toast .btn-action:active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%) !important;
+  }
+
 
   /* Number input spinners */
   .neumorphic input[type="number"]::-webkit-inner-spin-button,
@@ -580,4 +594,16 @@
   /* ── Neumorphic scrollbar ────────────────────────── */
   .neumorphic ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
   .neumorphic ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
+}
+
+/* ── Glass toast (dice roll popups) ─────────────────── */
+.glass-toast {
+  background: rgba(62, 62, 62, 0.15);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  box-shadow:
+    inset 1px 1px 4px rgba(255, 255, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.35);
 }

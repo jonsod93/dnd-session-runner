@@ -337,7 +337,7 @@ export default function CombatTracker() {
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
               <p className="text-[#908e8a] text-sm">
-                Add from the library or use Quick Add on the left.
+                Add from the library or use Other on the left.
               </p>
             </div>
           )}

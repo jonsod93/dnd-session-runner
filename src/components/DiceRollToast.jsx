@@ -33,8 +33,12 @@ function ToastItem({ roll, onExpire }) {
 
   return (
     <div
-      className={`pointer-events-auto glass-modal !rounded-2xl border ${borderColor} px-4 py-2.5 min-w-[240px] max-w-[420px]`}
-      style={glowStyle}
+      className={`pointer-events-auto glass-toast px-4 py-2.5 min-w-[240px] max-w-[420px]`}
+      style={isCrit
+        ? { background: 'rgba(34, 80, 50, 0.2)', boxShadow: 'inset 0 0 12px rgba(74, 222, 128, 0.12), inset 1px 1px 4px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(74, 222, 128, 0.25)', borderColor: 'rgba(74, 222, 128, 0.35)' }
+        : isCritMiss
+        ? { background: 'rgba(80, 34, 34, 0.2)', boxShadow: 'inset 0 0 12px rgba(248, 113, 113, 0.12), inset 1px 1px 4px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(248, 113, 113, 0.25)', borderColor: 'rgba(248, 113, 113, 0.35)' }
+        : undefined}
     >
       {hasContext && (
         <div className="flex items-baseline gap-2 mb-1.5">
@@ -42,12 +46,12 @@ function ToastItem({ roll, onExpire }) {
             <span className="text-sm font-semibold text-[#e6e6e6] capitalize">{roll.context}</span>
           )}
           {roll.combatantName && (
-            <span className="text-xs text-[#5a5854] truncate">{roll.combatantName}</span>
+            <span className="text-xs text-[#b0aeaa] font-medium truncate">{roll.combatantName}</span>
           )}
         </div>
       )}
       <div className="flex items-center gap-4">
-        <span className="text-xs text-[#7a7874] font-mono shrink-0">{roll.label}</span>
+        <span className="text-xs text-[#b0aeaa] font-mono font-semibold shrink-0">{roll.label}</span>
         <span
           className={`text-xl font-bold font-mono shrink-0 ${!totalColor ? 'text-gold-400' : ''}`}
           style={totalColor ? { color: totalColor } : undefined}
@@ -55,7 +59,7 @@ function ToastItem({ roll, onExpire }) {
           {roll.total}
         </span>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-xs text-[#5a5854] font-mono truncate">
+          <span className="text-xs text-[#9a9896] font-mono font-medium truncate">
             <DetailWithNatColor detail={roll.detail} />
           </span>
           {isCrit && (

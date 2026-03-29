@@ -13,7 +13,8 @@ export function AbilityModal({ title, content, onClose }) {
       onClick={onClose}
     >
       <div
-        className="glass-modal rounded-xl w-full max-w-lg max-h-[70vh] flex flex-col"
+        className="glass-toast rounded-xl w-full max-w-lg max-h-[70vh] flex flex-col"
+        style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700">

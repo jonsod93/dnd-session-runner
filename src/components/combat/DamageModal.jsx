@@ -41,7 +41,8 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
       onClick={onClose}
     >
       <div
-        className="glass-modal rounded-2xl w-80 p-5 relative"
+        className="glass-toast rounded-2xl w-80 p-5 relative"
+        style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}

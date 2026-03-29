@@ -18,7 +18,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4">
+    <div className="min-h-screen neumorphic flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <h1 className="font-display text-xl font-bold text-gold-400 text-center mb-1 tracking-widest uppercase">Mythranos</h1>
         <p className="text-sm text-[#9a9894] text-center mb-8">D&D Session Runner</p>
@@ -31,7 +31,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => { setUsername(e.target.value); setError(false) }}
               autoFocus
-              className="w-full bg-surface-2 border border-white/[0.1] rounded-xl px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/60 placeholder:text-[#787774] transition-colors"
+              className="input-field w-full rounded-xl px-3 py-2 text-sm text-[#e6e6e6] placeholder:text-[#7a7874] transition-all"
               placeholder="Enter username"
             />
           </div>
@@ -41,7 +41,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(false) }}
-              className="w-full bg-surface-2 border border-white/[0.1] rounded-xl px-3 py-2 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400/60 placeholder:text-[#787774] transition-colors"
+              className="input-field w-full rounded-xl px-3 py-2 text-sm text-[#e6e6e6] placeholder:text-[#7a7874] transition-all"
               placeholder="Enter password"
             />
           </div>

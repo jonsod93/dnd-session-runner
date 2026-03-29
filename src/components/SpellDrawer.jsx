@@ -73,25 +73,25 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
   }, [onClose])
 
   const drawerClass = isMobile
-    ? 'fixed inset-x-0 bottom-0 z-[2100] glass-modal !rounded-b-none !rounded-t-xl flex flex-col'
-    : 'fixed left-1/2 -translate-x-1/2 z-[2100] glass-modal !rounded-xl flex flex-col'
+    ? 'fixed inset-x-0 bottom-0 z-[2100] glass-toast !rounded-b-none !rounded-t-xl flex flex-col'
+    : 'fixed left-1/2 -translate-x-1/2 z-[2100] glass-toast !rounded-xl flex flex-col'
   const drawerStyle = isMobile
-    ? { maxHeight: '55vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }
-    : { bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)' }
+    ? { maxHeight: '55vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)', background: 'rgba(62, 62, 62, 0.65)' }
+    : { bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)', background: 'rgba(62, 62, 62, 0.65)' }
 
   return (
     <div className={drawerClass} style={drawerStyle}>
       {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]">
+      <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]" style={{ background: 'rgba(62, 62, 62, 0.75)' }}>
         <div className="flex items-center gap-3">
-          <h3 className="text-sm font-medium text-[#e6e6e6]">
+          <h3 className="text-sm font-semibold text-[#e6e6e6]">
             {loading ? 'Loading…' : (spell?.name ?? spellName)}
           </h3>
           {!loading && spell && <SpellMeta spell={spell} />}
         </div>
         <button
           onClick={onClose}
-          className="text-[#9a9894] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
+          className="text-[#b0aeaa] hover:text-[#e6e6e6] text-sm leading-none transition-colors"
         >
           ✕
         </button>
@@ -117,7 +117,7 @@ function SpellMeta({ spell }) {
   const label  = level === 0
     ? `${school ?? ''} cantrip`.trim()
     : `${ordinal(level)}-level ${(school ?? '').toLowerCase()}`.trim()
-  return <span className="text-sm text-[#9a9894] italic">{label}</span>
+  return <span className="text-sm text-[#b0aeaa] font-medium italic">{label}</span>
 }
 
 function SpellBody({ spell, onRoll }) {
@@ -133,17 +133,17 @@ function SpellBody({ spell, onRoll }) {
       {props.length > 0 && (
         <div className="flex flex-wrap gap-x-6 gap-y-0.5 mb-3">
           {props.map((p, i) => (
-            <span key={i} className="text-sm text-[#9a9894]"><HighlightedText text={p} /></span>
+            <span key={i} className="text-sm text-[#b0aeaa] font-medium"><HighlightedText text={p} /></span>
           ))}
         </div>
       )}
       {spell.desc && (
-        <p className="text-sm text-[#b8b5b0] leading-relaxed whitespace-pre-wrap">
+        <p className="text-sm text-[#e0dfdc] font-medium leading-relaxed whitespace-pre-wrap">
           <RichContent text={spell.desc} onRoll={onRoll} enableSpellLinks={false} actionName={spell.name} />
         </p>
       )}
       {spell.higher_level && (
-        <p className="text-sm text-[#b8b5b0] leading-relaxed mt-3 whitespace-pre-wrap">
+        <p className="text-sm text-[#e0dfdc] font-medium leading-relaxed mt-3 whitespace-pre-wrap">
           <span className="font-medium text-[#e6e6e6]">At Higher Levels. </span>
           <RichContent text={spell.higher_level} onRoll={onRoll} enableSpellLinks={false} actionName={spell.name} />
         </p>
