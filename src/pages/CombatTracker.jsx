@@ -366,11 +366,12 @@ export default function CombatTracker() {
                   onAddCondition={combat.addCondition}
                   onRemoveCondition={combat.removeCondition}
                   onSelect={(combatant) => {
+                    if (combatant.type === 'pc') return
                     if (!isMobile && selectedId === combatant.id) return
                     const newId = selectedId === combatant.id ? null : combatant.id
                     setSelectedId(newId)
                     if (isMobile && combatant.statblock) setMobileStatblockId(combatant.id)
-                  }}
+                  }}}
                   onSetDeathSaves={combat.setDeathSaves}
                   onToggleDeathSaves={combat.toggleDeathSaves}
                   onNat20Heal={(id, isPC) => {
