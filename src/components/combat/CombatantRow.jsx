@@ -192,12 +192,12 @@ export function CombatantRow({
               <div className="w-28 shrink-0 flex justify-center">
                 {combatant.hp != null && (
                   <button
-                    className="btn-action text-sm whitespace-nowrap flex items-center gap-1"
+                    className="btn-action whitespace-nowrap flex items-center gap-1"
                     onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                     title="Apply damage/healing (T)"
                   >
                     <span className="text-[#9a9894]">HP </span>
-                    <span className={`font-mono font-medium ${hpColor} ${isDead ? 'opacity-40' : ''}`}>{displayHp}/{combatant.hp.max}</span>
+                    <span className={`font-mono ${hpColor} ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 550 }}>{displayHp}/{combatant.hp.max}</span>
                     {tempHp > 0 && (
                       <span className="text-blue-400 font-mono text-xs" title="Temporary HP">+{tempHp}</span>
                     )}
@@ -273,7 +273,7 @@ export function CombatantRow({
                       title="Apply damage/healing"
                     >
                       <span className="inline-flex items-center gap-0.5">
-                        <span className={`font-mono font-medium ${hpColor} ${isDead ? 'opacity-40' : ''}`}>{displayHp}/{combatant.hp.max}</span>
+                        <span className={`font-mono ${hpColor} ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 550 }}>{displayHp}/{combatant.hp.max}</span>
                         {tempHp > 0 && (
                           <span className="text-blue-400 font-mono text-[10px]">+{tempHp}</span>
                         )}
@@ -315,7 +315,7 @@ export function CombatantRow({
 
       {/* Remove */}
       <button
-        className="shrink-0 self-start max-lg:self-center btn-action !w-7 !h-7 max-lg:!w-5 max-lg:!h-5 !p-0 flex items-center justify-center text-[9px] max-lg:text-[7px] text-[#5a5854] hover:!text-red-400 transition-all"
+        className="shrink-0 self-center btn-action !w-7 !h-7 max-lg:!w-5 max-lg:!h-5 !p-0 flex items-center justify-center text-[9px] max-lg:text-[7px] text-[#5a5854] hover:!text-red-400 transition-all"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >
@@ -669,17 +669,21 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
   )
 }
 
+const SHIELD_STROKE_PATH = 'M0 4.40484V18.1254C0 29.456 15.1399 36 15.1399 36C15.1399 36 29.9954 29.8332 29.9954 18.0892C29.9954 6.35201 30 4.40259 30 4.40259C30 4.40259 23.3459 0 15.1399 0C6.93393 0 0 4.40484 0 4.40484Z'
+
 function ShieldAC({ value, large }) {
-  const w = large ? 30 : 23
-  const h = large ? 36 : 28
-  const fontSize = large ? 'text-sm' : 'text-[11px]'
+  const w = large ? 28 : 23
+  const h = large ? 34 : 28
   return (
     <span className="shield-ac relative inline-flex items-center justify-center" style={{ width: w, height: h }}>
       <img className="shield-neutral absolute inset-0" src={shieldNeutral} width={w} height={h} alt="" />
       <img className="shield-hovered absolute inset-0 hidden" src={shieldHovered} width={w} height={h} alt="" />
       <img className="shield-selected absolute inset-0 hidden" src={shieldSelected} width={w} height={h} alt="" />
       <img className="shield-hovered-selected absolute inset-0 hidden" src={shieldHoveredSelected} width={w} height={h} alt="" />
-      <span className={`relative font-mono font-medium text-[#e6e6e6] ${fontSize}`} style={{ marginTop: -1 }}>{value}</span>
+      <svg className="absolute inset-0 pointer-events-none" width={w} height={h} viewBox="0 0 30 36" fill="none">
+        <path d={SHIELD_STROKE_PATH} className="shield-border" strokeWidth="1.5" fill="none" />
+      </svg>
+      <span className="relative font-mono text-[#e6e6e6] text-xs" style={{ marginTop: -1, fontWeight: 550 }}>{value}</span>
     </span>
   )
 }

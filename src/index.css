@@ -530,6 +530,18 @@
     .is-selected:hover .shield-hovered-selected { display: block; }
   }
 
+  /* Shield inner border: matches row background at 0.4 opacity */
+  .shield-border { stroke: rgba(50, 50, 50, 0.4); }
+  @media (min-width: 1024px) {
+    .combat-card:hover .shield-border,
+    .active-border:hover .shield-border,
+    .lair-border:hover .shield-border { stroke: rgba(56, 56, 56, 0.4); }
+  }
+  .is-selected .shield-border { stroke: rgba(44, 44, 44, 0.4); }
+  @media (min-width: 1024px) {
+    .is-selected:hover .shield-border { stroke: rgba(48, 48, 48, 0.4); }
+  }
+
   /* ── Neumorphic inputs (pressed-in well) ─────────── */
   .neumorphic .input-field {
     background: var(--neu-bg);
