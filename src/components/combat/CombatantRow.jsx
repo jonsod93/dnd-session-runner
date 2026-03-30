@@ -244,7 +244,7 @@ export function CombatantRow({
                   )}
                 </span>
 
-                <span className="shrink-0 w-16 text-right text-[11px]">
+                <span className="shrink-0 w-16 text-center text-[11px]">
                   {combatant.hp != null && (
                     <span className="inline-flex items-center gap-0.5">
                       <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
@@ -254,11 +254,13 @@ export function CombatantRow({
                     </span>
                   )}
                 </span>
-                <span className="shrink-0 w-8 text-right text-[11px]">
+                <span className="shrink-0 w-8 text-center text-[11px]">
                   {combatant.ac != null && (
-                    <span>
-                      <span className="text-[#9a9894]">AC</span>
-                      <span className="font-mono font-medium text-[#e6e6e6] ml-0.5">{combatant.ac}</span>
+                    <span className="relative inline-flex items-center justify-center">
+                      <svg className="absolute text-[#9a9894]" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" opacity="0.2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      </svg>
+                      <span className="relative font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
                     </span>
                   )}
                 </span>
