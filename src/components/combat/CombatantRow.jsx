@@ -263,13 +263,15 @@ export function CombatantRow({
                   )}
                 </span>
 
-                {combatant.hp != null && (
+                {combatant.hp != null ? (
                   <button
                     className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
                     onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                   >
                     Dmg
                   </button>
+                ) : (
+                  <span className="shrink-0 btn-action !text-[10px] !px-2 !py-1 invisible">Dmg</span>
                 )}
                 <button
                   className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
