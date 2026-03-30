@@ -476,6 +476,60 @@
       inset -2px -2px 3px rgba(95, 94, 94, 0.4);
   }
 
+  /* Row hover: buttons match the row's hovered background */
+  @media (min-width: 1024px) {
+    .neumorphic .combat-card:hover .btn-action,
+    .neumorphic .active-border:hover .btn-action,
+    .neumorphic .lair-border:hover .btn-action {
+      background: var(--neu-bg-elevated);
+      box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4);
+    }
+  }
+
+  /* Selected row: buttons match the selected row background */
+  .neumorphic .is-selected .btn-action {
+    background: #2c2c2c;
+    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4);
+  }
+
+  /* Active border hover */
+  @media (min-width: 1024px) {
+    .neumorphic .active-border:hover {
+      background: var(--neu-bg-elevated) !important;
+    }
+  }
+
+  /* Selected+hovered rows brighten from selected bg */
+  @media (min-width: 1024px) {
+    .neumorphic .combat-card.is-selected:hover,
+    .neumorphic .active-border.is-selected:hover,
+    .neumorphic .lair-border.is-selected:hover {
+      background: #303030 !important;
+    }
+    .neumorphic .combat-card.is-selected:hover .btn-action,
+    .neumorphic .active-border.is-selected:hover .btn-action,
+    .neumorphic .lair-border.is-selected:hover .btn-action {
+      background: #303030;
+    }
+  }
+
+  /* Shield AC: swap SVG based on row hover/selected state */
+  @media (min-width: 1024px) {
+    .combat-card:hover .shield-neutral,
+    .active-border:hover .shield-neutral,
+    .lair-border:hover .shield-neutral { display: none; }
+    .combat-card:hover .shield-hovered,
+    .active-border:hover .shield-hovered,
+    .lair-border:hover .shield-hovered { display: block; }
+  }
+  .is-selected .shield-neutral { display: none; }
+  .is-selected .shield-selected { display: block; }
+  @media (min-width: 1024px) {
+    .is-selected:hover .shield-selected { display: none; }
+    .is-selected:hover .shield-hovered { display: none !important; }
+    .is-selected:hover .shield-hovered-selected { display: block; }
+  }
+
   /* ── Neumorphic inputs (pressed-in well) ─────────── */
   .neumorphic .input-field {
     background: var(--neu-bg);
@@ -546,7 +600,7 @@
   }
 
   .neumorphic .section-title-glow {
-    text-shadow: 0 0 12px rgba(255, 107, 53, 0.3);
+    text-shadow: none;
   }
 
   /* ── Neumorphic scrollbar ────────────────────────── */

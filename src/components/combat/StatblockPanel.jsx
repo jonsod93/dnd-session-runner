@@ -238,51 +238,106 @@ function RichContent({ text, onRoll, onSpellClick, className, actionName, enable
 
                 const base = { ...result, context: attackType || actionName || null, damageType: null, damageTypeColor: null }
 
-                // Gather sibling damage dice from the same action text
-                const damageDice = []
-                for (let j = 0; j < segments.length; j++) {
-                  if (j === i || segments[j].type !== 'roll' || segments[j].expr.startsWith('d20')) continue
-                  const rc = rollColors[j]
-                  damageDice.push({ expr: segments[j].expr, damageType: rc?.damageType, color: rc?.color })
+                // Gather damage dice connected to the "Hit:" portion of the attack.
+                // Strategy: scan text segments between the "Hit:" marker and damage dice.
+                // - "plus" between dice = add together (primary damage group)
+                // - "or" + next segment is a damage die = alternative (separate group, shown as X / Y)
+                // - sentence-ending period after "X damage." = stop collecting
+                // - any other text that isn't a short connector = stop collecting
+                const damageGroups = [] // array of arrays: each inner array is dice that sum together
+                let currentGroup = []
+                let foundHit = false
+
+                for (let j = i + 1; j < segments.length; j++) {
+                  const seg2 = segments[j]
+                  if (seg2.type === 'text') {
+                    const t = seg2.text.toLowerCase()
+                    // Look for "Hit:" to start collecting damage dice
+                    if (/\bhit\s*:/i.test(t)) { foundHit = true; continue }
+                    if (!foundHit) continue
+                    // "plus" between damage dice connects them into the same group
+                    if (/\bplus\b/.test(t)) continue
+                    // A period after "X damage." ends the Hit: damage clause
+                    if (currentGroup.length > 0 && /\bdamage\b[_*.,;)\s]*\./i.test(t)) break
+                    // Short connector text (damage type labels, markdown, commas) - keep scanning
+                    if (/^\s*[_*)\s,]*\s*([a-z]+\s+damage)?\s*[_*,;]*\s*$/i.test(t)) continue
+                    // "or" as a damage alternative: only short connector text like
+                    // ", or 3 " - not prose like "saving throw or become diseased"
+                    if (/\bor\b/.test(t) && currentGroup.length > 0 && t.trim().length < 40) {
+                      // Check if a damage die follows soon (within next 2 segments)
+                      const nextRoll = segments.slice(j + 1, j + 3).find((s) => s.type === 'roll' && !s.expr.startsWith('d20'))
+                      if (nextRoll) {
+                        damageGroups.push(currentGroup)
+                        currentGroup = []
+                        continue
+                      }
+                    }
+                    // Any other substantial text after we have dice = unrelated content, stop
+                    if (currentGroup.length > 0) break
+                  } else if (seg2.type === 'roll' && !seg2.expr.startsWith('d20') && foundHit) {
+                    const rc2 = rollColors[j]
+                    currentGroup.push({ expr: seg2.expr, damageType: rc2?.damageType, color: rc2?.color })
+                  }
                 }
+                if (currentGroup.length > 0) damageGroups.push(currentGroup)
 
                 // No damage dice found (e.g. spellcasting) - attack-only
-                if (damageDice.length === 0) { onRoll(base); return }
+                if (damageGroups.length === 0) { onRoll(base); return }
 
                 // Nat 1 - critical miss, skip damage
                 if (result.naturalRoll === 1) { onRoll(base); return }
 
                 const isCrit = result.naturalRoll === 20
-                const damageRolls = []
-                let damageTotal = 0
-                let critMinTotal = 0
+                const hasAlternatives = damageGroups.length > 1
 
-                for (const dd of damageDice) {
-                  const dr = rollDamageExpr(dd.expr, { crit: isCrit })
-                  if (!dr) continue
-                  damageRolls.push({
-                    label: dr.label, detail: dr.detail, total: dr.total,
-                    damageType: dd.damageType, damageTypeColor: dd.color,
-                  })
-                  damageTotal += dr.total
-                  if (isCrit) critMinTotal += dr.baseCount * dr.sides + dr.mod
-                }
-
-                // Crit minimum: rolled damage must be >= max normal damage
-                let critMinApplied = false
-                if (isCrit && damageTotal < critMinTotal) {
-                  damageTotal = critMinTotal
-                  critMinApplied = true
-                }
-
-                onRoll({
-                  ...base,
-                  hasDamage: true,
-                  damageRolls,
-                  damageTotal,
-                  critMinApplied,
-                  critMinTotal: isCrit ? critMinTotal : undefined,
+                // Roll each group independently
+                const groupResults = damageGroups.map((group) => {
+                  const rolls = []
+                  let total = 0
+                  let critMin = 0
+                  for (const dd of group) {
+                    const dr = rollDamageExpr(dd.expr, { crit: isCrit })
+                    if (!dr) continue
+                    rolls.push({
+                      label: dr.label, detail: dr.detail, total: dr.total,
+                      damageType: dd.damageType, damageTypeColor: dd.color,
+                    })
+                    total += dr.total
+                    if (isCrit) critMin += dr.baseCount * dr.sides + dr.mod
+                  }
+                  // Crit minimum per group
+                  let critMinApplied = false
+                  if (isCrit && total < critMin) { total = critMin; critMinApplied = true }
+                  return { rolls, total, critMin, critMinApplied }
                 })
+
+                if (hasAlternatives) {
+                  // Multiple groups joined by "or" - show as "X / Y"
+                  const allRolls = groupResults.flatMap((g) => g.rolls)
+                  const damageTotal = groupResults.map((g) => g.total).join(' / ')
+                  const anyCritMin = groupResults.some((g) => g.critMinApplied)
+                  onRoll({
+                    ...base,
+                    hasDamage: true,
+                    damageRolls: allRolls,
+                    damageTotal,
+                    damageAlternatives: groupResults.map((g) => g.total),
+                    damageGroupSizes: groupResults.map((g) => g.rolls.length),
+                    critMinApplied: anyCritMin,
+                    critMinTotal: isCrit ? groupResults.map((g) => g.critMin).join(' / ') : undefined,
+                  })
+                } else {
+                  // Single group - standard summed damage
+                  const g = groupResults[0]
+                  onRoll({
+                    ...base,
+                    hasDamage: true,
+                    damageRolls: g.rolls,
+                    damageTotal: g.total,
+                    critMinApplied: g.critMinApplied,
+                    critMinTotal: isCrit ? g.critMin : undefined,
+                  })
+                }
               }}
               title={`Roll ${seg.expr}`}
             >

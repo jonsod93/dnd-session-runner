@@ -20,7 +20,7 @@ import { useLibrary }      from '../hooks/useLibrary'
 import { useIsMobile }     from '../hooks/useIsMobile'
 import { useSpotify }      from '../hooks/useSpotify'
 import { LeftPanel }       from '../components/combat/LeftPanel'
-import { CombatantRow, ShieldDefs } from '../components/combat/CombatantRow'
+import { CombatantRow } from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
 import { StatblockEditor } from '../components/combat/StatblockEditor'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
@@ -169,7 +169,7 @@ export default function CombatTracker() {
 
   return (
     <div className="flex neumorphic" style={{ height: 'calc(100vh - 48px)' }}>
-      <ShieldDefs />
+
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <div className={isMobile && mobileTab === 'tracker' ? 'hidden' : 'contents'}>
@@ -337,18 +337,16 @@ export default function CombatTracker() {
             <div className="flex-1 min-w-0 flex items-center">
               <div className="w-36 shrink-0">Name</div>
               <div className="flex-1 flex items-center justify-center gap-4" style={{ transform: 'translateX(-13px)' }}>
-                <div className="w-24 shrink-0 flex justify-center" title="Hit Points">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </div>
-                <div className="w-14 shrink-0 flex justify-center" title="Armor Class">
+                <div className="w-10 shrink-0 flex justify-center" title="Armor Class">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                 </div>
-                {/* Deal damage spacer to match row button */}
-                <div className="shrink-0" style={{ width: 96 }} />
+                <div className="w-28 shrink-0 flex justify-center" title="Hit Points">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </div>
               </div>
               {/* Conditions button spacer */}
               <div className="w-[72px] shrink-0" />

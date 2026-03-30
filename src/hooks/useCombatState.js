@@ -97,9 +97,7 @@ function reducer(state, action) {
           }
           if (!c.hp) return { ...c, tempHp: newTempHp }
           const newCurrent = Math.max(0, c.hp.current - remaining)
-          const autoDeathSaves = newCurrent === 0 && c.hp.current > 0 && c.type !== 'lair' && c.type !== 'pc'
-            ? { successes: 0, failures: 0 }
-            : (c.deathSaves ?? null)
+          const autoDeathSaves = c.deathSaves ?? null
           return {
             ...c,
             tempHp: newTempHp,

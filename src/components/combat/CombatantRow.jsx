@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import { createPortal } from 'react-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { CONDITIONS, uid } from '../../utils/combatUtils'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { DeathSaveTracker } from './DeathSaveTracker'
+import shieldNeutral from '../../assets/shield-ac-neutral.svg'
+import shieldHovered from '../../assets/shield-ac-hovered.svg'
+import shieldSelected from '../../assets/shield-ac-selected.svg'
+import shieldHoveredSelected from '../../assets/shield-ac-hovered-and-selected.svg'
 
 function SkullIcon({ className }) {
   return (
@@ -50,6 +55,26 @@ export function CombatantRow({
     transition: transition ?? undefined,
     zIndex: isDragging ? 10 : undefined,
   }
+
+  // ── HP countdown animation ─────────────────────────────────────────────────
+  const [displayHp, setDisplayHp] = useState(combatant.hp?.current ?? 0)
+  const hpProxyRef = useRef({ value: combatant.hp?.current ?? 0 })
+
+  useEffect(() => {
+    const target = combatant.hp?.current ?? 0
+    if (hpProxyRef.current.value === target) {
+      setDisplayHp(target)
+      return
+    }
+    const tween = gsap.to(hpProxyRef.current, {
+      value: target,
+      duration: 0.5,
+      ease: 'power2.out',
+      onUpdate: () => setDisplayHp(Math.round(hpProxyRef.current.value)),
+      onComplete: () => setDisplayHp(target),
+    })
+    return () => tween.kill()
+  }, [combatant.hp?.current])
 
   const hpPercent = combatant.hp ? combatant.hp.current / combatant.hp.max : null
   const hpColor =
@@ -136,7 +161,7 @@ export function CombatantRow({
       </button>
 
       {/* ── Content column ────────────────────────────────────────────────── */}
-      <div className={`flex-1 min-w-0 ${isDead ? 'opacity-40' : ''} ${isLair ? 'self-center' : ''}`}>
+      <div className={`flex-1 min-w-0 ${isLair ? 'self-center' : ''}`}>
 
         {/* ── Desktop layout (hidden on mobile) ─────────────────────────── */}
         <div className="max-lg:hidden">
@@ -159,33 +184,23 @@ export function CombatantRow({
               )}
             </span>
             <div className="flex-1 flex items-center justify-center gap-4">
-              <div className="w-24 shrink-0 flex justify-center">
-                {combatant.hp != null && (
-                  <span className="text-sm whitespace-nowrap flex items-center gap-1">
-                    <span className="text-[#9a9894]">HP </span>
-                    <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
-                    {tempHp > 0 && (
-                      <span className="text-blue-400 font-mono text-xs" title="Temporary HP">+{tempHp}</span>
-                    )}
-                  </span>
-                )}
-              </div>
-              <div className="w-14 shrink-0 flex justify-center">
+              <div className="w-10 shrink-0 flex justify-center">
                 {combatant.ac != null && (
-                  <span className="text-sm">
-                    <span className="text-[#9a9894]">AC </span>
-                    <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-                  </span>
+                  <ShieldAC value={combatant.ac} large />
                 )}
               </div>
-              <div className="shrink-0" style={{ width: 96 }}>
+              <div className="w-28 shrink-0 flex justify-center">
                 {combatant.hp != null && (
                   <button
-                    className="btn-action w-full"
+                    className="btn-action text-sm whitespace-nowrap flex items-center gap-1"
                     onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                     title="Apply damage/healing (T)"
                   >
-                    Deal damage
+                    <span className="text-[#9a9894]">HP </span>
+                    <span className={`font-mono font-medium ${hpColor} ${isDead ? 'opacity-40' : ''}`}>{displayHp}/{combatant.hp.max}</span>
+                    {tempHp > 0 && (
+                      <span className="text-blue-400 font-mono text-xs" title="Temporary HP">+{tempHp}</span>
+                    )}
                   </button>
                 )}
               </div>
@@ -258,7 +273,7 @@ export function CombatantRow({
                       title="Apply damage/healing"
                     >
                       <span className="inline-flex items-center gap-0.5">
-                        <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
+                        <span className={`font-mono font-medium ${hpColor} ${isDead ? 'opacity-40' : ''}`}>{displayHp}/{combatant.hp.max}</span>
                         {tempHp > 0 && (
                           <span className="text-blue-400 font-mono text-[10px]">+{tempHp}</span>
                         )}
@@ -654,42 +669,17 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
   )
 }
 
-const SHIELD_PATH = 'M0 3.42599V14.0975C0 22.9102 11.6073 28 11.6073 28C11.6073 28 22.9965 23.2036 22.9965 14.0694C22.9965 4.94045 23 3.42423 23 3.42423C23 3.42423 17.8985 0 11.6073 0C5.31601 0 0 3.42599 0 3.42599Z'
-
-export function ShieldDefs() {
+function ShieldAC({ value, large }) {
+  const w = large ? 30 : 23
+  const h = large ? 36 : 28
+  const fontSize = large ? 'text-sm' : 'text-[11px]'
   return (
-    <svg width="0" height="0" className="absolute">
-      <defs>
-        <filter id="shield-neu" x="-1" y="-1" width="25" height="30" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-          <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-          <feOffset dx="1" dy="1"/>
-          <feGaussianBlur stdDeviation="1.5"/>
-          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
-          <feColorMatrix type="matrix" values="0 0 0 0 0.054902 0 0 0 0 0.054902 0 0 0 0 0.054902 0 0 0 1 0"/>
-          <feBlend mode="normal" in2="shape" result="effect1"/>
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-          <feOffset dx="-1" dy="-1"/>
-          <feGaussianBlur stdDeviation="1.5"/>
-          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
-          <feColorMatrix type="matrix" values="0 0 0 0 0.372549 0 0 0 0 0.368627 0 0 0 0 0.368627 0 0 0 0.4 0"/>
-          <feBlend mode="normal" in2="effect1" result="effect2"/>
-        </filter>
-      </defs>
-    </svg>
-  )
-}
-
-function ShieldAC({ value }) {
-  return (
-    <span className="relative inline-flex items-center justify-center" style={{ width: 23, height: 28 }}>
-      <svg className="absolute inset-0" width="23" height="28" viewBox="0 0 23 28">
-        <g filter="url(#shield-neu)">
-          <path fillRule="evenodd" clipRule="evenodd" d={SHIELD_PATH} fill="#323232"/>
-        </g>
-      </svg>
-      <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -1 }}>{value}</span>
+    <span className="shield-ac relative inline-flex items-center justify-center" style={{ width: w, height: h }}>
+      <img className="shield-neutral absolute inset-0" src={shieldNeutral} width={w} height={h} alt="" />
+      <img className="shield-hovered absolute inset-0 hidden" src={shieldHovered} width={w} height={h} alt="" />
+      <img className="shield-selected absolute inset-0 hidden" src={shieldSelected} width={w} height={h} alt="" />
+      <img className="shield-hovered-selected absolute inset-0 hidden" src={shieldHoveredSelected} width={w} height={h} alt="" />
+      <span className={`relative font-mono font-medium text-[#e6e6e6] ${fontSize}`} style={{ marginTop: -1 }}>{value}</span>
     </span>
   )
 }

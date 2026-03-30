@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 const DURATION = 4500
+const DAMAGE_DURATION = 10000
 
 export function DiceRollToast({ rolls, onExpire, spellDrawerOpen }) {
   const desktopBottom = spellDrawerOpen ? 'bottom-[calc(38vh+2rem)]' : 'bottom-4'
@@ -15,8 +16,8 @@ export function DiceRollToast({ rolls, onExpire, spellDrawerOpen }) {
 
 function ToastItem({ roll, onExpire }) {
   useEffect(() => {
-    if (roll.hasDamage) return // no auto-dismiss for combined attack+damage rolls
-    const t = setTimeout(() => onExpire(roll.id), DURATION)
+    const duration = roll.hasDamage ? DAMAGE_DURATION : DURATION
+    const t = setTimeout(() => onExpire(roll.id), duration)
     return () => clearTimeout(t)
   }, [roll.id, roll.hasDamage, onExpire])
 
@@ -84,22 +85,48 @@ function ToastItem({ roll, onExpire }) {
           <div className="text-xs font-semibold mb-1.5" style={{ color: isCrit ? '#4ade80' : '#e6e6e6' }}>
             {isCrit ? 'Critical Damage!' : 'Damage'}
           </div>
-          {roll.damageRolls.map((dr, idx) => {
-            const rowColor = dr.damageTypeColor || '#e6e6e6'
-            return (
-            <div key={idx} className="flex flex-col gap-0.5 mb-1.5" style={{ color: rowColor }}>
-              <span className="text-xs font-mono font-semibold" style={{ opacity: 0.8 }}>{dr.label}</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-mono font-medium truncate" style={{ opacity: 0.7 }}>{dr.detail}</span>
-                {dr.damageType && (
-                  <span className="text-xs font-medium capitalize shrink-0">
-                    {dr.damageType}
-                  </span>
-                )}
-              </div>
-            </div>
-            )
-          })}
+          {roll.damageAlternatives ? (
+            // Alternative damage groups separated by "or"
+            roll.damageAlternatives.map((altTotal, gi) => {
+              // Find which rolls belong to this group using stored group sizes
+              const offset = (roll.damageGroupSizes || []).slice(0, gi).reduce((a, b) => a + b, 0)
+              const groupRolls = roll.damageRolls.slice(offset, offset + (roll.damageGroupSizes?.[gi] ?? 1))
+              return (
+                <div key={gi}>
+                  {gi > 0 && <div className="text-xs text-[#9a9896] italic my-1">or</div>}
+                  {groupRolls.map((dr, idx) => {
+                    const rowColor = dr.damageTypeColor || '#e6e6e6'
+                    return (
+                      <div key={idx} className="flex flex-col gap-0.5 mb-1.5" style={{ color: rowColor }}>
+                        <span className="text-xs font-mono font-semibold" style={{ opacity: 0.8 }}>{dr.label}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-mono font-medium truncate" style={{ opacity: 0.7 }}>{dr.detail}</span>
+                          {dr.damageType && (
+                            <span className="text-xs font-medium capitalize shrink-0">{dr.damageType}</span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })
+          ) : (
+            roll.damageRolls.map((dr, idx) => {
+              const rowColor = dr.damageTypeColor || '#e6e6e6'
+              return (
+                <div key={idx} className="flex flex-col gap-0.5 mb-1.5" style={{ color: rowColor }}>
+                  <span className="text-xs font-mono font-semibold" style={{ opacity: 0.8 }}>{dr.label}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-mono font-medium truncate" style={{ opacity: 0.7 }}>{dr.detail}</span>
+                    {dr.damageType && (
+                      <span className="text-xs font-medium capitalize shrink-0">{dr.damageType}</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })
+          )}
         </div>
       )}
 
