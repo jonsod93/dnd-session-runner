@@ -724,7 +724,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
       {sb.Abilities && (
         <>
           <hr className="border-black/[0.15] my-3" />
-          <div className="grid grid-cols-6 gap-1.5 text-center">
+          <div className="grid grid-cols-6 gap-2.5 text-center">
             {ABILITIES.map((a) => {
               const mod = abilityMod(sb.Abilities[a])
               return (
