@@ -20,7 +20,7 @@ import { useLibrary }      from '../hooks/useLibrary'
 import { useIsMobile }     from '../hooks/useIsMobile'
 import { useSpotify }      from '../hooks/useSpotify'
 import { LeftPanel }       from '../components/combat/LeftPanel'
-import { CombatantRow }    from '../components/combat/CombatantRow'
+import { CombatantRow, ShieldDefs } from '../components/combat/CombatantRow'
 import { StatblockPanel }  from '../components/combat/StatblockPanel'
 import { StatblockEditor } from '../components/combat/StatblockEditor'
 import { InitiativeModal } from '../components/combat/InitiativeModal'
@@ -169,6 +169,7 @@ export default function CombatTracker() {
 
   return (
     <div className="flex neumorphic" style={{ height: 'calc(100vh - 48px)' }}>
+      <ShieldDefs />
 
       {/* ── Left panel ──────────────────────────────────────────────────── */}
       <div className={isMobile && mobileTab === 'tracker' ? 'hidden' : 'contents'}>

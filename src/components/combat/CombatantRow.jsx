@@ -657,18 +657,41 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
   )
 }
 
+const SHIELD_PATH = 'M14 30 C14 30 26 24 26 15.5 L26 5.5 L14 1.5 L2 5.5 L2 15.5 C2 24 14 30 14 30Z'
+
+export function ShieldDefs() {
+  return (
+    <svg width="0" height="0" className="absolute">
+      <defs>
+        <filter id="shield-neu-dark" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur" />
+          <feOffset in="blur" dx="2" dy="2" result="shifted" />
+          <feComposite in="shifted" in2="SourceGraphic" operator="out" result="shadow" />
+          <feFlood floodColor="#0a0a0a" floodOpacity="1" />
+          <feComposite operator="in" in2="shadow" />
+          <feComposite operator="over" in2="SourceGraphic" />
+        </filter>
+        <filter id="shield-neu-light" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
+          <feOffset in="blur" dx="-1.5" dy="-1.5" result="shifted" />
+          <feComposite in="shifted" in2="SourceGraphic" operator="out" result="shadow" />
+          <feFlood floodColor="#5f5e5e" floodOpacity="0.5" />
+          <feComposite operator="in" in2="shadow" />
+          <feComposite operator="over" in2="SourceGraphic" />
+        </filter>
+      </defs>
+    </svg>
+  )
+}
+
 function ShieldAC({ value }) {
   return (
     <span className="relative inline-flex items-center justify-center" style={{ width: 28, height: 32 }}>
-      <span
-        className="absolute"
-        style={{
-          inset: -4,
-          clipPath: 'path("M18 34 C18 34 30 28 30 19.5 L30 9.5 L18 5.5 L6 9.5 L6 19.5 C6 28 18 34 18 34Z")',
-          background: '#282828',
-          boxShadow: 'inset 2.5px 2.5px 4px #0e0e0e, inset -2.5px -2.5px 4px rgba(95, 94, 94, 0.4)',
-        }}
-      />
+      <svg className="absolute inset-0" width="28" height="32" viewBox="0 0 28 32">
+        <path d={SHIELD_PATH} fill="#272727" />
+        <path d={SHIELD_PATH} fill="#272727" filter="url(#shield-neu-dark)" />
+        <path d={SHIELD_PATH} fill="transparent" filter="url(#shield-neu-light)" />
+      </svg>
       <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -2 }}>{value}</span>
     </span>
   )
