@@ -299,8 +299,10 @@
     box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
     transition: background 0.15s ease;
   }
-  .neumorphic .combat-card:hover {
-    background: var(--neu-bg-elevated);
+  @media (min-width: 1024px) {
+    .neumorphic .combat-card:hover {
+      background: var(--neu-bg-elevated);
+    }
   }
   .neumorphic .combat-card.is-selected {
     background: #2c2c2c;
