@@ -101,7 +101,7 @@ export function CombatantRow({
       style={sortableStyle}
       data-combatant-id={combatant.id}
       className={[
-        'flex items-start max-lg:items-center gap-2 px-4 py-4 rounded-xl min-h-[56px] shrink-0 cursor-default outline-none',
+        'flex items-start max-lg:items-center gap-2 px-4 py-4 max-lg:px-3 max-lg:py-2 rounded-xl min-h-[56px] max-lg:min-h-0 shrink-0 cursor-default outline-none',
         isActive
           ? `active-border${isSelected ? ' is-selected' : ''}`
           : isLair
@@ -128,7 +128,7 @@ export function CombatantRow({
 
       {/* Initiative */}
       <button
-        className={`shrink-0 self-center text-center font-mono transition-colors w-8 text-sm max-lg:w-10 max-lg:text-xl max-lg:mr-2 ${isActive ? 'text-[#e87830] font-medium' : 'text-[#9a9894] font-medium hover:text-[#e6e6e6]'}`}
+        className={`shrink-0 self-center text-center font-mono transition-colors w-8 text-sm max-lg:w-7 max-lg:text-sm ${isActive ? 'text-[#e87830] font-medium' : 'text-[#9a9894] font-medium hover:text-[#e6e6e6]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >
@@ -222,76 +222,59 @@ export function CombatantRow({
         {/* ── Mobile layout (hidden on desktop) ─────────────────────────── */}
         <div className="lg:hidden">
           {isLair ? (
-            <span className={`text-sm font-semibold ${nameColor}`}>{combatant.name}</span>
+            <span className={`text-xs font-semibold ${nameColor}`}>{combatant.name}</span>
           ) : (
             <>
-              {/*
-                CSS grid with 2 columns: [1fr  auto]
-                  Col 1 (1fr):  Name (row 1) and AC+HP (row 2) — left-aligned
-                  Col 2 (auto): Conditions button (row 1) and Deal damage button (row 2)
-                The "auto" column sizes to the widest child, so both buttons get equal width.
-                "w-full" on each button fills that column width.
-              */}
-              <div className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1.5">
-                {/* Row 1 col 1: Name */}
-                <span className="flex items-center gap-1 min-w-0">
+              {/* Single-row layout: Name + HP/AC ... Dmg | Cond */}
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 min-w-0 flex-1">
                   <span
-                    className={`text-sm font-semibold truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
+                    className={`text-xs font-semibold truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
                     title={combatant.name}
                   >
                     {combatant.name}
                   </span>
                   {isPC && (
                     <button
-                      className={`shrink-0 text-base leading-none transition-colors ${combatant.deathSaves ? 'text-red-500' : 'text-white/15 hover:text-red-500/60'}`}
+                      className={`shrink-0 leading-none transition-colors ${combatant.deathSaves ? 'text-red-500' : 'text-white/15 hover:text-red-500/60'}`}
                       onClick={(e) => { e.stopPropagation(); onToggleDeathSaves?.(combatant.id) }}
                     >
-                      💀
+                      <SkullIcon className="w-3 h-3" />
                     </button>
+                  )}
+                  {combatant.hp != null && (
+                    <span className="shrink-0 text-[11px] flex items-center gap-0.5 ml-1">
+                      <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
+                      {tempHp > 0 && (
+                        <span className="text-blue-400 font-mono text-[10px]">+{tempHp}</span>
+                      )}
+                    </span>
+                  )}
+                  {combatant.ac != null && (
+                    <span className="shrink-0 text-[11px] ml-0.5">
+                      <span className="text-[#9a9894]">AC</span>
+                      <span className="font-mono font-medium text-[#e6e6e6] ml-0.5">{combatant.ac}</span>
+                    </span>
                   )}
                 </span>
 
-                {/* Row 1 col 2: Conditions button */}
-                <button
-                  className="w-full text-center btn-action"
-                  onClick={openConditions}
-                >
-                  Conditions
-                </button>
-
-                {/* Row 2 col 1: HP + AC (only rendered when at least one exists) */}
-                {(combatant.ac != null || combatant.hp != null) && (
-                  <div className="flex items-center gap-2">
-                    {combatant.hp != null && (
-                      <span className="text-sm flex items-center gap-1">
-                        <span className="text-[#9a9894]">HP </span>
-                        <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
-                        {tempHp > 0 && (
-                          <span className="text-blue-400 font-mono text-xs">+{tempHp}</span>
-                        )}
-                      </span>
-                    )}
-                    {combatant.ac != null && (
-                      <span className="text-sm">
-                        <span className="text-[#9a9894]">AC </span>
-                        <span className="font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Row 2 col 2: Deal damage button */}
                 {combatant.hp != null && (
                   <button
-                    className="w-full text-center btn-action"
+                    className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
                     onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                   >
-                    Deal damage
+                    Dmg
                   </button>
                 )}
+                <button
+                  className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
+                  onClick={openConditions}
+                >
+                  Cond
+                </button>
               </div>
 
-              {/* Condition tags — full width, below the grid */}
+              {/* Condition tags — full width, below the row */}
               {conditionTags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1.5">
                   {conditionTags}
@@ -316,7 +299,7 @@ export function CombatantRow({
 
       {/* Remove */}
       <button
-        className="shrink-0 self-start btn-action !w-7 !h-7 !p-0 flex items-center justify-center text-[9px] text-[#5a5854] hover:!text-red-400 transition-all"
+        className="shrink-0 self-start max-lg:self-center btn-action !w-7 !h-7 max-lg:!w-5 max-lg:!h-5 !p-0 flex items-center justify-center text-[9px] max-lg:text-[7px] text-[#5a5854] hover:!text-red-400 transition-all"
         onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
         title="Remove"
       >

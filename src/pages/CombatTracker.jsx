@@ -414,7 +414,7 @@ export default function CombatTracker() {
         <StatblockPanel
           combatant={mobileStatblockCombatant}
           combatants={combat.combatants}
-          onClear={() => setMobileStatblockId(null)}
+          onClear={() => { setMobileStatblockId(null); setSelectedId(null) }}
           onUsageChange={(key, value) => combat.updateUsage(mobileStatblockId, key, value)}
           onRoll={handleRoll}
           onSpellClick={setActiveSpell}
@@ -430,7 +430,7 @@ export default function CombatTracker() {
         <div className="fixed bottom-14 left-0 right-0 z-40 px-3 py-2 pointer-events-none">
           <button
             onClick={combat.nextTurn}
-            className="pointer-events-auto w-full py-3.5 bg-[#202226] hover:bg-[#252729] active:shadow-neu-pressed text-[#e6e6e6] font-semibold text-base rounded-2xl transition-all shadow-neu-raised-sm"
+            className="pointer-events-auto w-full py-3.5 btn-action !text-base !font-semibold !text-[#e6e6e6] !rounded-2xl"
           >
             Next Turn
           </button>
