@@ -658,39 +658,17 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
 }
 
 function ShieldAC({ value }) {
-  const shieldPath = 'M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z'
   return (
-    <span className="relative inline-flex items-center justify-center" style={{ width: 28, height: 30 }}>
-      <svg className="absolute inset-0" width="28" height="30" viewBox="0 0 28 30">
-        <defs>
-          <filter id="shield-inset" x="-50%" y="-50%" width="200%" height="200%">
-            {/* Create inverted shape for inset shadow */}
-            <feComponentTransfer in="SourceAlpha">
-              <feFuncA type="table" tableValues="1 0" />
-            </feComponentTransfer>
-            <feGaussianBlur stdDeviation="1.5" />
-            <feOffset dx="1.5" dy="1.5" result="shadow" />
-            <feFlood floodColor="#0e0e0e" floodOpacity="0.8" result="color" />
-            <feComposite in="color" in2="shadow" operator="in" result="darkShadow" />
-            {/* Light edge */}
-            <feComponentTransfer in="SourceAlpha">
-              <feFuncA type="table" tableValues="1 0" />
-            </feComponentTransfer>
-            <feGaussianBlur stdDeviation="1" />
-            <feOffset dx="-1" dy="-1" result="highlight" />
-            <feFlood floodColor="#5f5e5e" floodOpacity="0.3" result="lightColor" />
-            <feComposite in="lightColor" in2="highlight" operator="in" result="lightShadow" />
-            {/* Combine */}
-            <feMerge>
-              <feMergeNode in="SourceGraphic" />
-              <feMergeNode in="darkShadow" />
-              <feMergeNode in="lightShadow" />
-            </feMerge>
-          </filter>
-        </defs>
-        <path d={shieldPath} fill="#272727" filter="url(#shield-inset)" />
-      </svg>
-      <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -1 }}>{value}</span>
+    <span className="relative inline-flex items-center justify-center" style={{ width: 28, height: 32 }}>
+      <span
+        className="absolute inset-0"
+        style={{
+          clipPath: 'path("M14 30 C14 30 26 24 26 15.5 L26 5.5 L14 1.5 L2 5.5 L2 15.5 C2 24 14 30 14 30Z")',
+          background: '#282828',
+          boxShadow: 'inset 2px 2px 3px #0e0e0e, inset -2px -2px 3px rgba(95, 94, 94, 0.4)',
+        }}
+      />
+      <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -2 }}>{value}</span>
     </span>
   )
 }
