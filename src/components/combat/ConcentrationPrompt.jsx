@@ -29,13 +29,13 @@ export function ConcentrationPrompt({ check, combatantName, onKeep, onDrop, onCl
         </p>
 
         {/* DC and roll result */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="text-center stat-card px-4 py-2">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex-1 text-center px-4 py-2 rounded-xl" style={{ background: '#282828', boxShadow: 'inset 2px 2px 3px #0e0e0e, inset -2px -2px 3px rgba(95, 94, 94, 0.4)' }}>
             <div className="text-[10px] text-[#7a7874] uppercase tracking-wider">DC</div>
             <div className="text-lg font-bold font-mono text-[#e6e6e6]">{dc}</div>
           </div>
-          <div className="text-[#5a5854]">vs</div>
-          <div className="text-center stat-card px-4 py-2">
+          <div className="text-[#5a5854] shrink-0">vs</div>
+          <div className="flex-1 text-center px-4 py-2 rounded-xl" style={{ background: '#282828', boxShadow: 'inset 2px 2px 3px #0e0e0e, inset -2px -2px 3px rgba(95, 94, 94, 0.4)' }}>
             <div className="text-[10px] text-[#7a7874] uppercase tracking-wider">Roll</div>
             <div className="text-lg font-bold font-mono text-red-400">
               {total}
