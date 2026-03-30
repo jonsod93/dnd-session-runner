@@ -244,6 +244,12 @@ export function CombatantRow({
                   )}
                 </span>
 
+                <span className="shrink-0 w-7 flex justify-center text-[11px]">
+                  {combatant.ac != null && (
+                    <ShieldAC value={combatant.ac} />
+                  )}
+                </span>
+
                 {combatant.hp != null ? (
                   <button
                     className="shrink-0 btn-action !text-[11px] !px-2 !py-1 !rounded-lg"
@@ -260,11 +266,6 @@ export function CombatantRow({
                 ) : (
                   <span className="shrink-0 w-16" />
                 )}
-                <span className="shrink-0 w-7 flex justify-center text-[11px]">
-                  {combatant.ac != null && (
-                    <ShieldAC value={combatant.ac} />
-                  )}
-                </span>
 
                 <button
                   className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
