@@ -136,7 +136,7 @@ export function CombatantRow({
       </button>
 
       {/* ── Content column ────────────────────────────────────────────────── */}
-      <div className={`flex-1 min-w-0 max-lg:pr-2 ${isDead ? 'opacity-40' : ''} ${isLair ? 'self-center' : ''}`}>
+      <div className={`flex-1 min-w-0 ${isDead ? 'opacity-40' : ''} ${isLair ? 'self-center' : ''}`}>
 
         {/* ── Desktop layout (hidden on mobile) ─────────────────────────── */}
         <div className="max-lg:hidden">
@@ -225,7 +225,7 @@ export function CombatantRow({
             <span className={`text-xs font-semibold ${nameColor}`}>{combatant.name}</span>
           ) : (
             <>
-              {/* Single-row layout: Name + HP/AC ... Dmg | Cond */}
+              {/* Single-row layout: Name | HP | AC | Dmg | Cond */}
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1 min-w-0 flex-1">
                   <span
@@ -242,16 +242,21 @@ export function CombatantRow({
                       <SkullIcon className="w-3 h-3" />
                     </button>
                   )}
+                </span>
+
+                <span className="shrink-0 w-16 text-right text-[11px]">
                   {combatant.hp != null && (
-                    <span className="shrink-0 text-[11px] flex items-center gap-0.5 ml-1">
+                    <span className="inline-flex items-center gap-0.5">
                       <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
                       {tempHp > 0 && (
                         <span className="text-blue-400 font-mono text-[10px]">+{tempHp}</span>
                       )}
                     </span>
                   )}
+                </span>
+                <span className="shrink-0 w-8 text-right text-[11px]">
                   {combatant.ac != null && (
-                    <span className="shrink-0 text-[11px] ml-0.5">
+                    <span>
                       <span className="text-[#9a9894]">AC</span>
                       <span className="font-mono font-medium text-[#e6e6e6] ml-0.5">{combatant.ac}</span>
                     </span>
