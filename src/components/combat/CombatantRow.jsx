@@ -254,14 +254,9 @@ export function CombatantRow({
                     </span>
                   )}
                 </span>
-                <span className="shrink-0 w-8 text-center text-[11px]">
+                <span className="shrink-0 w-7 flex justify-center text-[11px]">
                   {combatant.ac != null && (
-                    <span className="relative inline-flex items-center justify-center">
-                      <svg className="absolute text-[#9a9894]" width="30" height="30" viewBox="0 0 24 24" fill="currentColor" opacity="0.15">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      </svg>
-                      <span className="relative font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>
-                    </span>
+                    <ShieldAC value={combatant.ac} />
                   )}
                 </span>
 
@@ -659,6 +654,22 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
         Add {condition.name}
       </button>
     </div>
+  )
+}
+
+function ShieldAC({ value }) {
+  return (
+    <span className="relative inline-flex items-center justify-center" style={{ width: 28, height: 30 }}>
+      <svg className="absolute inset-0" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Dark pressed-in fill */}
+        <path d="M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z" fill="#262626" />
+        {/* Inner dark shadow (top-left) */}
+        <path d="M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z" fill="none" stroke="#0e0e0e" strokeWidth="2.5" strokeOpacity="0.7" transform="translate(0.6, 0.6) scale(0.96)" style={{ transformOrigin: '14px 15px' }} />
+        {/* Inner light highlight (bottom-right) */}
+        <path d="M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z" fill="none" stroke="rgba(95,94,94,0.4)" strokeWidth="1.5" transform="translate(-0.4, -0.4) scale(0.96)" style={{ transformOrigin: '14px 15px' }} />
+      </svg>
+      <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -1 }}>{value}</span>
+    </span>
   )
 }
 
