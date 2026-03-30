@@ -34,7 +34,7 @@ const MAP_CONFIG = {
   zoom: -3,
   minZoom: -4,
   maxZoom: 0,
-  pixelsPerMile: 6.533,
+  pixelsPerMile: 5.488,
 }
 
 // ─── Right-click handler component ──────────────────────────────────────────
