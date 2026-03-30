@@ -57,11 +57,11 @@ function ToastItem({ roll, onExpire }) {
         </div>
       )}
 
-      {/* Attack roll row */}
-      <div className="flex flex-col gap-0.5">
-        <span className="text-xs text-[#b0aeaa] font-mono font-semibold shrink-0">{roll.label}</span>
+      {/* Roll info */}
+      <div className="flex flex-col gap-0.5" style={(!isAttack && roll.damageTypeColor) ? { color: roll.damageTypeColor } : undefined}>
+        <span className="text-xs font-mono font-semibold shrink-0" style={(!isAttack && roll.damageTypeColor) ? { opacity: 0.8 } : { color: '#b0aeaa' }}>{roll.label}</span>
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-xs text-[#9a9896] font-mono font-medium truncate">
+          <span className="text-xs font-mono font-medium truncate" style={(!isAttack && roll.damageTypeColor) ? { opacity: 0.7 } : { color: '#9a9896' }}>
             <DetailWithNatColor detail={roll.detail} />
           </span>
           {isCrit && (
@@ -71,10 +71,7 @@ function ToastItem({ roll, onExpire }) {
             <span className="text-xs font-bold text-red-400 shrink-0">Critical miss!</span>
           )}
           {roll.damageType && (
-            <span
-              className="text-xs font-medium capitalize shrink-0"
-              style={roll.damageTypeColor ? { color: roll.damageTypeColor } : undefined}
-            >
+            <span className="text-xs font-medium capitalize shrink-0">
               {roll.damageType} damage
             </span>
           )}
@@ -90,14 +87,16 @@ function ToastItem({ roll, onExpire }) {
           {roll.damageRolls.map((dr, idx) => {
             const rowColor = dr.damageTypeColor || '#e6e6e6'
             return (
-            <div key={idx} className="flex items-center gap-3 mb-1" style={{ color: rowColor }}>
-              <span className="text-xs font-mono font-semibold shrink-0 w-16" style={{ opacity: 0.8 }}>{dr.label}</span>
-              <span className="text-xs font-mono font-medium truncate" style={{ opacity: 0.7 }}>{dr.detail}</span>
-              {dr.damageType && (
-                <span className="text-xs font-medium capitalize shrink-0">
-                  {dr.damageType}
-                </span>
-              )}
+            <div key={idx} className="flex flex-col gap-0.5 mb-1.5" style={{ color: rowColor }}>
+              <span className="text-xs font-mono font-semibold" style={{ opacity: 0.8 }}>{dr.label}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-mono font-medium truncate" style={{ opacity: 0.7 }}>{dr.detail}</span>
+                {dr.damageType && (
+                  <span className="text-xs font-medium capitalize shrink-0">
+                    {dr.damageType}
+                  </span>
+                )}
+              </div>
             </div>
             )
           })}
