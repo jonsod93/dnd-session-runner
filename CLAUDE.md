@@ -65,3 +65,7 @@ Tailwind with custom config: gold color palette, Cinzel (display), DM Sans (body
 
 - Main branch: `main`
 - Remote: https://github.com/jonsod93/dnd-session-runner.git
+- Always pull latest main before starting work in a new conversation
+- Branch off main for all changes
+- Merge directly to main when done, no PRs
+- Push main after merging
