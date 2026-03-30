@@ -257,7 +257,7 @@ export function CombatantRow({
                 <span className="shrink-0 w-8 text-center text-[11px]">
                   {combatant.ac != null && (
                     <span className="relative inline-flex items-center justify-center">
-                      <svg className="absolute text-[#9a9894]" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" opacity="0.2">
+                      <svg className="absolute text-[#9a9894]" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" opacity="0.15">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                       </svg>
                       <span className="relative font-mono font-medium text-[#e6e6e6]">{combatant.ac}</span>

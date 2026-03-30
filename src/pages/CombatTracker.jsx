@@ -305,13 +305,13 @@ export default function CombatTracker() {
             {/* Content — matches flex-1 content div in CombatantRow */}
             <div className="flex-1 min-w-0 flex items-center gap-2">
               <span className="flex-1 min-w-0">Name</span>
-              <span className="shrink-0 w-16 text-center" title="Hit Points">
-                <svg className="inline" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <span className="shrink-0 w-16 flex justify-center" title="Hit Points">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </span>
-              <span className="shrink-0 w-8 text-center" title="Armor Class">
-                <svg className="inline" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <span className="shrink-0 w-8 flex justify-center" title="Armor Class">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
               </span>
