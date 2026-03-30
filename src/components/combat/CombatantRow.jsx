@@ -657,27 +657,27 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
   )
 }
 
-const SHIELD_PATH = 'M14 30 C14 30 26 24 26 15.5 L26 5.5 L14 1.5 L2 5.5 L2 15.5 C2 24 14 30 14 30Z'
+const SHIELD_PATH = 'M13.8243 0.433856C13.6416 0.167787 13.3416 0.00628425 13.0189 0.000179365C12.6962 -0.00592553 12.3904 0.144118 12.1977 0.403086C10.9394 2.09436 9.24824 3.41494 7.30238 4.2257C5.35652 5.03648 3.22802 5.30742 1.1411 5.01C0.854158 4.96912 0.563596 5.05472 0.344672 5.24466C0.125748 5.4346 0 5.71016 0 6V11.5623C0.007706 14.9732 1.04132 18.303 2.9665 21.1188C4.89166 23.9346 7.61936 26.106 10.795 27.351L11.9768 27.8118L11.9889 27.8164C12.6408 28.0608 13.3592 28.0608 14.0111 27.8164L14.0232 27.8118L15.2032 27.3518C18.3788 26.1068 21.1084 23.9346 23.0336 21.1188C24.9586 18.303 25.9922 14.9732 26 11.5623V11.56V6C26 5.72314 25.8852 5.45868 25.683 5.26958C25.4808 5.0805 25.2092 4.9837 24.933 5.00224C19.8348 5.34466 16.0777 3.71482 13.8243 0.433856Z'
 
 export function ShieldDefs() {
   return (
     <svg width="0" height="0" className="absolute">
       <defs>
-        <filter id="shield-neu-dark" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur" />
-          <feOffset in="blur" dx="2" dy="2" result="shifted" />
-          <feComposite in="shifted" in2="SourceGraphic" operator="out" result="shadow" />
-          <feFlood floodColor="#0a0a0a" floodOpacity="1" />
-          <feComposite operator="in" in2="shadow" />
-          <feComposite operator="over" in2="SourceGraphic" />
-        </filter>
-        <filter id="shield-neu-light" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
-          <feOffset in="blur" dx="-1.5" dy="-1.5" result="shifted" />
-          <feComposite in="shifted" in2="SourceGraphic" operator="out" result="shadow" />
-          <feFlood floodColor="#5f5e5e" floodOpacity="0.5" />
-          <feComposite operator="in" in2="shadow" />
-          <feComposite operator="over" in2="SourceGraphic" />
+        <filter id="shield-neu" x="-2" y="-2" width="30" height="32" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+          <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+          <feOffset dx="-2" dy="-2"/>
+          <feGaussianBlur stdDeviation="1.5"/>
+          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+          <feColorMatrix type="matrix" values="0 0 0 0 0.372549 0 0 0 0 0.368627 0 0 0 0 0.368627 0 0 0 0.4 0"/>
+          <feBlend mode="normal" in2="shape" result="effect1"/>
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+          <feOffset dx="2" dy="2"/>
+          <feGaussianBlur stdDeviation="1.5"/>
+          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+          <feColorMatrix type="matrix" values="0 0 0 0 0.054902 0 0 0 0 0.054902 0 0 0 0 0.054902 0 0 0 1 0"/>
+          <feBlend mode="normal" in2="effect1" result="effect2"/>
         </filter>
       </defs>
     </svg>
@@ -686,13 +686,13 @@ export function ShieldDefs() {
 
 function ShieldAC({ value }) {
   return (
-    <span className="relative inline-flex items-center justify-center" style={{ width: 28, height: 32 }}>
-      <svg className="absolute inset-0" width="28" height="32" viewBox="0 0 28 32">
-        <path d={SHIELD_PATH} fill="#272727" />
-        <path d={SHIELD_PATH} fill="#272727" filter="url(#shield-neu-dark)" />
-        <path d={SHIELD_PATH} fill="transparent" filter="url(#shield-neu-light)" />
+    <span className="relative inline-flex items-center justify-center" style={{ width: 28, height: 30 }}>
+      <svg className="absolute inset-0" width="28" height="30" viewBox="-1 -1 28 30">
+        <g filter="url(#shield-neu)">
+          <path fillRule="evenodd" clipRule="evenodd" d={SHIELD_PATH} fill="#292929"/>
+        </g>
       </svg>
-      <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -2 }}>{value}</span>
+      <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -1 }}>{value}</span>
     </span>
   )
 }
