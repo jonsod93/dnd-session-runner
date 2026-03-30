@@ -225,9 +225,9 @@ export function CombatantRow({
             <span className={`text-xs font-semibold ${nameColor}`}>{combatant.name}</span>
           ) : (
             <>
-              {/* Single-row layout: Name | HP | AC | Cond */}
+              {/* Single-row layout: Name | AC | HP | Cond */}
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 min-w-0 flex-1">
+                <span className="flex items-center gap-1 min-w-0 shrink">
                   <span
                     className={`text-xs font-semibold truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
                     title={combatant.name}
@@ -244,13 +244,13 @@ export function CombatantRow({
                   )}
                 </span>
 
-                <span className="shrink-0 w-7 flex justify-center text-[11px]">
+                <span className="shrink-0 flex justify-center text-[11px]">
                   {combatant.ac != null && (
                     <ShieldAC value={combatant.ac} />
                   )}
                 </span>
 
-                {combatant.hp != null ? (
+                {combatant.hp != null && (
                   <button
                     className="shrink-0 btn-action !text-[11px] !px-2 !py-1 !rounded-lg"
                     onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
@@ -263,8 +263,6 @@ export function CombatantRow({
                       )}
                     </span>
                   </button>
-                ) : (
-                  <span className="shrink-0 w-16" />
                 )}
 
                 <button
