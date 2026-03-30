@@ -58,27 +58,21 @@ function ToastItem({ roll, onExpire }) {
       )}
 
       {/* Attack roll row */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-0.5">
         <span className="text-xs text-[#b0aeaa] font-mono font-semibold shrink-0">{roll.label}</span>
-        <span
-          className={`text-xl font-bold font-mono shrink-0 ${!totalColor ? 'text-gold-400' : ''}`}
-          style={totalColor ? { color: totalColor } : undefined}
-        >
-          {roll.total}
-        </span>
-        <div className="flex flex-col gap-0.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-xs text-[#9a9896] font-mono font-medium truncate">
             <DetailWithNatColor detail={roll.detail} />
           </span>
           {isCrit && (
-            <span className="text-xs font-bold text-green-400">Critical hit!</span>
+            <span className="text-xs font-bold text-green-400 shrink-0">Critical hit!</span>
           )}
           {isCritMiss && (
-            <span className="text-xs font-bold text-red-400">Critical miss!</span>
+            <span className="text-xs font-bold text-red-400 shrink-0">Critical miss!</span>
           )}
           {roll.damageType && (
             <span
-              className="text-xs font-medium capitalize"
+              className="text-xs font-medium capitalize shrink-0"
               style={roll.damageTypeColor ? { color: roll.damageTypeColor } : undefined}
             >
               {roll.damageType} damage
@@ -98,9 +92,6 @@ function ToastItem({ roll, onExpire }) {
             return (
             <div key={idx} className="flex items-center gap-3 mb-1" style={{ color: rowColor }}>
               <span className="text-xs font-mono font-semibold shrink-0 w-16" style={{ opacity: 0.8 }}>{dr.label}</span>
-              <span className="text-base font-bold font-mono shrink-0">
-                {dr.total}
-              </span>
               <span className="text-xs font-mono font-medium truncate" style={{ opacity: 0.7 }}>{dr.detail}</span>
               {dr.damageType && (
                 <span className="text-xs font-medium capitalize shrink-0">
@@ -110,17 +101,32 @@ function ToastItem({ roll, onExpire }) {
             </div>
             )
           })}
-          <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-white/[0.06]">
-            <span className="text-xs text-[#b0aeaa] font-semibold">Total</span>
+        </div>
+      )}
+
+      {/* Totals section */}
+      <div className="mt-2 pt-2 border-t border-white/[0.08] flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-[#b0aeaa] font-semibold">Total</span>
+          <span
+            className={`text-lg font-bold font-mono shrink-0 ${!totalColor ? 'text-gold-400' : ''}`}
+            style={totalColor ? { color: totalColor } : undefined}
+          >
+            {roll.total}
+          </span>
+        </div>
+        {roll.hasDamage && roll.damageRolls?.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#b0aeaa] font-semibold">Damage</span>
             <span className="text-lg font-bold font-mono text-gold-400">
               {roll.damageTotal}
             </span>
             {roll.critMinApplied && (
-              <span className="text-xs text-[#9a9896] italic">(min. {roll.critMinTotal} applied)</span>
+              <span className="text-xs text-[#9a9896] italic">(min. {roll.critMinTotal})</span>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
