@@ -371,7 +371,7 @@ export default function CombatTracker() {
                     const newId = selectedId === combatant.id ? null : combatant.id
                     setSelectedId(newId)
                     if (isMobile && combatant.statblock) setMobileStatblockId(combatant.id)
-                  }}}
+                  }}
                   onSetDeathSaves={combat.setDeathSaves}
                   onToggleDeathSaves={combat.toggleDeathSaves}
                   onNat20Heal={(id, isPC) => {
