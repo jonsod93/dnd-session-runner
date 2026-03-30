@@ -225,7 +225,7 @@ export function CombatantRow({
             <span className={`text-xs font-semibold ${nameColor}`}>{combatant.name}</span>
           ) : (
             <>
-              {/* Single-row layout: Name | HP | AC | Dmg | Cond */}
+              {/* Single-row layout: Name | HP | AC | Cond */}
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1 min-w-0 flex-1">
                   <span
@@ -244,32 +244,28 @@ export function CombatantRow({
                   )}
                 </span>
 
-                <span className="shrink-0 w-16 text-center text-[11px]">
-                  {combatant.hp != null && (
+                {combatant.hp != null ? (
+                  <button
+                    className="shrink-0 btn-action !text-[11px] !px-2 !py-1 !rounded-lg"
+                    onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+                    title="Apply damage/healing"
+                  >
                     <span className="inline-flex items-center gap-0.5">
                       <span className={`font-mono font-medium ${hpColor}`}>{combatant.hp.current}/{combatant.hp.max}</span>
                       {tempHp > 0 && (
                         <span className="text-blue-400 font-mono text-[10px]">+{tempHp}</span>
                       )}
                     </span>
-                  )}
-                </span>
+                  </button>
+                ) : (
+                  <span className="shrink-0 w-16" />
+                )}
                 <span className="shrink-0 w-7 flex justify-center text-[11px]">
                   {combatant.ac != null && (
                     <ShieldAC value={combatant.ac} />
                   )}
                 </span>
 
-                {combatant.hp != null ? (
-                  <button
-                    className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
-                    onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-                  >
-                    Dmg
-                  </button>
-                ) : (
-                  <span className="shrink-0 btn-action !text-[10px] !px-2 !py-1 invisible">Dmg</span>
-                )}
                 <button
                   className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
                   onClick={openConditions}
