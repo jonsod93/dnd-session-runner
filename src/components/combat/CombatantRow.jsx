@@ -658,15 +658,37 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
 }
 
 function ShieldAC({ value }) {
+  const shieldPath = 'M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z'
   return (
     <span className="relative inline-flex items-center justify-center" style={{ width: 28, height: 30 }}>
-      <svg className="absolute inset-0" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Dark pressed-in fill */}
-        <path d="M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z" fill="#262626" />
-        {/* Inner dark shadow (top-left) */}
-        <path d="M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z" fill="none" stroke="#0e0e0e" strokeWidth="2.5" strokeOpacity="0.7" transform="translate(0.6, 0.6) scale(0.96)" style={{ transformOrigin: '14px 15px' }} />
-        {/* Inner light highlight (bottom-right) */}
-        <path d="M14 28 C14 28 25 23 25 15.5 L25 5.5 L14 2 L3 5.5 L3 15.5 C3 23 14 28 14 28Z" fill="none" stroke="rgba(95,94,94,0.4)" strokeWidth="1.5" transform="translate(-0.4, -0.4) scale(0.96)" style={{ transformOrigin: '14px 15px' }} />
+      <svg className="absolute inset-0" width="28" height="30" viewBox="0 0 28 30">
+        <defs>
+          <filter id="shield-inset" x="-50%" y="-50%" width="200%" height="200%">
+            {/* Create inverted shape for inset shadow */}
+            <feComponentTransfer in="SourceAlpha">
+              <feFuncA type="table" tableValues="1 0" />
+            </feComponentTransfer>
+            <feGaussianBlur stdDeviation="1.5" />
+            <feOffset dx="1.5" dy="1.5" result="shadow" />
+            <feFlood floodColor="#0e0e0e" floodOpacity="0.8" result="color" />
+            <feComposite in="color" in2="shadow" operator="in" result="darkShadow" />
+            {/* Light edge */}
+            <feComponentTransfer in="SourceAlpha">
+              <feFuncA type="table" tableValues="1 0" />
+            </feComponentTransfer>
+            <feGaussianBlur stdDeviation="1" />
+            <feOffset dx="-1" dy="-1" result="highlight" />
+            <feFlood floodColor="#5f5e5e" floodOpacity="0.3" result="lightColor" />
+            <feComposite in="lightColor" in2="highlight" operator="in" result="lightShadow" />
+            {/* Combine */}
+            <feMerge>
+              <feMergeNode in="SourceGraphic" />
+              <feMergeNode in="darkShadow" />
+              <feMergeNode in="lightShadow" />
+            </feMerge>
+          </filter>
+        </defs>
+        <path d={shieldPath} fill="#272727" filter="url(#shield-inset)" />
       </svg>
       <span className="relative font-mono font-medium text-[#e6e6e6] text-[11px]" style={{ marginTop: -1 }}>{value}</span>
     </span>
