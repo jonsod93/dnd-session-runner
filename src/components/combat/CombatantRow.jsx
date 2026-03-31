@@ -309,7 +309,7 @@ export function CombatantRow({
           </button>
         )}
         <button
-          className="shrink-0 btn-action !p-0 !w-[26px] !h-[26px] max-lg:!rounded-lg flex items-center justify-center text-[#5a5854] hover:!text-red-400 transition-all"
+          className="shrink-0 btn-action !py-1 !px-2 max-lg:!rounded-lg flex items-center justify-center text-[#5a5854] hover:!text-red-400 transition-all"
           onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
           title="Remove"
         >
