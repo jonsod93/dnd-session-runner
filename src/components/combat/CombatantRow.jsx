@@ -292,7 +292,7 @@ export function CombatantRow({
       <div className="shrink-0 self-center flex items-center max-lg:gap-2 gap-1">
         {!isLair && (
           <button
-            className="lg:hidden shrink-0 btn-action !px-2 !py-1 !rounded-lg"
+            className="lg:hidden shrink-0 btn-action !px-2 !py-[5px] !rounded-lg"
             onClick={openConditions}
             title="Add/manage conditions"
           >
