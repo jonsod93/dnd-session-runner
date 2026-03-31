@@ -326,9 +326,7 @@ export default function CombatTracker() {
 
         {/* Header row — desktop */}
         {combat.combatants.length > 0 && (
-          <div className="max-lg:hidden shrink-0 flex items-center gap-2 mx-3 px-4 py-1.5 border-b border-black/[0.15] text-xs text-[#6a6864] uppercase tracking-wider font-medium bg-[var(--neu-bg-raised)]">
-            {/* Drag handle spacer */}
-            <div className="w-[10px] shrink-0" />
+          <div className="max-lg:hidden shrink-0 flex items-center gap-2 mx-3 pr-4 py-1.5 border-b border-black/[0.15] text-xs text-[#6a6864] uppercase tracking-wider font-medium bg-[var(--neu-bg-raised)]" style={{ paddingLeft: 'calc(1rem + 3px)' }}>
             {/* Active arrow spacer */}
             <div className="w-3 shrink-0" />
             {/* Initiative */}
@@ -336,7 +334,7 @@ export default function CombatTracker() {
             {/* Content column — mirrors row's flex-1 content div */}
             <div className="flex-1 min-w-0 flex items-center">
               <div className="w-36 shrink-0">Name</div>
-              <div className="flex-1 flex items-center justify-center gap-4" style={{ transform: 'translateX(-13px)' }}>
+              <div className="shrink-0 flex items-center gap-4">
                 <div className="w-10 shrink-0 flex justify-center" title="Armor Class">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -348,11 +346,9 @@ export default function CombatTracker() {
                   </svg>
                 </div>
               </div>
-              {/* Conditions button spacer */}
-              <div className="w-[72px] shrink-0" />
             </div>
             {/* Remove button spacer */}
-            <div className="w-4 shrink-0 ml-0.5" />
+            <div className="w-7 shrink-0" />
           </div>
         )}
 

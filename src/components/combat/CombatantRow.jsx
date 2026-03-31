@@ -108,8 +108,8 @@ export function CombatantRow({
         className={`inline-flex items-center gap-0.5 text-xs px-2 py-1 rounded-lg condition-badge ${cond.color}`}
         title={title}
       >
+        {cond.expiry && <ClockIcon className="w-3 h-3 opacity-50 shrink-0" />}
         {label}
-        {cond.expiry && <span className="opacity-50 ml-0.5">⏱</span>}
         <button
           className="opacity-50 hover:opacity-100 leading-none ml-0.5 text-base -my-2 py-2"
           onClick={(e) => { e.stopPropagation(); onRemoveCondition(combatant.id, cond.id) }}
@@ -137,17 +137,8 @@ export function CombatantRow({
       {...(!isLair ? { ...attributes, ...listeners } : {})}
       onClick={() => onSelect(combatant)}
     >
-      {/* Drag handle — desktop only, visual affordance; drag listeners are on the row */}
-      <button
-        className={`shrink-0 self-center text-white/20 max-lg:hidden ${isLair ? 'invisible pointer-events-none' : 'hover:text-white/40 cursor-grab active:cursor-grabbing'}`}
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripIcon />
-      </button>
-
-      {/* Active arrow — desktop only */}
-      <span className={`max-lg:hidden shrink-0 self-center w-3 text-[#e87830] text-xs leading-none ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Active arrow — desktop only, invisible placeholder on inactive rows */}
+      <span className={`max-lg:hidden shrink-0 self-center w-3 text-xs leading-none ${isActive ? 'text-[#e87830]' : 'invisible'}`}>
         ▶
       </span>
 
@@ -168,7 +159,7 @@ export function CombatantRow({
           <div className="flex items-center min-w-0">
             <span className="w-36 shrink-0 flex items-center gap-1">
               <span
-                className={`text-sm font-semibold truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
+                className={`text-sm font-semibold truncate ${nameColor} ${isDead ? 'opacity-40' : ''}`}
                 title={combatant.name}
               >
                 {combatant.name}
@@ -183,7 +174,7 @@ export function CombatantRow({
                 </button>
               )}
             </span>
-            <div className="flex-1 flex items-center justify-center gap-4">
+            <div className="shrink-0 flex items-center gap-4">
               <div className="w-10 shrink-0 flex justify-center">
                 {combatant.ac != null && (
                   <ShieldAC value={combatant.ac} large />
@@ -192,11 +183,11 @@ export function CombatantRow({
               <div className="w-28 shrink-0 flex justify-center">
                 {combatant.hp != null && (
                   <button
-                    className="btn-action whitespace-nowrap flex items-center gap-1"
+                    className="group/hp btn-action whitespace-nowrap flex items-center gap-1"
                     onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                     title="Apply damage/healing (T)"
                   >
-                    <span className="text-[#9a9894]">HP </span>
+                    <span className="text-[#9a9894] group-hover/hp:text-[#e6e6e6] transition-colors">HP </span>
                     <span className={`font-mono ${hpColor} ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 550 }}>{displayHp}/{combatant.hp.max}</span>
                     {tempHp > 0 && (
                       <span className="text-blue-400 font-mono text-xs" title="Temporary HP">+{tempHp}</span>
@@ -205,21 +196,21 @@ export function CombatantRow({
                 )}
               </div>
             </div>
+            {!isLair && conditionTags.length > 0 && (
+              <div className="flex flex-wrap gap-1 items-center ml-3 min-w-0">
+                {conditionTags}
+              </div>
+            )}
             {!isLair && (
               <button
-                className="shrink-0 btn-action"
+                className="shrink-0 btn-action ml-auto"
                 onClick={openConditions}
                 title="Add/manage conditions"
               >
-                Conditions
+                <TagIcon className="w-4 h-4" />
               </button>
             )}
           </div>
-          {!isLair && conditionTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {conditionTags}
-            </div>
-          )}
           {showDeathSaves && (
             <DeathSaveTracker
               deathSaves={combatant.deathSaves}
@@ -244,7 +235,7 @@ export function CombatantRow({
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1 min-w-0 flex-1">
                   <span
-                    className={`text-xs font-semibold truncate ${nameColor} ${isDead ? 'line-through' : ''}`}
+                    className={`text-xs font-semibold truncate ${nameColor} ${isDead ? 'opacity-40' : ''}`}
                     title={combatant.name}
                   >
                     {combatant.name}
@@ -283,10 +274,11 @@ export function CombatantRow({
                 </span>
 
                 <button
-                  className="shrink-0 btn-action !text-[10px] !px-2 !py-1"
+                  className="shrink-0 btn-action !px-2 !py-1"
                   onClick={openConditions}
+                  title="Add/manage conditions"
                 >
-                  Cond
+                  <TagIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
 
@@ -351,6 +343,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   const [custom, setCustom]               = useState('')
   const [selectedCondition, setSelectedCondition] = useState(null) // condition object for DurationPicker / Concentration prompt
   const [spellName, setSpellName]         = useState('')
+  const [withDuration, setWithDuration]   = useState(false)
   const menuRef                           = useRef(null)
   const isMobile                          = useIsMobile()
 
@@ -362,7 +355,21 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
       setSelectedCondition(c)
       return
     }
-    // For non-Concentration, go to DurationPicker (Feature 3) or add directly
+    if (isMobile && withDuration) {
+      setSelectedCondition(c)
+      return
+    }
+    if (isMobile) {
+      // Mobile without duration: add immediately
+      onAdd({ name: c.name, color: c.color, info: c.info || '' })
+      return
+    }
+    // Desktop: add immediately with no duration
+    onAdd({ name: c.name, color: c.color, info: c.info || '' })
+  }
+
+  const handleClockClick = (e, c) => {
+    e.stopPropagation()
     setSelectedCondition(c)
   }
 
@@ -401,10 +408,22 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="relative shrink-0 px-10 py-3 border-b border-black/[0.15] text-center">
-            <p className="text-sm font-medium text-[#e6e6e6]">Add Condition</p>
+          <div className="relative shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center">
+            <label
+              className="flex items-center gap-1.5 cursor-pointer select-none"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="checkbox"
+                checked={withDuration}
+                onChange={(e) => setWithDuration(e.target.checked)}
+                className="accent-[#d4a843] w-3.5 h-3.5"
+              />
+              <span className={`text-xs transition-colors ${withDuration ? 'text-gold-400' : 'text-[#9a9894]'}`}>Duration</span>
+            </label>
+            <p className="text-sm font-medium text-[#e6e6e6] flex-1 text-center">Add Condition</p>
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
+              className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
               onClick={onClose}
             >
               ✕
@@ -471,7 +490,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   }
 
   // ── Desktop: small anchored popup ──────────────────────────────────────────
-  const MENU_W     = 210
+  const MENU_W     = selectedCondition ? 340 : 210
   const MENU_MAX_H = 400
 
   const left       = Math.min(anchor.right - MENU_W, window.innerWidth - MENU_W - 8)
@@ -511,11 +530,20 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               availableConditions.map((c) => (
                 <button
                   key={c.name}
-                  className="w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-[#202226] rounded-lg transition-all"
+                  className="group w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-[#202226] rounded-lg transition-all flex items-center"
                   onClick={() => handleConditionClick(c)}
                   title={c.info || ''}
                 >
-                  {c.name}
+                  <span className="flex-1">{c.name}</span>
+                  {c.name !== 'Concentration' && (
+                    <span
+                      className="opacity-0 group-hover:opacity-60 hover:!opacity-100 ml-2 transition-opacity"
+                      onClick={(e) => handleClockClick(e, c)}
+                      title="Set duration"
+                    >
+                      <ClockIcon className="w-3.5 h-3.5" />
+                    </span>
+                  )}
                 </button>
               ))
             )}
@@ -546,30 +574,24 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
 
 // ── Condition sub-panel (Concentration spell name + DurationPicker) ──────────
 function ConditionSubPanel({ condition, spellName, setSpellName, onConcentrationAdd, onAdd, onBack, combatants, activeTurnId, mobile }) {
-  const [expiryType, setExpiryType]   = useState('none')  // 'none' | 'end_own' | 'start_own' | 'end_inf' | 'start_inf'
-  const [needsSave, setNeedsSave]     = useState(false)
+  const [timing, setTiming]     = useState('end')    // 'end' | 'start'
+  const [target, setTarget]     = useState('own')     // 'own' | 'inflicter'
+  const [removal, setRemoval]   = useState('auto')    // 'auto' | 'save'
 
   const isConcentration = condition.name === 'Concentration'
 
   const activeCombatant = combatants?.find((c) => c.id === activeTurnId)
 
   const handleDurationAdd = () => {
-    let expiry = null
-    if (expiryType !== 'none') {
-      const [timing, target] = expiryType.split('_')
-      expiry = {
-        type: timing === 'end' ? 'end_of_turn' : 'start_of_turn',
-        // 'own' will be resolved by the caller (targetId = combatant receiving condition)
-        // 'inf' = current active combatant
-        targetId: target === 'inf' ? activeTurnId : '__self__',
-      }
-    }
     onAdd({
       name: condition.name,
       color: condition.color,
       info: condition.info || '',
-      expiry,
-      needsSave,
+      expiry: {
+        type: timing === 'end' ? 'end_of_turn' : 'start_of_turn',
+        targetId: target === 'own' ? '__self__' : activeTurnId,
+      },
+      needsSave: removal === 'save',
     })
   }
 
@@ -602,7 +624,7 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
     )
   }
 
-  // Non-Concentration: DurationPicker
+  // Non-Concentration: Duration toggles
   return (
     <div className="space-y-2">
       <button
@@ -613,51 +635,32 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
       </button>
       <p className="text-sm text-[#e6e6e6] font-medium">{condition.name}</p>
 
-      <div className="space-y-1">
-        <p className="text-[10px] text-[#9a9894] uppercase tracking-wider">Duration</p>
-        {[
-          { val: 'none', label: 'No duration' },
-          { val: 'end_own', label: 'End of own turn' },
-          { val: 'start_own', label: 'Start of own turn' },
-          ...(activeCombatant ? [
-            { val: 'end_inf', label: `End of ${activeCombatant.name}'s turn` },
-            { val: 'start_inf', label: `Start of ${activeCombatant.name}'s turn` },
-          ] : []),
-        ].map(({ val, label }) => (
-          <button
-            key={val}
-            className={`w-full text-left px-2 py-1 text-xs rounded transition-colors ${
-              expiryType === val
-                ? 'bg-gold-400/10 text-gold-400 shadow-neu-pressed border border-gold-400/30'
-                : 'text-[#e6e6e6] hover:bg-[#202226] border border-transparent'
-            }`}
-            onClick={() => setExpiryType(val)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-1.5">
+        <SegmentedToggle
+          options={[
+            { value: 'end', label: 'End of' },
+            { value: 'start', label: 'Start of' },
+          ]}
+          value={timing}
+          onChange={setTiming}
+        />
+        <SegmentedToggle
+          options={[
+            { value: 'own', label: 'Own turn' },
+            ...(activeCombatant ? [{ value: 'inflicter', label: `${activeCombatant.name}'s turn` }] : []),
+          ]}
+          value={target}
+          onChange={setTarget}
+        />
+        <SegmentedToggle
+          options={[
+            { value: 'auto', label: 'Auto remove' },
+            { value: 'save', label: 'Saving Throw' },
+          ]}
+          value={removal}
+          onChange={setRemoval}
+        />
       </div>
-
-      {expiryType !== 'none' && (
-        <div className="flex items-center gap-2 pt-1">
-          <span className="text-[10px] text-[#9a9894] uppercase tracking-wider">Needs save</span>
-          <div className="flex gap-1">
-            {[false, true].map((val) => (
-              <button
-                key={String(val)}
-                className={`text-xs px-2 py-0.5 rounded border transition-colors ${
-                  needsSave === val
-                    ? 'border-gold-400/40 bg-gold-400/10 text-gold-400'
-                    : 'border-white/[0.12] text-[#9a9894] hover:text-[#e6e6e6]'
-                }`}
-                onClick={() => setNeedsSave(val)}
-              >
-                {val ? 'Yes' : 'No'}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <button
         onClick={handleDurationAdd}
@@ -688,12 +691,41 @@ function ShieldAC({ value, large }) {
   )
 }
 
-function GripIcon() {
+function TagIcon({ className }) {
   return (
-    <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor">
-      <circle cx="2" cy="2.5"  r="1.2" /><circle cx="8" cy="2.5"  r="1.2" />
-      <circle cx="2" cy="7"    r="1.2" /><circle cx="8" cy="7"    r="1.2" />
-      <circle cx="2" cy="11.5" r="1.2" /><circle cx="8" cy="11.5" r="1.2" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="1em" height="1em">
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
     </svg>
   )
 }
+
+function ClockIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="1em" height="1em">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  )
+}
+
+function SegmentedToggle({ options, value, onChange }) {
+  return (
+    <div className="inline-flex rounded-lg border border-white/[0.12] overflow-hidden">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          className={`text-[10px] px-2 py-1 transition-colors whitespace-nowrap ${
+            value === opt.value
+              ? 'bg-gold-400/15 text-gold-400'
+              : 'text-[#9a9894] hover:text-[#e6e6e6] hover:bg-[#202226]'
+          }`}
+          onClick={() => onChange(opt.value)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
