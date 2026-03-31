@@ -233,9 +233,9 @@ export function CombatantRow({
             <>
               {/* Single-row layout: Name | AC | HP | Cond */}
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 min-w-0">
+                <span className="flex items-center gap-1 min-w-0 flex-1 max-w-[14ch]">
                   <span
-                    className={`text-xs font-semibold truncate max-w-[14ch] ${nameColor} ${isDead ? 'opacity-40' : ''}`}
+                    className={`text-xs font-semibold truncate ${nameColor} ${isDead ? 'opacity-40' : ''}`}
                     title={combatant.name}
                   >
                     {combatant.name}
