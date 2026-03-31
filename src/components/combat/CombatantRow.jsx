@@ -233,7 +233,7 @@ export function CombatantRow({
             <>
               {/* Single-row layout: Name | AC | HP | Cond */}
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 min-w-0 w-[14ch] shrink-0">
+                <span className="flex items-center gap-1 min-w-0 w-[100px] shrink-0">
                   <span
                     className={`text-xs font-semibold truncate ${nameColor} ${isDead ? 'opacity-40' : ''}`}
                     title={combatant.name}
