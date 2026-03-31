@@ -233,12 +233,12 @@ export function CombatantRow({
             <>
               {/* Single-row layout: Name | AC | HP | Cond */}
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 min-w-0 flex-1">
+                <span className="flex items-center gap-1 min-w-0 shrink-0">
                   <span
-                    className={`text-xs font-semibold truncate ${nameColor} ${isDead ? 'opacity-40' : ''}`}
+                    className={`text-xs font-semibold ${nameColor} ${isDead ? 'opacity-40' : ''}`}
                     title={combatant.name}
                   >
-                    {combatant.name}
+                    {combatant.name.length > 14 ? combatant.name.slice(0, 14) + '…' : combatant.name}
                   </span>
                   {isPC && (
                     <button
