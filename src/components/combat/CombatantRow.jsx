@@ -201,15 +201,6 @@ export function CombatantRow({
                 {conditionTags}
               </div>
             )}
-            {!isLair && (
-              <button
-                className="shrink-0 btn-action ml-auto"
-                onClick={openConditions}
-                title="Add/manage conditions"
-              >
-                <TagIcon className="w-4 h-4" />
-              </button>
-            )}
           </div>
           {showDeathSaves && (
             <DeathSaveTracker
@@ -272,14 +263,6 @@ export function CombatantRow({
                     </button>
                   )}
                 </span>
-
-                <button
-                  className="shrink-0 btn-action !px-2 !py-1"
-                  onClick={openConditions}
-                  title="Add/manage conditions"
-                >
-                  <TagIcon className="w-3.5 h-3.5" />
-                </button>
               </div>
 
               {/* Condition tags — full width, below the row */}
@@ -305,14 +288,34 @@ export function CombatantRow({
         </div>
       </div>
 
-      {/* Remove */}
-      <button
-        className="shrink-0 self-center btn-action !w-7 !h-7 max-lg:!w-5 max-lg:!h-5 !p-0 flex items-center justify-center text-[9px] max-lg:text-[7px] text-[#5a5854] hover:!text-red-400 transition-all"
-        onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
-        title="Remove"
-      >
-        ✕
-      </button>
+      {/* Conditions + Remove */}
+      <div className="shrink-0 self-center flex items-center gap-1">
+        {!isLair && (
+          <button
+            className="lg:hidden shrink-0 btn-action !px-2 !py-1"
+            onClick={openConditions}
+            title="Add/manage conditions"
+          >
+            <TagIcon className="w-3.5 h-3.5" />
+          </button>
+        )}
+        {!isLair && (
+          <button
+            className="max-lg:hidden shrink-0 btn-action !px-2 !py-1"
+            onClick={openConditions}
+            title="Add/manage conditions"
+          >
+            <TagIcon className="w-4 h-4" />
+          </button>
+        )}
+        <button
+          className="shrink-0 self-center btn-action !w-7 !h-7 max-lg:!w-6 max-lg:!h-6 !p-0 flex items-center justify-center text-[11px] max-lg:text-[10px] text-[#5a5854] hover:!text-red-400 transition-all"
+          onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
+          title="Remove"
+        >
+          ✕
+        </button>
+      </div>
 
 
       {/* Condition dropdown portal */}
