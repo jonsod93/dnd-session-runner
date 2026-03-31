@@ -289,10 +289,10 @@ export function CombatantRow({
       </div>
 
       {/* Conditions + Remove */}
-      <div className="shrink-0 self-center flex items-center gap-1">
+      <div className="shrink-0 self-center flex items-center max-lg:gap-2 gap-1">
         {!isLair && (
           <button
-            className="lg:hidden shrink-0 btn-action !px-2 !py-1"
+            className="lg:hidden shrink-0 btn-action !px-2 !py-1 !rounded-lg"
             onClick={openConditions}
             title="Add/manage conditions"
           >
@@ -309,11 +309,11 @@ export function CombatantRow({
           </button>
         )}
         <button
-          className="shrink-0 self-center btn-action !w-7 !h-7 max-lg:!w-6 max-lg:!h-6 !p-0 flex items-center justify-center text-[11px] max-lg:text-[10px] text-[#5a5854] hover:!text-red-400 transition-all"
+          className="shrink-0 btn-action !px-1.5 !py-1 max-lg:!rounded-lg flex items-center justify-center text-[#5a5854] hover:!text-red-400 transition-all"
           onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
           title="Remove"
         >
-          ✕
+          <span className="max-lg:text-[12px] text-[11px]" style={{ fontWeight: 700 }}>✕</span>
         </button>
       </div>
 
