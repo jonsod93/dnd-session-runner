@@ -80,19 +80,17 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(5,7,10,0.5)' }}
       onClick={onClose}
     >
       <div
         className="glass-toast rounded-2xl w-full max-w-md flex flex-col max-h-[80vh]"
-        style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.15]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
           <div>
             <h2 className="text-sm font-medium text-[#e6e6e6]">Roll Initiative</h2>
-            <p className="text-xs text-[#7a7874] mt-0.5">Edit any value before confirming</p>
+            <p className="text-xs text-[#8a8884] mt-0.5">Edit any value before confirming</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -102,7 +100,8 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
               Reroll All
             </button>
             <button
-              className="text-[#5a5854] hover:text-[#e6e6e6] text-base leading-none transition-colors"
+              className="w-5 h-5 rounded-[5px] bg-[#1c1c20] flex items-center justify-center text-[#505060] hover:text-[#9090A8] cursor-pointer text-xs leading-none transition-colors"
+              style={{ boxShadow: 'var(--neum-btn)' }}
               onClick={onClose}
             >
               ✕
@@ -125,7 +124,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                     </span>
                   )}
                   {c.type === 'quick' && (
-                    <span className="text-xs text-[#7a7874] border border-white/[0.08] px-1.5 rounded-lg">
+                    <span className="text-xs text-[#8a8884] border border-white/[0.08] px-1.5 rounded-lg">
                       NPC
                     </span>
                   )}
@@ -136,7 +135,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                   )}
                 </div>
                 {c.type === 'monster' && c.statblock && (
-                  <span className="text-xs text-[#7a7874]">
+                  <span className="text-xs text-[#8a8884]">
                     {c.statblock.InitiativeModifier !== undefined
                       ? `Init ${c.statblock.InitiativeModifier >= 0 ? '+' : ''}${c.statblock.InitiativeModifier}`
                       : `Dex ${c.statblock.Abilities?.Dex ?? '?'}`}
@@ -154,7 +153,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
             </div>
           ))}
           {displayRows.length === 0 && (
-            <p className="text-[#7a7874] text-sm text-center py-6">No combatants to roll for.</p>
+            <p className="text-[#8a8884] text-sm text-center py-6">No combatants to roll for.</p>
           )}
         </div>
 

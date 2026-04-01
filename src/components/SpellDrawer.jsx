@@ -73,16 +73,16 @@ export function SpellDrawer({ spellName, onClose, onRoll }) {
   }, [onClose])
 
   const drawerClass = isMobile
-    ? 'fixed inset-x-0 bottom-0 z-[2100] glass-toast !rounded-b-none !rounded-t-xl flex flex-col'
-    : 'fixed left-1/2 -translate-x-1/2 z-[2100] glass-toast !rounded-xl flex flex-col'
+    ? 'fixed inset-x-0 bottom-0 z-[2300] glass-toast !rounded-b-none !rounded-t-xl flex flex-col'
+    : 'fixed left-1/2 -translate-x-1/2 z-[2300] glass-toast !rounded-xl flex flex-col'
   const drawerStyle = isMobile
-    ? { maxHeight: '55vh', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)', background: 'rgba(62, 62, 62, 0.65)' }
-    : { bottom: '16px', maxHeight: '38vh', width: '50vw', boxShadow: '0 -6px 32px rgba(0,0,0,0.5)', background: 'rgba(62, 62, 62, 0.65)' }
+    ? { maxHeight: '55vh' }
+    : { bottom: '16px', maxHeight: '38vh', width: '50vw' }
 
   return (
     <div className={drawerClass} style={drawerStyle}>
       {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.06]" style={{ background: 'rgba(62, 62, 62, 0.75)' }}>
+      <div className="shrink-0 flex items-center justify-between px-6 py-3 border-b border-white/[0.04]" style={{ background: '#2c2c2c' }}>
         <div className="flex items-center gap-3">
           <h3 className="text-sm font-semibold text-[#e6e6e6]">
             {loading ? 'Loading…' : (spell?.name ?? spellName)}

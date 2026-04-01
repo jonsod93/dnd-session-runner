@@ -39,7 +39,6 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
       <div className="fixed inset-0 z-[65] flex items-center justify-center pointer-events-none">
         <div
           className="pointer-events-auto glass-toast rounded-2xl px-5 py-3 max-w-sm animate-fade-in"
-          style={{ background: 'rgba(62, 62, 62, 0.65)', boxShadow: 'inset 0 0 10px rgba(251,191,36,0.15), inset 1px 1px 4px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4)' }}
         >
           <p className="text-sm text-[#e6e6e6]">
             <span className="font-medium text-amber-400">{condition.name}</span> on{' '}
@@ -54,17 +53,15 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
   return (
     <div
       className="fixed inset-0 z-[65] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
     >
       <div
         className="glass-toast rounded-2xl w-80 p-5"
-        style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-1">
           {combatant?.name ?? 'Unknown'} - Saving Throw
         </h3>
-        <p className="text-xs text-[#7a7874] mb-3">
+        <p className="text-xs text-[#8a8884] mb-3">
           <span className="text-amber-400">{combatant?.name ?? 'Unknown'}</span> must save to lose <span className="text-amber-400">{condition.name}</span>
         </p>
 
@@ -83,7 +80,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
                 onClick={() => handleRoll(ab)}
               >
                 <div className="font-medium">{ab}</div>
-                <div className={`text-[10px] font-mono ${proficient ? 'text-gold-400' : 'text-[#7a7874]'}`}>{formatMod(mod)}</div>
+                <div className={`text-[10px] font-mono ${proficient ? 'text-gold-400' : 'text-[#8a8884]'}`}>{formatMod(mod)}</div>
               </button>
             )
           })}
@@ -92,7 +89,7 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
         {/* Roll result */}
         {rollResult && (
           <div className="text-center mb-3 py-2 stat-card rounded-lg">
-            <div className="text-xs text-[#7a7874] mb-0.5">{rollResult.ability} Save</div>
+            <div className="text-xs text-[#8a8884] mb-0.5">{rollResult.ability} Save</div>
             <div className="text-xl font-bold font-mono text-gold-400">{rollResult.total}</div>
             <div className="text-[10px] text-[#5a5854] font-mono">
               d20({rollResult.roll}){formatMod(rollResult.mod)}

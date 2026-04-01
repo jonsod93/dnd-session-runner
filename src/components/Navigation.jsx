@@ -51,7 +51,7 @@ export default function Navigation() {
               [
                 'flex items-center px-3 text-sm border-b-2 transition-colors duration-150',
                 isActive
-                  ? 'border-[#e87830] text-[#e6e6e6]'
+                  ? 'border-[#FF7A45] text-[#e6e6e6]'
                   : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
               ].join(' ')
             }
@@ -96,7 +96,7 @@ export default function Navigation() {
                   [
                     'block px-4 py-3 text-sm transition-colors border-l-2',
                     isActive
-                      ? 'border-gold-400 text-[#e6e6e6] bg-white/[0.05]'
+                      ? 'border-[#FF7A45] text-[#e6e6e6] bg-white/[0.05]'
                       : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6] hover:bg-white/[0.04]',
                   ].join(' ')
                 }
