@@ -73,12 +73,14 @@ function reducer(state, action) {
         })
       })
 
-      // Auto-clear legendary action usage for the combatant whose turn starts
+      // Auto-clear legendary action and reaction usage for the combatant whose turn starts
       const updated = combatants.map((c) => {
         if (c.id !== nextId) return c
-        if (!c.statblock?.LegendaryActions?.length) return c
+        const hasLegendary = c.statblock?.LegendaryActions?.length
+        if (!hasLegendary && !c.statblock) return c
         const newUsage = { ...(c.usage ?? {}) }
-        delete newUsage['__Legendary Actions']
+        if (hasLegendary) delete newUsage['__Legendary Actions']
+        delete newUsage['__Reactions']
         return { ...c, usage: newUsage }
       })
       return { ...state, combatants: updated, activeTurnId: nextId, roundCount: newRoundCount, pendingExpiries }

@@ -471,7 +471,7 @@ function AbilityEntry({ item, usage, onUsageChange, onRoll, onSpellClick }) {
   )
 }
 
-function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll, onSpellClick, compact }) {
+function Section({ title, items, usage, onUsageChange, legendaryPerRound, reactionCount, onRoll, onSpellClick, compact }) {
   if (!items?.length) return null
   return (
     <div className="mb-1">
@@ -483,6 +483,14 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
             <UsageBoxes
               trackKey={`__${title}`}
               count={legendaryPerRound}
+              usage={usage}
+              onUsageChange={onUsageChange}
+            />
+          )}
+          {reactionCount != null && (
+            <UsageBoxes
+              trackKey="__Reactions"
+              count={reactionCount}
               usage={usage}
               onUsageChange={onUsageChange}
             />
@@ -881,7 +889,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
       <Section title="Traits"            items={sb.Traits}           {...sectionProps} />
       <Section title="Actions"           items={sb.Actions}          {...sectionProps} />
       <Section title="Bonus Actions"     items={sb.BonusActions}     {...sectionProps} />
-      <Section title="Reactions"         items={sb.Reactions}        {...sectionProps} />
+      <Section title="Reactions"         items={sb.Reactions?.length ? sb.Reactions : [{ Name: 'Attack of Opportunity', Description: `When an enemy leaves the melee range of ${sb.Name}, it may use its reaction to make an Attack of Opportunity.` }]}        reactionCount={1} {...sectionProps} />
       <Section
         title="Legendary Actions"
         items={sb.LegendaryActions}
