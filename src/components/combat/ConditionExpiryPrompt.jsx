@@ -101,13 +101,13 @@ export function ConditionExpiryPrompt({ expiry, combatant, onKeep, onClear }) {
         <div className="flex gap-2">
           <button
             onClick={onClear}
-            className="flex-1 btn-action text-sm !px-4 !py-2 !text-green-400"
+            className="flex-1 text-sm font-medium rounded-xl px-4 py-2 neu-btn-raised text-green-400"
           >
             Saved
           </button>
           <button
             onClick={onKeep}
-            className="flex-1 btn-action text-sm !px-4 !py-2 !text-[rgb(255,90,90)]"
+            className="flex-1 text-sm font-medium rounded-xl px-4 py-2 neu-btn-raised text-[rgb(255,90,90)]"
           >
             Failed
           </button>

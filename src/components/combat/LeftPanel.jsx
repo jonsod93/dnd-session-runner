@@ -153,7 +153,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             className={[
               'flex-1 py-3 text-sm border-b-2 transition-all',
               tab === key
-                ? 'border-[#FF7A45] text-[#e6e6e6] nav-active-glow'
+                ? 'border-[#FF7A45] tab-gradient-b text-[#e6e6e6] nav-active-glow'
                 : 'border-transparent text-[#8a8884] hover:text-[#e6e6e6]',
             ].join(' ')}
             onClick={() => setTab(key)}

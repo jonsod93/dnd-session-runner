@@ -482,16 +482,7 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, reacti
       <div className={`${compact ? '' : 'sticky -top-3 z-10'} bg-[var(--sb-bg)] -mx-4 px-4 pb-2`}>
         <hr className="border-white/[0.04] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
-          <p
-            className="text-[11px] font-bold uppercase leading-none"
-            style={{
-              letterSpacing: '0.1em',
-              background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >{title}</p>
+          <p className="text-[11px] font-bold uppercase leading-none text-[var(--accent,#FF7A45)]" style={{ letterSpacing: '0.1em' }}>{title}</p>
           {legendaryPerRound != null && (
             <UsageBoxes
               trackKey={`__${title}`}

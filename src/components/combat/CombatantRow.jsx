@@ -125,7 +125,7 @@ export function CombatantRow({
       style={sortableStyle}
       data-combatant-id={combatant.id}
       className={[
-        'max-lg:flex max-lg:items-center max-lg:gap-2 max-lg:px-3 max-lg:py-2 max-lg:min-h-0',
+        'max-lg:flex max-lg:items-center max-lg:gap-2 max-lg:pl-6 max-lg:pr-3 max-lg:py-2 max-lg:min-h-0',
         'lg:grid lg:grid-cols-[36px_1fr_2fr_auto] lg:items-center lg:pl-[22px] lg:pr-[6px] lg:py-[6px]',
         'min-h-[50px] rounded-[10px] shrink-0 cursor-pointer outline-none relative',
         isActive
@@ -210,10 +210,6 @@ export function CombatantRow({
                   )}
                 </span>
 
-                <span className="shrink-0 w-7 flex justify-center text-[11px] font-mono font-normal" style={{ color: 'var(--text-muted)' }}>
-                  {combatant.ac != null && combatant.ac}
-                </span>
-
                 <span className="shrink-0 w-[72px]">
                   {combatant.hp != null && (
                     <button
@@ -229,6 +225,10 @@ export function CombatantRow({
                       </span>
                     </button>
                   )}
+                </span>
+
+                <span className="shrink-0 w-7 flex justify-center text-[11px] font-mono font-normal" style={{ color: 'var(--text-muted)' }}>
+                  {combatant.ac != null && combatant.ac}
                 </span>
               </div>
 
