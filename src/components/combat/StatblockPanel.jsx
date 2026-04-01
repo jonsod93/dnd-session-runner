@@ -114,10 +114,13 @@ function detectDamageContext(fullText, segmentIndex, segments) {
   return null
 }
 
-// Detect attack type from full action text (e.g., "Melee Weapon Attack", "Ranged Spell Attack")
+// Detect attack type from full action text (e.g., "Melee Weapon Attack", "Ranged Spell Attack", "Melee Attack Roll")
 function detectAttackType(fullText) {
   const m = fullText.match(/(melee|ranged)\s+(weapon|spell)\s+attack/i)
   if (m) return `${m[1]} ${m[2]} attack`
+  // Conflux format: "Melee Attack Roll:", "Ranged Spell Attack:"
+  const m2 = fullText.match(/(melee|ranged)\s+(?:(spell)\s+)?attack\s+roll/i)
+  if (m2) return `${m2[1]} ${m2[2] || 'weapon'} attack`
   // Check for breath weapon, etc.
   if (/breath/i.test(fullText)) return 'Breath weapon'
   return null
@@ -125,10 +128,15 @@ function detectAttackType(fullText) {
 
 // Detect what damage type a "to hit" roll deals from context
 function detectHitDamageType(fullText) {
-  // Find the damage type mentioned after the hit notation
-  const hitIdx = fullText.toLowerCase().indexOf('to hit')
+  // Find the damage type mentioned after the hit/attack notation
+  const lower = fullText.toLowerCase()
+  const hitIdx = Math.max(
+    lower.indexOf('to hit'),
+    lower.indexOf('attack roll'),
+    lower.indexOf('spell attack'),
+  )
   if (hitIdx < 0) return null
-  const after = fullText.slice(hitIdx).toLowerCase()
+  const after = lower.slice(hitIdx)
   for (const dt of DAMAGE_TYPES) {
     if (after.includes(`${dt} damage`)) return dt
   }

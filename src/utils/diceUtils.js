@@ -99,11 +99,13 @@ export function parseRichText(text, spellRegex) {
 function _parseDice(text) {
   const segments = []
   // Match (priority order):
-  //   [+-]N to hit           → attack roll
-  //   (NdM[ ± K])            → damage in parens (spaces around operator allowed)
+  //   [+-]N to hit           → attack roll (standard format)
+  //   [+-]N, range/reach     → attack roll (Conflux format: "Spell Attack: +6, range 60 ft.")
+  //   N (NdM[ ± K])          → damage total + dice in parens (e.g. "27 (6d8)")
+  //   (NdM[ ± K])            → damage in parens without total
   //   \bNdM[ ± K]\b          → standalone dice expr (spaces around operator allowed)
   // Note: [lL] accepted as "1" — common OCR/data typo (e.g. "l6d8" for "16d8", "1d6 -l" for "1d6 -1")
-  const re = /([+-]\d+\s+to\s+hit)|(\([lL\d]+d\d+\s*(?:[+-]\s*[lL\d]+)?\s*\))|(\b[lL\d]+d\d+\s*(?:[+-]\s*[lL\d]+)?(?=\s|[^a-zA-Z]|$))/gi
+  const re = /([+-]\d+\s+to\s+hit)|([+-]\d+(?=,\s*(?:range|reach)))|((?:\d+\s+)?\([lL\d]+d\d+\s*(?:[+-]\s*[lL\d]+)?\s*\))|(\b[lL\d]+d\d+\s*(?:[+-]\s*[lL\d]+)?(?=\s|[^a-zA-Z]|$))/gi
   let lastIdx = 0
   let m
   while ((m = re.exec(text)) !== null) {
@@ -111,15 +113,21 @@ function _parseDice(text) {
       segments.push({ type: 'text', text: text.slice(lastIdx, m.index) })
     }
     if (m[1]) {
+      // Standard "+N to hit"
       const modPart = m[1].match(/[+-]\d+/)[0]
       segments.push({ type: 'roll', text: m[1], expr: `d20${modPart}` })
     } else if (m[2]) {
-      // Strip spaces and fix l→1 so "l6d8" → expr "16d8"
-      const inner = m[2].slice(1, -1).replace(/\s+/g, '').replace(/[lL]/g, '1')
-      segments.push({ type: 'roll', text: m[2], expr: inner })
+      // Conflux-style "+N, range/reach" (attack roll without "to hit")
+      const modPart = m[2].match(/[+-]\d+/)[0]
+      segments.push({ type: 'roll', text: m[2], expr: `d20${modPart}` })
     } else if (m[3]) {
-      const expr = m[3].replace(/\s+/g, '').replace(/[lL]/g, '1')
-      segments.push({ type: 'roll', text: m[3], expr })
+      // Parens dice, possibly with leading total: "27 (6d8)" or "(6d8)"
+      const parenMatch = m[3].match(/\(([^)]+)\)/)
+      const inner = parenMatch[1].replace(/\s+/g, '').replace(/[lL]/g, '1')
+      segments.push({ type: 'roll', text: m[3], expr: inner })
+    } else if (m[4]) {
+      const expr = m[4].replace(/\s+/g, '').replace(/[lL]/g, '1')
+      segments.push({ type: 'roll', text: m[4], expr })
     }
     lastIdx = re.lastIndex
   }
