@@ -257,10 +257,10 @@ export function CombatantRow({
 
       {/* ── Stats + conditions column — grid col 3 on desktop ──── */}
       <div className="max-lg:hidden flex items-center gap-[6px]">
-        <div className="flex items-center justify-center gap-[6px] w-[120px] shrink-0">
+        <div className="flex items-center gap-[6px] w-[120px] shrink-0">
           {combatant.hp != null ? (
             <button
-              className="hp-btn whitespace-nowrap"
+              className="hp-btn whitespace-nowrap flex-1"
               onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
               title="Apply damage/healing (T)"
             >
@@ -270,13 +270,11 @@ export function CombatantRow({
               )}
             </button>
           ) : (
-            <div className="w-[60px]" />
+            <div className="flex-1" />
           )}
-          {combatant.ac != null && (
-            <div className="text-center font-mono text-[13px] font-normal w-[30px]" style={{ color: 'var(--text-muted)' }}>
-              {combatant.ac}
-            </div>
-          )}
+          <div className="text-center font-mono text-[13px] font-normal w-[30px]" style={{ color: 'var(--text-muted)' }}>
+            {combatant.ac != null && combatant.ac}
+          </div>
         </div>
         <div className="w-[20px] shrink-0" />
         {!isLair && conditionTags.length > 0 && (

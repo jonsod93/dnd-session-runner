@@ -300,7 +300,7 @@ export default function CombatTracker() {
 
         {/* Header row — mobile */}
         {combat.combatants.length > 0 && (
-          <div className="lg:hidden shrink-0 flex items-center gap-2 pl-6 pr-3 mx-3 py-1.5 border-b border-white/[0.04] text-[10px] uppercase tracking-wider font-medium" style={{ color: 'var(--text-subtle)', letterSpacing: '0.07em' }}>
+          <div className="lg:hidden shrink-0 flex items-center gap-2 pl-6 pr-3 mx-3 py-2 border-b border-white/[0.04] text-[11px] uppercase tracking-wider font-medium" style={{ color: 'var(--text-subtle)', letterSpacing: '0.07em' }}>
             <div className="w-7 shrink-0 text-center">#</div>
             <div className="flex-1 min-w-0 flex items-center gap-2">
               <span className="w-[100px] shrink-0">Name</span>
@@ -316,7 +316,7 @@ export default function CombatTracker() {
 
         {/* Header row — desktop (4-column grid matching CombatantRow) */}
         {combat.combatants.length > 0 && (
-          <div className="max-lg:hidden shrink-0 grid grid-cols-[36px_1fr_2fr_auto] items-center pl-[22px] pr-[6px] py-1 mx-3 border-b border-white/[0.04] mb-[3px]" style={{ color: 'var(--text-subtle)', fontSize: '10px', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 500 }}>
+          <div className="max-lg:hidden shrink-0 grid grid-cols-[36px_1fr_2fr_auto] items-center pl-[22px] pr-[6px] py-2 mx-3 border-b border-white/[0.04] mb-[3px]" style={{ color: 'var(--text-subtle)', fontSize: '13px', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 500 }}>
             <div className="text-center">#</div>
             <div>Name</div>
             <div className="flex items-center gap-[6px]">
