@@ -45,7 +45,7 @@ export const DAMAGE_TYPE_COLORS = {
   fire:        'rgb(255, 90, 90)',
   cold:        '#60a5fa', // blue-400
   lightning:   '#facc15', // yellow-400
-  thunder:     '#a78bfa', // violet-400
+  thunder:     '#fbbf24', // amber-400
   acid:        '#4ade80', // green-400
   poison:      '#86efac', // green-300
   necrotic:    '#b5cc8e', // sickly pale green
