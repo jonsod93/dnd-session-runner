@@ -48,11 +48,15 @@ function UsageBoxes({ trackKey, count, usage, onUsageChange }) {
             onUsageChange(trackKey, i < used ? i : i + 1)
           }}
           className={[
-            'w-3 h-3 rounded-sm border transition-colors',
+            'w-3 h-3 rounded-sm transition-colors',
             i < used
-              ? 'bg-gold-400 border-gold-400'
-              : 'border-white/20 hover:border-gold-400/60 bg-transparent',
+              ? 'border-none'
+              : 'border border-white/20 hover:border-[var(--accent)]/60 bg-transparent',
           ].join(' ')}
+          style={i < used ? {
+            background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+            boxShadow: '0 0 4px var(--accent-glow-soft)',
+          } : undefined}
         />
       ))}
     </div>
@@ -478,7 +482,16 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, reacti
       <div className={`${compact ? '' : 'sticky -top-3 z-10'} bg-[var(--sb-bg)] -mx-4 px-4 pb-2`}>
         <hr className="border-white/[0.04] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
-          <p className="text-[10px] font-semibold uppercase leading-none text-[var(--accent,#FF7A45)]" style={{ letterSpacing: '0.1em' }}>{title}</p>
+          <p
+            className="text-[11px] font-bold uppercase leading-none"
+            style={{
+              letterSpacing: '0.1em',
+              background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >{title}</p>
           {legendaryPerRound != null && (
             <UsageBoxes
               trackKey={`__${title}`}
