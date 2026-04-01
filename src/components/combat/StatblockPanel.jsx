@@ -107,8 +107,14 @@ function detectDamageContext(fullText, segmentIndex, segments) {
     if (segments[j].type === 'text') {
       const afterText = segments[j].text.toLowerCase()
       for (const dt of DAMAGE_TYPES) {
+        // Match "fire damage" pattern
         if (afterText.match(new RegExp(`^[\\s_*)*]*${dt}\\s+damage`))) return dt
+        // Match bare damage type before "plus" or "and" (e.g. "fire plus 27 (6d8) radiant damage")
+        if (afterText.match(new RegExp(`^[\\s_*)*]*${dt}\\s+(?:plus|and)\\b`))) return dt
       }
+      // If this text segment contains "plus" or "and" connecting to another roll,
+      // stop searching - don't let the lookahead cross into a different damage clause
+      if (/\b(?:plus|and)\b/.test(afterText) && afterText.match(/\b(?:plus|and)\s+\d/)) return null
     }
   }
   return null
