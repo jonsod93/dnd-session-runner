@@ -24,16 +24,16 @@ function ToastItem({ roll, onExpire }) {
   const isAttack = roll.rollType === 'attack'
   const isCrit = isAttack && roll.naturalRoll === 20
   const isCritMiss = isAttack && roll.naturalRoll === 1
-  const totalColor = isCrit ? '#4ade80' : isCritMiss ? '#f87171' : roll.damageTypeColor || (isAttack ? '#e87830' : undefined)
+  const totalColor = isCrit ? '#4ade80' : isCritMiss ? '#f87171' : roll.damageTypeColor || (isAttack ? '#FF7A45' : undefined)
   const hasContext = roll.context || roll.combatantName
 
   return (
     <div
       className={`pointer-events-auto glass-toast ${roll.hasDamage ? 'pl-4 pr-8 py-3 min-w-[280px]' : 'px-4 py-2.5 min-w-[240px]'} max-w-[420px] relative`}
       style={isCrit
-        ? { background: 'rgba(34, 80, 50, 0.2)', boxShadow: 'inset 0 0 12px rgba(74, 222, 128, 0.12), inset 1px 1px 4px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(74, 222, 128, 0.25)', borderColor: 'rgba(74, 222, 128, 0.35)' }
+        ? { background: '#1e2520', boxShadow: '0 28px 60px rgba(0,0,0,0.78), 0 10px 24px rgba(0,0,0,0.50), 0 0 20px rgba(74,222,128,0.25), inset 0 1px 0 rgba(255,255,255,0.065)', borderColor: 'rgba(74, 222, 128, 0.35)' }
         : isCritMiss
-        ? { background: 'rgba(80, 34, 34, 0.2)', boxShadow: 'inset 0 0 12px rgba(248, 113, 113, 0.12), inset 1px 1px 4px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(248, 113, 113, 0.25)', borderColor: 'rgba(248, 113, 113, 0.35)' }
+        ? { background: '#251e1e', boxShadow: '0 28px 60px rgba(0,0,0,0.78), 0 10px 24px rgba(0,0,0,0.50), 0 0 20px rgba(248,113,113,0.25), inset 0 1px 0 rgba(255,255,255,0.065)', borderColor: 'rgba(248, 113, 113, 0.35)' }
         : undefined}
     >
       {/* Close button for combined rolls */}
@@ -133,7 +133,7 @@ function ToastItem({ roll, onExpire }) {
       {/* Totals section */}
       <div className="mt-2 pt-2 border-t border-white/[0.08] flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#b0aeaa] font-semibold">Total</span>
+          <span className="text-xs text-[#b0aeaa] font-semibold">{isAttack ? 'To hit' : 'Total'}</span>
           <span
             className={`text-lg font-bold font-mono shrink-0 ${!totalColor ? 'text-gold-400' : ''}`}
             style={totalColor ? { color: totalColor } : undefined}

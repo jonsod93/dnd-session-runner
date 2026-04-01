@@ -233,352 +233,408 @@
   }
 
   /* ══════════════════════════════════════════════════
-     Neumorphic overrides — scoped to .neumorphic
+     Neumorphic design system — scoped to .neumorphic
      Only affects the combat tracker page
      ══════════════════════════════════════════════════ */
 
   .neumorphic {
-    --neu-bg: #2e2e2e;
-    --neu-bg-raised: #323232;
-    --neu-bg-elevated: #383838;
-    --neu-bg-button: #3c3c3c;
-    --neu-shadow-dark: #0e0e0e;
-    --neu-shadow-light: rgba(95, 94, 94, 0.25);
-    --neu-border-light: rgba(95, 94, 94, 0.3);
-    --neu-border-dark: rgba(14, 14, 14, 0.5);
-    background-color: var(--neu-bg);
+    --bg-top: #2c2c2c;
+    --bg-bottom: #232323;
+    --panel: #262626;
+    --shadow-dark: #141414;
+    --shadow-light: #383838;
+    --text-primary: #d4d4d4;
+    --text-secondary: #b8b8b8;
+    --text-muted: #909090;
+    --text-subtle: #6e6e6e;
+    --accent: #FF7A45;
+    --accent-deep: #BF2E00;
+    --accent-glow-strong: rgba(220, 80, 10, 0.70);
+    --accent-glow-soft: rgba(220, 80, 10, 0.28);
+    --hp-full: #d4d4d4;
+    --hp-half: #c07830;
+    --hp-low: #d85555;
+    --hp-dead: #944040;
+    --neum-panel: 7px 7px 18px #141414, -4px -4px 12px #383838;
+    --neum-raised: 7px 7px 18px #141414, -4px -4px 12px #3e3e3e;
+    --neum-inset: inset 3px 3px 8px #141414, inset -2px -2px 6px #383838;
+    --neum-btn: 2px 2px 5px #181818, -1px -1px 4px #444444;
+    --neum-btn-inset: inset 1px 1px 3px #181818, inset -1px -1px 2px #3a3a3a;
+    --neum-hp-hover: 3px 3px 8px #181818, -2px -2px 6px #444444;
+    --neum-hp-press: inset 2px 2px 5px #141414, inset -1px -1px 4px #323232;
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    min-height: 100vh;
   }
 
-  /* ── WCAG contrast fixes for lighter neumorphic background ─── */
-  .neumorphic .text-\[\#9a9894\] { color: #b0aeaa; }
-  .neumorphic .text-\[\#7a7874\] { color: #9a9896; }
-  .neumorphic .text-\[\#6a6864\] { color: #908e8a; }
-  .neumorphic .text-\[\#5a5854\] { color: #7a7874; }
-  .neumorphic .placeholder\:text-\[\#5a5854\]::placeholder { color: #7a7874; }
-
-  /* When combat tracker is active, match the nav bar to neumorphic palette */
+  /* When combat tracker is active, match the nav bar and root bg */
   :has(> main .neumorphic) > nav {
     background: #2a2a2a !important;
-    border-bottom-color: rgba(0,0,0,0.4) !important;
+    border-bottom-color: rgba(255,255,255,0.04) !important;
   }
   :has(> main .neumorphic) {
-    background-color: #2e2e2e !important;
+    background: linear-gradient(180deg, #2c2c2c 0%, #232323 100%) !important;
   }
 
+  /* ── Panels ──────────────────────────────────────── */
   .neumorphic .glass-panel {
-    background: var(--neu-bg-raised);
+    background: var(--panel);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-radius: 1rem;
-    border: 2px solid;
-    border-top-color: var(--neu-border-light);
-    border-left-color: var(--neu-border-light);
-    border-bottom-color: var(--neu-border-dark);
-    border-right-color: var(--neu-border-dark);
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px rgba(95, 94, 94, 0.4);
+    border-radius: 14px;
+    border: none;
+    box-shadow: var(--neum-panel);
   }
 
   .neumorphic .glass-modal,
   .neumorphic.glass-modal {
-    background: var(--neu-bg-raised) !important;
+    background: var(--panel) !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-radius: 1rem;
-    border: 2px solid;
-    border-top-color: var(--neu-border-light);
-    border-left-color: var(--neu-border-light);
-    border-bottom-color: var(--neu-border-dark);
-    border-right-color: var(--neu-border-dark);
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px rgba(95, 94, 94, 0.4);
+    border-radius: 14px;
+    border: none;
+    box-shadow: var(--neum-panel);
   }
 
+  /* ── Combat rows ─────────────────────────────────── */
   .neumorphic .combat-card {
-    background: var(--neu-bg-raised);
-    border-radius: 0.75rem;
+    background: transparent;
+    border-radius: 10px;
     border: none;
-    border-left: 3px solid transparent;
-    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
-    transition: background 0.15s ease;
+    box-shadow: none;
+    cursor: pointer;
+    transition: background 150ms ease;
+    position: relative;
   }
   @media (min-width: 1024px) {
     .neumorphic .combat-card:hover {
-      background: var(--neu-bg-elevated);
+      background: #2e2e2e;
     }
   }
   .neumorphic .combat-card.is-selected {
-    background: #2c2c2c;
+    background: #232323;
     border: none;
-    border-left: 3px solid transparent;
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    box-shadow: var(--neum-inset);
+  }
+  @media (min-width: 1024px) {
+    .neumorphic .combat-card.is-selected:hover {
+      background: #2e2e2e;
+    }
   }
 
+  /* ── Library cards ────────────────────────────────── */
   .neumorphic .library-card {
-    background: var(--neu-bg-raised);
+    background: transparent;
     border-radius: 0.75rem;
     border: none;
-    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
-    transition: background 0.15s ease;
+    box-shadow: none;
+    transition: background 150ms ease;
   }
   .neumorphic .library-card:hover {
-    background: var(--neu-bg-elevated);
+    background: #2e2e2e;
+    box-shadow: none;
+    border-color: transparent;
   }
   .neumorphic .library-card:active {
-    background: #2c2c2c;
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    background: #2e2e2e;
+    box-shadow: var(--neum-inset);
     z-index: 1;
   }
 
+  /* ── Stat cards (ability grid cells) ─────────────── */
   .neumorphic .stat-card {
-    background: var(--neu-bg-raised);
+    background: transparent;
     border: none;
-    border-radius: 0.75rem;
-    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    border-radius: 8px;
+    box-shadow: none;
+    padding: 8px;
+    text-align: center;
+    transition: box-shadow 140ms ease, background 140ms ease;
   }
   .neumorphic .stat-card:hover {
-    background: var(--neu-bg-elevated);
+    background: #2a2a2a;
+    box-shadow: var(--neum-btn);
   }
   .neumorphic .stat-card:active {
-    background: var(--neu-bg-raised);
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    background: #202020;
+    box-shadow: var(--neum-inset);
   }
 
-  /* Condition badges — neumorphic raised pills */
+  /* ── Condition badges — flat at rest, raised on hover ── */
   .neumorphic .condition-badge {
-    background: var(--neu-bg-raised) !important;
+    font-size: 12px !important;
+    font-weight: 500;
     border: none;
-    box-shadow: 1px 1px 2px #0e0e0e, -1px -1px 2px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
-    transition: background 0.15s ease;
+    border-radius: 5px !important;
+    padding: 3px 8px !important;
+    box-shadow: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: box-shadow 140ms ease, filter 140ms ease;
   }
   .neumorphic .condition-badge:hover {
-    background: var(--neu-bg-elevated) !important;
+    box-shadow: var(--neum-btn);
+    filter: brightness(1.1);
   }
 
-  /* Active turn: raised card with orange left accent + side borders */
+  /* ── Active turn row ─────────────────────────────── */
   .neumorphic .active-border {
-    background: var(--neu-bg-raised) !important;
-    border: none !important;
-    border-left: 3px solid #e87830 !important;
+    background: transparent;
+    border: none;
     z-index: 1;
-    border-radius: 0.75rem;
+    border-radius: 10px;
     animation: none;
-    box-shadow:
-      2px 2px 4px #0e0e0e,
-      -2px -2px 4px rgba(95, 94, 94, 0.4),
-      inset 0px 0px 0px #0e0e0e,
-      inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    box-shadow: var(--neum-raised);
+    position: relative;
+    transition: background 150ms ease;
+  }
+  .neumorphic .active-border::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    border-radius: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow-strong), 0 0 20px var(--accent-glow-soft);
+  }
+  @media (min-width: 1024px) {
+    .neumorphic .active-border:hover {
+      background: #2e2e2e;
+    }
   }
   .neumorphic .active-border.is-selected {
-    background: #2c2c2c !important;
-    border: none !important;
-    border-left: 3px solid #e87830 !important;
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    background: #232323;
+    border: none;
+    box-shadow: var(--neum-raised), var(--neum-inset);
+  }
+  @media (min-width: 1024px) {
+    .neumorphic .active-border.is-selected:hover {
+      background: #2e2e2e;
+    }
   }
 
-  /* Concentration: raised card with blue left accent + side borders */
+  /* ── Lair action row ─────────────────────────────── */
   .neumorphic .lair-border {
-    background: var(--neu-bg-raised) !important;
-    border: none !important;
-    border-left: 3px solid rgb(255, 90, 90) !important;
-    border-radius: 0.75rem;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
     animation: none;
-    box-shadow: 1px 1px 3px #0e0e0e, -1px -1px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
-    transition: background 0.15s ease;
+    box-shadow: none;
+    transition: background 150ms ease;
+    position: relative;
   }
-  .neumorphic .lair-border:hover {
-    background: var(--neu-bg-elevated) !important;
+  .neumorphic .lair-border::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    border-radius: 2px;
+    background: #ff5a5a;
+    box-shadow: 0 0 8px rgba(255, 90, 90, 0.6), 0 0 20px rgba(255, 90, 90, 0.25);
+  }
+  @media (min-width: 1024px) {
+    .neumorphic .lair-border:hover {
+      background: #2e2e2e !important;
+    }
   }
   .neumorphic .lair-border.is-selected {
-    background: #2c2c2c !important;
-    border: none !important;
-    border-left: 3px solid rgb(255, 90, 90) !important;
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    background: #232323;
+    border: none;
+    box-shadow: var(--neum-inset);
+  }
+  @media (min-width: 1024px) {
+    .neumorphic .lair-border.is-selected:hover {
+      background: #2e2e2e;
+    }
   }
 
+  /* ── Reusable raised button ───────────────────────── */
+  .neumorphic .neu-btn-raised {
+    background: var(--panel);
+    color: var(--text-primary);
+    border: none;
+    box-shadow: var(--neum-btn);
+    transition: box-shadow 140ms ease, background 140ms ease;
+  }
+  .neumorphic .neu-btn-raised:hover {
+    background: #303030;
+  }
+  .neumorphic .neu-btn-raised:active {
+    box-shadow: var(--neum-btn-inset);
+  }
+  .glass-toast .neu-btn-raised {
+    background: #323232;
+    color: var(--text-primary);
+    border: none;
+    box-shadow: var(--neum-btn);
+    transition: box-shadow 140ms ease, background 140ms ease;
+  }
+  .glass-toast .neu-btn-raised:hover {
+    background: #3a3a3a;
+  }
+  .glass-toast .neu-btn-raised:active {
+    box-shadow: var(--neum-btn-inset);
+  }
 
-  /* ── Neumorphic buttons ──────────────────────────── */
+  /* ── Buttons ─────────────────────────────────────── */
   .neumorphic .btn-neon-gold {
-    background: linear-gradient(145deg, #e8501e, #c43a10);
-    color: #ffffff;
+    background: transparent;
+    color: var(--text-primary);
     border: none;
     outline: none;
-    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    border-radius: 10px;
+    box-shadow: none;
+    transition: box-shadow 140ms ease, background 140ms ease;
   }
   .neumorphic .btn-neon-gold:hover {
-    background: linear-gradient(145deg, #f05a28, #d44518);
-    box-shadow: 2px 2px 4px #0e0e0e, -2px -2px 4px rgba(230, 80, 30, 0.35), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
-    transform: translateY(-1px);
+    background: #2e2e2e;
+    box-shadow: var(--neum-btn);
   }
   .neumorphic .btn-neon-gold:active {
-    background: linear-gradient(145deg, #b03010, #8c2005);
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
-    transform: translateY(0);
+    box-shadow: var(--neum-btn-inset);
   }
 
   .neumorphic .btn-outline {
-    background: var(--neu-bg-raised);
+    background: var(--panel);
     border: none;
     outline: none;
-    color: #b0aeaa;
-    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    color: var(--text-muted);
+    box-shadow: var(--neum-btn);
   }
   .neumorphic .btn-outline:hover {
-    color: #e6e6e6;
-    background: var(--neu-bg-elevated);
+    color: var(--text-primary);
+    background: #2e2e2e;
   }
   .neumorphic .btn-outline:active {
-    background: transparent;
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    box-shadow: var(--neum-btn-inset);
   }
 
   .neumorphic .btn-action {
-    background: var(--neu-bg-raised);
+    background: transparent;
     border: none;
     outline: none;
-    color: #b0aeaa;
-    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4);
+    color: #808080;
+    box-shadow: none;
+    border-radius: 6px;
+    transition: color 120ms ease, box-shadow 140ms ease, background 140ms ease;
   }
   .neumorphic .btn-action:hover {
-    background: var(--neu-bg-elevated);
-    color: #e6e6e6;
+    color: #a0a0a0;
+    background: #2e2e2e;
+    box-shadow: var(--neum-btn);
   }
   .neumorphic .btn-action:active {
-    background: #292929;
-    box-shadow:
-      0px 0px 0px #0e0e0e,
-      0px 0px 0px rgba(95, 94, 94, 0.25),
-      inset 2px 2px 3px #0e0e0e,
-      inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    box-shadow: var(--neum-btn-inset);
   }
 
-  /* Row hover: buttons match the row's hovered background */
+  /* ── Row action buttons: hidden at rest, shown on hover only ─── */
   @media (min-width: 1024px) {
-    .neumorphic .combat-card:hover .btn-action,
-    .neumorphic .active-border:hover .btn-action,
-    .neumorphic .lair-border:hover .btn-action {
-      background: var(--neu-bg-elevated);
-      box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4);
+    .neumorphic .row-actions {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 140ms ease;
+    }
+    .neumorphic .combat-card:hover .row-actions,
+    .neumorphic .active-border:hover .row-actions,
+    .neumorphic .lair-border:hover .row-actions {
+      opacity: 1;
+      pointer-events: auto;
     }
   }
 
-  /* Selected row: buttons match the selected row background */
-  .neumorphic .is-selected .btn-action {
-    background: #2c2c2c;
-    box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4);
-  }
-
-  /* Active border hover */
+  /* ── Row hover: initiative number brightens ─────── */
   @media (min-width: 1024px) {
-    .neumorphic .active-border:hover {
-      background: var(--neu-bg-elevated) !important;
+    .neumorphic .combat-card:hover .init-num {
+      color: var(--text-primary);
     }
   }
 
-  /* Selected+hovered rows brighten from selected bg */
-  @media (min-width: 1024px) {
-    .neumorphic .combat-card.is-selected:hover,
-    .neumorphic .active-border.is-selected:hover,
-    .neumorphic .lair-border.is-selected:hover {
-      background: #303030 !important;
-    }
-    .neumorphic .combat-card.is-selected:hover .btn-action,
-    .neumorphic .active-border.is-selected:hover .btn-action,
-    .neumorphic .lair-border.is-selected:hover .btn-action {
-      background: #303030;
-    }
-  }
-
-  /* Shield AC: swap SVG based on row hover/selected state */
-  @media (min-width: 1024px) {
-    .combat-card:hover .shield-neutral,
-    .active-border:hover .shield-neutral,
-    .lair-border:hover .shield-neutral { display: none; }
-    .combat-card:hover .shield-hovered,
-    .active-border:hover .shield-hovered,
-    .lair-border:hover .shield-hovered { display: block; }
-  }
-  .is-selected .shield-neutral { display: none; }
-  .is-selected .shield-selected { display: block; }
-  @media (min-width: 1024px) {
-    .is-selected:hover .shield-selected { display: none; }
-    .is-selected:hover .shield-hovered { display: none !important; }
-    .is-selected:hover .shield-hovered-selected { display: block; }
-  }
-
-  /* Shield inner border: matches row background at 0.4 opacity */
-  .shield-border { stroke: rgba(50, 50, 50, 0.4); }
-  @media (min-width: 1024px) {
-    .combat-card:hover .shield-border,
-    .active-border:hover .shield-border,
-    .lair-border:hover .shield-border { stroke: rgba(56, 56, 56, 0.4); }
-  }
-  .is-selected .shield-border { stroke: rgba(44, 44, 44, 0.4); }
-  @media (min-width: 1024px) {
-    .is-selected:hover .shield-border { stroke: rgba(48, 48, 48, 0.4); }
-  }
-
-  /* ── Neumorphic inputs (pressed-in well) ─────────── */
-  .neumorphic .input-field {
-    background: var(--neu-bg);
+  /* ── HP button: flat at rest, neumorphic on hover ── */
+  .neumorphic .hp-btn {
+    width: 100%;
+    padding: 5px 4px;
+    border-radius: 8px;
     border: none;
-    box-shadow: inset 1.5px 1.5px 3px #0e0e0e, inset -1.5px -1.5px 3px rgba(95, 94, 94, 0.4);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    background: transparent;
+    box-shadow: none;
+    transition: box-shadow 140ms ease, background 140ms ease;
+  }
+  .neumorphic .hp-btn:hover {
+    box-shadow: var(--neum-hp-hover);
+    background: #303030;
+  }
+  .neumorphic .hp-btn:active {
+    box-shadow: var(--neum-hp-press);
+  }
+
+  /* ── Row dividers ────────────────────────────────── */
+  .neumorphic .row-divider {
+    height: 1px;
+    min-height: 1px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+    margin: 1px 8px;
+    transition: opacity 120ms ease;
+  }
+  .neumorphic .active-border + .row-divider,
+  .neumorphic .combat-card:hover + .row-divider,
+  .neumorphic .lair-border:hover + .row-divider,
+  .neumorphic .is-selected + .row-divider,
+  .neumorphic .library-card:hover + .row-divider {
+    opacity: 0;
+  }
+  .neumorphic .row-divider:has(+ .active-border),
+  .neumorphic .row-divider:has(+ .combat-card:hover),
+  .neumorphic .row-divider:has(+ .lair-border:hover),
+  .neumorphic .row-divider:has(+ .is-selected),
+  .neumorphic .row-divider:has(+ .library-card:hover) {
+    opacity: 0;
+  }
+
+  /* ── Inputs (pressed-in well) ────────────────────── */
+  .neumorphic .input-field {
+    background: #1e1e1e;
+    border: none;
+    border-radius: 8px;
+    box-shadow: var(--neum-inset);
+    color: var(--text-primary);
+    padding: 8px 12px;
   }
   .neumorphic .input-field:focus {
-    box-shadow: inset 2px 2px 3px #0e0e0e, inset -2px -2px 3px rgba(95, 94, 94, 0.4);
+    box-shadow: var(--neum-inset);
     border: none;
   }
 
-  /* Elements inside glass overlays: transparent backgrounds */
+  /* Elements inside glass overlays */
   .glass-toast .input-field {
-    background: rgba(0, 0, 0, 0.25) !important;
+    background: #1e1e1e !important;
     border: none !important;
-    box-shadow: inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.5), inset -1.5px -1.5px 3px rgba(255, 255, 255, 0.06) !important;
+    box-shadow: var(--neum-inset) !important;
   }
   .glass-toast .input-field:focus {
-    box-shadow: inset 3px 3px 4px rgba(0, 0, 0, 0.5), inset -3px -3px 4px rgba(255, 255, 255, 0.08) !important;
+    box-shadow: var(--neum-inset) !important;
     border: none !important;
   }
-  /* Buttons inside glass overlays: use base gradient style, not neumorphic raised */
   .glass-toast .btn-action {
-    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    box-shadow: none !important;
+    background: var(--panel) !important;
+    border: none !important;
+    box-shadow: var(--neum-btn) !important;
   }
   .glass-toast .btn-action:hover {
-    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%) !important;
-    border-color: rgba(255,255,255,0.14) !important;
+    color: #9090A8 !important;
   }
   .glass-toast .btn-action:active {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%) !important;
+    box-shadow: var(--neum-btn-inset) !important;
   }
-
 
   /* Number input spinners */
   .neumorphic input[type="number"]::-webkit-inner-spin-button,
@@ -591,45 +647,58 @@
     -moz-appearance: textfield;
   }
 
-  /* ── Neumorphic side panels ─────────────────────── */
+  /* ── Side panels ─────────────────────────────────── */
   .neumorphic .neu-panel-left {
-    border-right: 2px solid;
-    border-right-color: var(--neu-border-dark);
-    border-top: 2px solid;
-    border-top-color: var(--neu-border-light);
-    box-shadow: 4px 0 8px var(--neu-shadow-dark), -2px 0 4px var(--neu-shadow-light);
+    background: var(--panel);
+    border: none;
+    border-radius: 0 14px 14px 0;
+    box-shadow: var(--neum-panel);
   }
 
   .neumorphic .neu-panel-right {
-    border-left: 2px solid;
-    border-left-color: var(--neu-border-light);
-    border-top: 2px solid;
-    border-top-color: var(--neu-border-light);
-    box-shadow: -4px 0 8px var(--neu-shadow-dark), 2px 0 4px var(--neu-shadow-light);
+    background: var(--panel);
+    border: none;
+    border-radius: 14px 0 0 14px;
+    box-shadow: var(--neum-panel);
   }
 
-  /* ── Neumorphic nav glow ─────────────────────────── */
+  /* ── Nav glow and section glow: disabled ─────────── */
   .neumorphic .nav-active-glow {
     box-shadow: none;
   }
-
   .neumorphic .section-title-glow {
     text-shadow: none;
   }
 
-  /* ── Neumorphic scrollbar ────────────────────────── */
-  .neumorphic ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
-  .neumorphic ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
+  /* ── Section headers ─────────────────────────────── */
+  .neumorphic .label-section {
+    color: var(--accent) !important;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  /* ── Scrollbar ───────────────────────────────────── */
+  .neumorphic {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.08) transparent;
+  }
+  .neumorphic ::-webkit-scrollbar { width: 4px; height: 4px; }
+  .neumorphic ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+  .neumorphic ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+  .neumorphic ::-webkit-scrollbar-track { background: transparent; }
 }
 
-/* ── Glass toast (dice roll popups) ─────────────────── */
+/* ── Glass toast (popups and dialogs) ────────────────── */
 .glass-toast {
-  background: rgba(62, 62, 62, 0.15);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 1rem;
+  background: #2c2c2c;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 12px;
   box-shadow:
-    inset 1px 1px 4px rgba(255, 255, 255, 0.1),
-    0 8px 32px rgba(0, 0, 0, 0.35);
+    0 28px 60px rgba(0, 0, 0, 0.78),
+    0 10px 24px rgba(0, 0, 0, 0.50),
+    inset 0 1px 0 rgba(255, 255, 255, 0.065);
 }

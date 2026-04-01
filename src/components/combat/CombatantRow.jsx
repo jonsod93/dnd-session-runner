@@ -3,13 +3,9 @@ import gsap from 'gsap'
 import { createPortal } from 'react-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { CONDITIONS, uid } from '../../utils/combatUtils'
+import { CONDITIONS, uid, getConditionColor } from '../../utils/combatUtils'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { DeathSaveTracker } from './DeathSaveTracker'
-import shieldNeutral from '../../assets/shield-ac-neutral.svg'
-import shieldHovered from '../../assets/shield-ac-hovered.svg'
-import shieldSelected from '../../assets/shield-ac-selected.svg'
-import shieldHoveredSelected from '../../assets/shield-ac-hovered-and-selected.svg'
 
 function SkullIcon({ className }) {
   return (
@@ -77,13 +73,14 @@ export function CombatantRow({
   }, [combatant.hp?.current])
 
   const hpPercent = combatant.hp ? combatant.hp.current / combatant.hp.max : null
-  const hpColor =
-    hpPercent === null ? 'text-[#e6e6e6]' :
-    hpPercent <= 0.25  ? 'text-[rgb(255,90,90)]'   :
-    hpPercent <= 0.5   ? 'text-amber-400'  :
-                         'text-[#e6e6e6]'
+  const hpColorVar =
+    hpPercent === null ? 'var(--text-primary)' :
+    hpPercent <= 0     ? 'var(--hp-dead)'  :
+    hpPercent <= 0.25  ? 'var(--hp-low)'   :
+    hpPercent <= 0.5   ? 'var(--hp-half)'  :
+                         'var(--hp-full)'
 
-  const nameColor = isLair ? 'text-[#e6e6e6]' : isActive ? 'text-[#e87830]' : 'text-[#e6e6e6]'
+  const nameColor = isLair ? 'text-[var(--text-primary)]' : isActive ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'
 
   const openConditions = (e) => {
     e.stopPropagation()
@@ -101,11 +98,13 @@ export function CombatantRow({
     const label = cond.name === 'Concentration' && cond.spellName
       ? `${cond.name}: ${cond.spellName}`
       : cond.name
+    // Always look up color from CONDITIONS array (stored cond.color may have stale Tailwind classes)
+    const colorClass = getConditionColor(cond.name)
 
     return (
       <span
         key={cond.id}
-        className={`inline-flex items-center gap-0.5 text-xs px-2 py-1 rounded-lg condition-badge ${cond.color}`}
+        className={`inline-flex items-center gap-0.5 text-xs px-2 py-1 rounded-lg condition-badge ${colorClass}`}
         title={title}
       >
         {cond.expiry && <ClockIcon className="w-3 h-3 opacity-50 shrink-0" />}
@@ -126,7 +125,9 @@ export function CombatantRow({
       style={sortableStyle}
       data-combatant-id={combatant.id}
       className={[
-        'flex items-start max-lg:items-center gap-2 px-4 py-4 max-lg:px-3 max-lg:py-2 rounded-xl min-h-[56px] max-lg:min-h-0 shrink-0 cursor-default outline-none',
+        'max-lg:flex max-lg:items-center max-lg:gap-2 max-lg:px-3 max-lg:py-2 max-lg:min-h-0',
+        'lg:grid lg:grid-cols-[36px_1fr_2fr_auto] lg:items-center lg:pl-[22px] lg:pr-[6px] lg:py-[6px]',
+        'min-h-[50px] rounded-[10px] shrink-0 cursor-pointer outline-none relative',
         isActive
           ? `active-border${isSelected ? ' is-selected' : ''}`
           : isLair
@@ -137,83 +138,51 @@ export function CombatantRow({
       {...(!isLair ? { ...attributes, ...listeners } : {})}
       onClick={() => onSelect(combatant)}
     >
-      {/* Active arrow — desktop only, invisible placeholder on inactive rows */}
-      <span className={`max-lg:hidden shrink-0 self-center w-3 text-xs leading-none ${isActive ? 'text-[#e87830]' : 'invisible'}`}>
-        ▶
-      </span>
-
-      {/* Initiative */}
+      {/* Initiative — grid col 1 on desktop */}
       <button
-        className={`shrink-0 self-center text-center font-mono transition-colors w-8 text-sm max-lg:w-7 max-lg:text-sm ${isActive ? 'text-[#e87830] font-medium' : 'text-[#9a9894] font-medium hover:text-[#e6e6e6]'}`}
+        className={`max-lg:shrink-0 max-lg:w-7 max-lg:text-sm text-center font-mono transition-colors text-[13px] font-semibold init-num ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`}
         onClick={(e) => { e.stopPropagation(); onSetActive(combatant.id) }}
         title="Set as active turn"
       >
         {combatant.initiative ?? '—'}
       </button>
 
-      {/* ── Content column ────────────────────────────────────────────────── */}
-      <div className={`flex-1 min-w-0 ${isLair ? 'self-center' : ''}`}>
+      {/* ── Name + conditions column — grid col 2 on desktop ─────────── */}
+      <div className={`max-lg:flex-1 max-lg:min-w-0 ${isLair ? 'self-center' : ''}`}>
 
         {/* ── Desktop layout (hidden on mobile) ─────────────────────────── */}
         <div className="max-lg:hidden">
-          <div className="flex items-center min-w-0">
-            <span className="w-36 shrink-0 flex items-center gap-1">
-              <span
-                className={`text-sm font-semibold truncate ${nameColor} ${isDead ? 'opacity-40' : ''}`}
-                title={combatant.name}
-              >
-                {combatant.name}
-              </span>
-              {isPC && (
-                <button
-                  className={`shrink-0 text-base leading-none transition-colors ${combatant.deathSaves ? 'text-red-500' : 'text-white/15 hover:text-red-500/60'}`}
-                  onClick={(e) => { e.stopPropagation(); onToggleDeathSaves?.(combatant.id) }}
-                  title={combatant.deathSaves ? 'Hide death saves' : 'Track death saves'}
-                >
-                  <SkullIcon className="w-4 h-4" />
-                </button>
-              )}
+          <div className="flex items-center gap-1 min-w-0">
+            <span
+              className={`text-sm font-semibold truncate ${nameColor} ${isDead ? 'opacity-40' : ''}`}
+              title={combatant.name}
+            >
+              {combatant.name}
             </span>
-            <div className="shrink-0 flex items-center gap-4">
-              <div className="w-10 shrink-0 flex justify-center">
-                {combatant.ac != null && (
-                  <ShieldAC value={combatant.ac} large />
-                )}
-              </div>
-              <div className="w-28 shrink-0 flex justify-center">
-                {combatant.hp != null && (
-                  <button
-                    className="group/hp btn-action whitespace-nowrap flex items-center gap-1"
-                    onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
-                    title="Apply damage/healing (T)"
-                  >
-                    <span className="text-[#9a9894] group-hover/hp:text-[#e6e6e6] transition-colors">HP </span>
-                    <span className={`font-mono ${hpColor} ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 550 }}>{displayHp}/{combatant.hp.max}</span>
-                    {tempHp > 0 && (
-                      <span className="text-blue-400 font-mono text-xs" title="Temporary HP">+{tempHp}</span>
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-            {!isLair && conditionTags.length > 0 && (
-              <div className="flex flex-wrap gap-1 items-center ml-3 min-w-0">
-                {conditionTags}
+            {isPC && (
+              <button
+                className={`shrink-0 text-base leading-none transition-colors ${combatant.deathSaves ? 'text-red-500' : 'text-white/15 hover:text-red-500/60'}`}
+                onClick={(e) => { e.stopPropagation(); onToggleDeathSaves?.(combatant.id) }}
+                title={combatant.deathSaves ? 'Hide death saves' : 'Track death saves'}
+              >
+                <SkullIcon className="w-4 h-4" />
+              </button>
+            )}
+            {showDeathSaves && (
+              <div className="shrink-0 ml-2">
+                <DeathSaveTracker
+                  deathSaves={combatant.deathSaves}
+                  onUpdate={(s, f) => onSetDeathSaves?.(combatant.id, s, f)}
+                  onNat20={() => onNat20Heal?.(combatant.id, isPC)}
+                  onNat1={() => {
+                    const newF = Math.min(3, combatant.deathSaves.failures + 2)
+                    onSetDeathSaves?.(combatant.id, combatant.deathSaves.successes, newF)
+                  }}
+                  isPC={isPC}
+                />
               </div>
             )}
           </div>
-          {showDeathSaves && (
-            <DeathSaveTracker
-              deathSaves={combatant.deathSaves}
-              onUpdate={(s, f) => onSetDeathSaves?.(combatant.id, s, f)}
-              onNat20={() => onNat20Heal?.(combatant.id, isPC)}
-              onNat1={() => {
-                const newF = Math.min(3, combatant.deathSaves.failures + 2)
-                onSetDeathSaves?.(combatant.id, combatant.deathSaves.successes, newF)
-              }}
-              isPC={isPC}
-            />
-          )}
         </div>
 
         {/* ── Mobile layout (hidden on desktop) ─────────────────────────── */}
@@ -241,23 +210,21 @@ export function CombatantRow({
                   )}
                 </span>
 
-                <span className="shrink-0 w-7 flex justify-center text-[11px]">
-                  {combatant.ac != null && (
-                    <ShieldAC value={combatant.ac} />
-                  )}
+                <span className="shrink-0 w-7 flex justify-center text-[11px] font-mono font-normal" style={{ color: 'var(--text-muted)' }}>
+                  {combatant.ac != null && combatant.ac}
                 </span>
 
                 <span className="shrink-0 w-[72px]">
                   {combatant.hp != null && (
                     <button
-                      className="w-full btn-action !text-[11px] !px-2 !py-1 !rounded-lg text-center"
+                      className="w-full hp-btn !text-[11px] !rounded-lg text-center"
                       onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
                       title="Apply damage/healing"
                     >
                       <span className="inline-flex items-center gap-0.5">
-                        <span className={`font-mono ${hpColor} ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 550 }}>{displayHp}/{combatant.hp.max}</span>
+                        <span className={`font-mono ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 400, color: hpColorVar }}>{displayHp}/{combatant.hp.max}</span>
                         {tempHp > 0 && (
-                          <span className="text-blue-400 font-mono text-[10px]">+{tempHp}</span>
+                          <span className="text-blue-400 font-mono text-[11px]" style={{ fontWeight: 400 }}>+{tempHp}</span>
                         )}
                       </span>
                     </button>
@@ -288,20 +255,42 @@ export function CombatantRow({
         </div>
       </div>
 
-      {/* Conditions + Remove */}
-      <div className="shrink-0 self-center flex items-center max-lg:gap-2 gap-1">
-        {!isLair && (
-          <button
-            className="lg:hidden shrink-0 btn-action !px-2 !py-[6px] !rounded-lg"
-            onClick={openConditions}
-            title="Add/manage conditions"
-          >
-            <TagIcon className="w-3.5 h-3.5" />
-          </button>
+      {/* ── Stats + conditions column — grid col 3 on desktop ──── */}
+      <div className="max-lg:hidden flex items-center gap-[6px]">
+        <div className="flex items-center justify-center gap-[6px] w-[120px] shrink-0">
+          {combatant.hp != null ? (
+            <button
+              className="hp-btn whitespace-nowrap"
+              onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
+              title="Apply damage/healing (T)"
+            >
+              <span className={`font-mono text-[13px] ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 400, color: hpColorVar }}>{displayHp}/{combatant.hp.max}</span>
+              {tempHp > 0 && (
+                <span className="text-blue-400 font-mono text-[13px] ml-0.5" style={{ fontWeight: 400 }} title="Temporary HP">+{tempHp}</span>
+              )}
+            </button>
+          ) : (
+            <div className="w-[60px]" />
+          )}
+          {combatant.ac != null && (
+            <div className="text-center font-mono text-[13px] font-normal w-[30px]" style={{ color: 'var(--text-muted)' }}>
+              {combatant.ac}
+            </div>
+          )}
+        </div>
+        <div className="w-[20px] shrink-0" />
+        {!isLair && conditionTags.length > 0 && (
+          <div className="flex gap-[6px] items-center flex-wrap py-[2px]">
+            {conditionTags}
+          </div>
         )}
+      </div>
+
+      {/* ── Action buttons — grid col 4 on desktop ────────────────── */}
+      <div className="shrink-0 self-center flex items-center gap-2 row-actions pr-2">
         {!isLair && (
           <button
-            className="max-lg:hidden shrink-0 btn-action !px-2 !py-1"
+            className="shrink-0 btn-action !w-auto !h-auto !px-2 !py-[6px] !rounded-lg"
             onClick={openConditions}
             title="Add/manage conditions"
           >
@@ -309,11 +298,11 @@ export function CombatantRow({
           </button>
         )}
         <button
-          className="shrink-0 btn-action max-lg:!py-[6px] !py-1 !px-2 max-lg:!px-[10px] max-lg:!rounded-lg flex items-center justify-center text-[#5a5854] hover:!text-red-400 transition-all"
+          className="shrink-0 btn-action !w-auto !h-auto !py-[6px] !px-[10px] !rounded-lg flex items-center justify-center hover:!text-red-400 transition-all"
           onClick={(e) => { e.stopPropagation(); onRemove(combatant.id) }}
           title="Remove"
         >
-          <span className="max-lg:text-[12px] text-[11px]" style={{ fontWeight: 700 }}>✕</span>
+          <span className="text-[12px]" style={{ fontWeight: 700 }}>✕</span>
         </button>
       </div>
 
@@ -402,12 +391,11 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
     return createPortal(
       <div
         className="fixed inset-0 z-[70] flex items-end justify-center neumorphic"
-        style={{ background: 'rgba(0,0,0,0.5)' }}
         onClick={onClose}
       >
         <div
           className="glass-toast rounded-t-xl w-full overflow-hidden flex flex-col"
-          style={{ maxHeight: '80vh', background: 'rgba(62, 62, 62, 0.65)' }}
+          style={{ maxHeight: '80vh' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -508,7 +496,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
     <div
       ref={menuRef}
       className="fixed z-[70] glass-toast rounded-xl overflow-y-auto neumorphic"
-      style={{ width: MENU_W, ...posStyle, background: 'rgba(62, 62, 62, 0.65)' }}
+      style={{ width: MENU_W, ...posStyle }}
       onClick={(e) => e.stopPropagation()}
     >
       {selectedCondition ? (
@@ -551,7 +539,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               ))
             )}
           </div>
-          <div className="border-t border-black/[0.15] px-3 py-2">
+          <div className="border-t border-white/[0.04] px-3 py-2">
             <form onSubmit={handleCustomSubmit} className="flex gap-1.5 items-center">
               <input
                 type="text"
@@ -559,11 +547,11 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 onChange={(e) => setCustom(e.target.value)}
                 onKeyDown={(e) => e.stopPropagation()}
                 placeholder="Custom..."
-                className="flex-1 min-w-0 bg-transparent border-b border-black/[0.2] py-1 text-sm text-[#e6e6e6] focus:outline-none focus:border-gold-400 placeholder:text-[#5a5854] transition-all"
+                className="input-field flex-1 min-w-0 !py-1 !text-sm !rounded-lg"
               />
               <button
                 type="submit"
-                className="shrink-0 btn-action !text-xs !px-2.5 !py-1 !text-white !font-semibold"
+                className="shrink-0 text-xs px-2.5 py-1 font-semibold rounded-lg neu-btn-raised"
               >
                 Add
               </button>
@@ -619,7 +607,7 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
         />
         <button
           onClick={onConcentrationAdd}
-          className="w-full text-sm text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 rounded-xl px-3 py-1.5 transition-all hover:shadow-neon-blue"
+          className="w-full text-sm rounded-xl px-3 py-1.5 neu-btn-raised"
         >
           Add Concentration
         </button>
@@ -638,7 +626,7 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
       </button>
       <p className="text-sm text-[#e6e6e6] font-medium">{condition.name}</p>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-col gap-1.5">
         <SegmentedToggle
           options={[
             { value: 'end', label: 'End of' },
@@ -646,14 +634,16 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
           ]}
           value={timing}
           onChange={setTiming}
+          fullWidth
         />
         <SegmentedToggle
           options={[
             { value: 'own', label: 'Own turn' },
-            ...(activeCombatant ? [{ value: 'inflicter', label: `${activeCombatant.name}'s turn` }] : []),
+            ...(activeCombatant ? [{ value: 'inflicter', label: `${truncateName(activeCombatant.name, 14)}'s turn` }] : []),
           ]}
           value={target}
           onChange={setTarget}
+          fullWidth
         />
         <SegmentedToggle
           options={[
@@ -662,12 +652,13 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
           ]}
           value={removal}
           onChange={setRemoval}
+          fullWidth
         />
       </div>
 
       <button
         onClick={handleDurationAdd}
-        className="w-full text-sm text-gold-400 border border-gold-400/30 hover:bg-gold-400/10 rounded-xl px-3 py-1.5 transition-all hover:shadow-neon-gold"
+        className="w-full text-sm rounded-xl px-3 py-1.5 neu-btn-raised"
       >
         Add {condition.name}
       </button>
@@ -675,23 +666,19 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
   )
 }
 
-const SHIELD_STROKE_PATH = 'M0 4.40484V18.1254C0 29.456 15.1399 36 15.1399 36C15.1399 36 29.9954 29.8332 29.9954 18.0892C29.9954 6.35201 30 4.40259 30 4.40259C30 4.40259 23.3459 0 15.1399 0C6.93393 0 0 4.40484 0 4.40484Z'
 
-function ShieldAC({ value, large }) {
-  const w = large ? 28 : 23
-  const h = large ? 34 : 28
-  return (
-    <span className="shield-ac relative inline-flex items-center justify-center" style={{ width: w, height: h }}>
-      <img className="shield-neutral absolute inset-0" src={shieldNeutral} width={w} height={h} alt="" />
-      <img className="shield-hovered absolute inset-0 hidden" src={shieldHovered} width={w} height={h} alt="" />
-      <img className="shield-selected absolute inset-0 hidden" src={shieldSelected} width={w} height={h} alt="" />
-      <img className="shield-hovered-selected absolute inset-0 hidden" src={shieldHoveredSelected} width={w} height={h} alt="" />
-      <svg className="absolute inset-0 pointer-events-none" width={w} height={h} viewBox="0 0 30 36" fill="none">
-        <path d={SHIELD_STROKE_PATH} className="shield-border" strokeWidth="1.5" fill="none" />
-      </svg>
-      <span className="relative font-mono text-[#e6e6e6] text-xs" style={{ marginTop: -1, fontWeight: 550 }}>{value}</span>
-    </span>
-  )
+/** Truncate a name smartly, preserving any trailing number. e.g. "Abominable Beauty 4" → "Abominable B… 4" */
+function truncateName(name, maxLen) {
+  if (name.length <= maxLen) return name
+  const match = name.match(/^(.+?)\s+(\d+)$/)
+  if (match) {
+    const [, base, num] = match
+    const suffix = ` ${num}`
+    const available = maxLen - suffix.length - 1 // 1 for ellipsis
+    if (available < 2) return name.slice(0, maxLen - 1) + '…'
+    return base.slice(0, available).trimEnd() + '…' + suffix
+  }
+  return name.slice(0, maxLen - 1).trimEnd() + '…'
 }
 
 function TagIcon({ className }) {
@@ -712,17 +699,50 @@ function ClockIcon({ className }) {
   )
 }
 
-function SegmentedToggle({ options, value, onChange }) {
+function SegmentedToggle({ options, value, onChange, fullWidth }) {
+  const refs = useRef([])
+  const containerRef = useRef(null)
+  const activeIdx = options.findIndex((o) => o.value === value)
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 })
+
+  useEffect(() => {
+    const el = refs.current[activeIdx]
+    if (el && containerRef.current) {
+      const cRect = containerRef.current.getBoundingClientRect()
+      const eRect = el.getBoundingClientRect()
+      setIndicator({ left: eRect.left - cRect.left, width: eRect.width })
+    }
+  }, [activeIdx, options])
+
   return (
-    <div className="inline-flex rounded-lg border border-white/[0.12] overflow-hidden">
-      {options.map((opt) => (
+    <div
+      ref={containerRef}
+      className={`relative flex rounded-xl p-[3px] select-none ${fullWidth ? 'w-full' : 'inline-flex rounded-lg p-[2px]'}`}
+      style={{ background: '#1e1e1e', boxShadow: 'var(--neum-inset)' }}
+    >
+      {/* Sliding indicator */}
+      <div
+        className={`absolute top-[3px] bottom-[3px] transition-all duration-200 ease-out ${fullWidth ? 'rounded-[9px]' : 'rounded-[6px]'}`}
+        style={{
+          width: indicator.width,
+          left: indicator.left,
+          background: 'linear-gradient(145deg, #484848, #303030)',
+          boxShadow: '2px 2px 5px var(--shadow-dark), -1px -1px 4px var(--shadow-light)',
+        }}
+      />
+      {options.map((opt, i) => (
         <button
           key={opt.value}
-          className={`text-[10px] px-2 py-1 transition-colors whitespace-nowrap ${
-            value === opt.value
-              ? 'bg-gold-400/15 text-gold-400'
-              : 'text-[#9a9894] hover:text-[#e6e6e6] hover:bg-[#202226]'
+          ref={(el) => { refs.current[i] = el }}
+          className={`relative z-10 transition-colors whitespace-nowrap text-center ${
+            fullWidth
+              ? 'flex-1 text-sm py-2 rounded-[9px]'
+              : 'text-[10px] px-2.5 py-1 rounded-[6px]'
           }`}
+          style={{
+            color: value === opt.value ? 'var(--text-primary)' : 'var(--text-muted)',
+            fontWeight: value === opt.value ? 600 : 400,
+          }}
           onClick={() => onChange(opt.value)}
         >
           {opt.label}

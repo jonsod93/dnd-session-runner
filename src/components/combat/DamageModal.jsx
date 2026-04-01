@@ -36,26 +36,25 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      className="fixed inset-0 z-[2250] flex items-center justify-center"
       onClick={onClose}
     >
       <div
         className="glass-toast rounded-2xl w-80 p-5 relative"
-        style={{ background: 'rgba(62, 62, 62, 0.65)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 text-[#787774] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
+          className="absolute top-3 right-3 w-5 h-5 rounded-[5px] bg-[#1c1c20] flex items-center justify-center text-[#505060] hover:text-[#9090A8] cursor-pointer text-xs leading-none transition-colors"
+          style={{ boxShadow: 'var(--neum-btn)' }}
         >
           ✕
         </button>
 
         <h3 className="text-sm font-medium text-[#e6e6e6] mb-0.5">Apply Damage / Healing</h3>
-        <p className="text-xs text-[#7a7874] mb-4">
+        <p className="text-xs text-[#8a8884] mb-4">
           {combatant.name} -{' '}
           <span className="font-mono text-[#e6e6e6]">
             {combatant.hp?.current}/{combatant.hp?.max} HP
@@ -67,7 +66,7 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
 
         <form onSubmit={handleApply}>
           {/* Damage / Healing */}
-          <label className="text-xs text-[#7a7874] block mb-1.5">Damage or Healing</label>
+          <label className="text-xs text-[#8a8884] block mb-1.5">Damage or Healing</label>
           <input
             ref={inputRef}
             type="number"
@@ -77,14 +76,14 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
             className="input-field font-mono"
           />
           {value !== '' && !isNaN(parsed) && (
-            <p className={`text-xs mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#7a7874]'}`}>
+            <p className={`text-xs mt-1.5 ${isDmg ? 'text-red-400' : isHeal ? 'text-green-400' : 'text-[#8a8884]'}`}>
               {isDmg ? `${parsed} damage` : isHeal ? `${-parsed} healing` : 'no change'}
             </p>
           )}
 
           {/* Temp HP */}
           <div className="mt-4 pt-4 border-t border-black/[0.15]">
-            <label className="text-xs text-[#7a7874] block mb-1.5">Temporary HP</label>
+            <label className="text-xs text-[#8a8884] block mb-1.5">Temporary HP</label>
             <input
               type="number"
               value={tempHpValue}

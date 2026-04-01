@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect, Fragment } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
 import { SpellDrawer } from '../SpellDrawer'
@@ -142,7 +142,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         />
       )}
       {/* Tabs + collapse button */}
-      <div className="flex border-b border-black/[0.15] shrink-0">
+      <div className="flex border-b border-white/[0.04] shrink-0">
         {[
           { key: 'npc',      label: 'NPC'       },
           { key: 'pc',       label: 'PC'        },
@@ -153,8 +153,8 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             className={[
               'flex-1 py-3 text-sm border-b-2 transition-all',
               tab === key
-                ? 'border-[#e87830] text-[#e6e6e6] nav-active-glow'
-                : 'border-transparent text-[#7a7874] hover:text-[#e6e6e6]',
+                ? 'border-[#FF7A45] text-[#e6e6e6] nav-active-glow'
+                : 'border-transparent text-[#8a8884] hover:text-[#e6e6e6]',
             ].join(' ')}
             onClick={() => setTab(key)}
           >
@@ -163,7 +163,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         ))}
         <button
           onClick={onToggleCollapse}
-          className="max-lg:hidden px-2 text-[#7a7874] hover:text-[#e6e6e6] transition-colors shrink-0"
+          className="max-lg:hidden px-2 text-[#8a8884] hover:text-[#e6e6e6] transition-colors shrink-0"
           title="Collapse library"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -175,7 +175,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── NPC Library ────────────────────────────────────────────────── */}
       {tab === 'npc' && (
         <>
-          <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0 flex items-center gap-2">
+          <div className="px-2.5 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-2">
             <div className="relative flex-1">
               <input
                 type="text"
@@ -196,13 +196,14 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               + New
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-1.5">
+          <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col">
             {filteredNPCs.length === 0 && (
-              <p className="text-[#7a7874] text-sm text-center py-6">No results</p>
+              <p className="text-[#8a8884] text-sm text-center py-6">No results</p>
             )}
-            {filteredNPCs.map((entry) => (
+            {filteredNPCs.map((entry, idx) => (
+              <Fragment key={entry._key ?? entry.Id ?? entry.Name}>
+              {idx > 0 && <div className="row-divider" />}
               <div
-                key={entry._key ?? entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2 flex items-center gap-2 library-card group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
                 onMouseEnter={(e) => {
@@ -218,23 +219,23 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                   {entry.Type && (
-                    <div className="text-xs text-[#7a7874] truncate mt-0.5">{entry.Type}</div>
+                    <div className="text-xs text-[#8a8884] truncate mt-0.5">{entry.Type}</div>
                   )}
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">
                   {entry.ChallengeRating && (
-                    <span className="text-xs text-[#7a7874]">CR {entry.ChallengeRating}</span>
+                    <span className="text-xs text-[#8a8884]">CR {entry.ChallengeRating}</span>
                   )}
                   <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
                     <button
-                      className="text-[#7a7874] hover:text-gold-400 text-xs"
+                      className="text-[#8a8884] hover:text-gold-400 text-xs"
                       onClick={(e) => { e.stopPropagation(); onEditStatblock?.(entry) }}
                       title="Edit statblock"
                     >
                       ✎
                     </button>
                     <button
-                      className="text-[#7a7874] hover:text-red-400 text-xs"
+                      className="text-[#8a8884] hover:text-red-400 text-xs"
                       onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'npc', key: entry._key }) }}
                       title="Delete statblock"
                     >
@@ -243,6 +244,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   </div>
                 </div>
               </div>
+              </Fragment>
             ))}
           </div>
         </>
@@ -251,7 +253,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── PC Library ─────────────────────────────────────────────────── */}
       {tab === 'pc' && (
         <>
-          <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0 flex items-center gap-2">
+          <div className="px-2.5 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-2">
             <div className="relative flex-1">
               <input
                 type="text"
@@ -273,7 +275,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             </button>
           </div>
           {pcEditName && (
-            <div className="px-2.5 py-2 border-b border-black/[0.15] shrink-0">
+            <div className="px-2.5 py-2 border-b border-white/[0.04] shrink-0">
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
@@ -305,32 +307,33 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               </form>
             </div>
           )}
-          <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-1.5">
+          <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col">
             {filteredPCs.length === 0 && (
-              <p className="text-[#7a7874] text-sm text-center py-6">No results</p>
+              <p className="text-[#8a8884] text-sm text-center py-6">No results</p>
             )}
-            {filteredPCs.map((entry) => (
+            {filteredPCs.map((entry, idx) => (
+              <Fragment key={entry._key ?? entry.Id ?? entry.Name}>
+              {idx > 0 && <div className="row-divider" />}
               <div
-                key={entry._key ?? entry.Id ?? entry.Name}
                 className="w-full text-left px-3 py-2 flex items-center gap-2 library-card group cursor-pointer"
                 onClick={() => isMobile ? setMobileLibraryMenu({ entry }) : handleLibraryAdd(entry)}
               >
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                   <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
                   {entry.AC != null && (
-                    <span className="text-[10px] text-[#7a7874] font-mono shrink-0">AC {entry.AC}</span>
+                    <span className="text-[10px] text-[#8a8884] font-mono shrink-0">AC {entry.AC}</span>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all shrink-0">
                   <button
-                    className="text-[#7a7874] hover:text-[#e87830] text-xs"
+                    className="text-[#8a8884] hover:text-[#e87830] text-xs"
                     onClick={(e) => { e.stopPropagation(); setPcEditName({ original: entry.Name, value: entry.Name, ac: entry.AC != null ? String(entry.AC) : '' }) }}
                     title="Edit PC"
                   >
                     ✎
                   </button>
                   <button
-                    className="text-[#7a7874] hover:text-red-400 text-xs"
+                    className="text-[#8a8884] hover:text-red-400 text-xs"
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ name: entry.Name, type: 'pc' }) }}
                     title="Delete PC"
                   >
@@ -338,6 +341,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                   </button>
                 </div>
               </div>
+              </Fragment>
             ))}
           </div>
         </>
@@ -347,88 +351,96 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {tab === 'quickadd' && (
         <div className="flex-1 p-3">
           <form onSubmit={handleQuickAdd} className="space-y-4">
-            <div>
-              <label className="label-section mb-2 block">Name</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={qaName}
-                  onChange={(e) => setQaName(e.target.value)}
-                  placeholder="Creature name…"
-                  className="input-field w-full !pr-8"
-                />
-                {qaName && (
-                  <button type="button" onClick={() => setQaName('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787774] hover:text-[#e6e6e6] text-xs leading-none transition-colors">✕</button>
-                )}
-              </div>
+            {/* Toggle: NPC/Summon vs Lair Action */}
+            <div
+              className="relative flex rounded-xl p-[3px] cursor-pointer select-none"
+              style={{ background: '#1e1e1e', boxShadow: 'var(--neum-inset)' }}
+            >
+              {/* Sliding active indicator */}
+              <div
+                className="absolute top-[3px] bottom-[3px] rounded-[9px] transition-all duration-200 ease-out"
+                style={{
+                  width: 'calc(50% - 3px)',
+                  left: qaType === 'quick' ? '3px' : 'calc(50%)',
+                  background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+                  boxShadow: '2px 2px 5px var(--shadow-dark), -1px -1px 4px var(--shadow-light), 0 0 12px var(--accent-glow-soft)',
+                }}
+              />
+              {[
+                { val: 'quick', label: 'Custom' },
+                { val: 'lair',  label: 'Lair Action'  },
+              ].map(({ val, label }) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setQaType(val)}
+                  className="relative z-10 flex-1 text-sm py-2 rounded-[9px] transition-colors duration-200 text-center"
+                  style={{
+                    color: qaType === val ? '#ffffff' : 'var(--text-muted)',
+                    fontWeight: qaType === val ? 600 : 400,
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="label-section mb-2 block">Type</label>
-              <div className="flex gap-2">
-                {[
-                  { val: 'quick', label: 'NPC / Summon' },
-                  { val: 'lair',  label: 'Lair Action'  },
-                ].map(({ val, label }) => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => setQaType(val)}
-                    className={[
-                      'flex-1 text-sm rounded-xl px-2 py-1.5 transition-all',
-                      qaType === val
-                        ? 'text-[#e6e6e6]'
-                        : 'text-[#7a7874] hover:text-[#e6e6e6]',
-                    ].join(' ')}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      boxShadow: qaType === val
-                        ? '0px 0px 0px #0e0e0e, 0px 0px 0px rgba(95,94,94,0.25), inset 2px 2px 3px #0e0e0e, inset -2px -2px 3px rgba(95, 94, 94, 0.4)'
-                        : '1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.4), inset 0px 0px 0px #0e0e0e, inset 0px 0px 0px rgba(95, 94, 94, 0.4)',
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
+
             {qaType === 'quick' && (
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <label className="label-section mb-1.5 block">HP</label>
-                  <input
-                    type="number"
-                    value={qaHp}
-                    onChange={(e) => setQaHp(e.target.value)}
-                    placeholder="Hit Points"
-                    min="1"
-                    className="input-field"
-                  />
+              <>
+                <div>
+                  <label className="label-section mb-2 block">Name</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={qaName}
+                      onChange={(e) => setQaName(e.target.value)}
+                      placeholder="Creature name…"
+                      className="input-field w-full !pr-8"
+                    />
+                    {qaName && (
+                      <button type="button" onClick={() => setQaName('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787774] hover:text-[#e6e6e6] text-xs leading-none transition-colors">✕</button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <label className="label-section mb-1.5 block">AC</label>
-                  <input
-                    type="number"
-                    value={qaAc}
-                    onChange={(e) => setQaAc(e.target.value)}
-                    placeholder="Armor Class"
-                    min="1"
-                    className="input-field"
-                  />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="label-section mb-1.5 block">HP</label>
+                    <input
+                      type="number"
+                      value={qaHp}
+                      onChange={(e) => setQaHp(e.target.value)}
+                      placeholder="Hit Points"
+                      min="1"
+                      className="input-field"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="label-section mb-1.5 block">AC</label>
+                    <input
+                      type="number"
+                      value={qaAc}
+                      onChange={(e) => setQaAc(e.target.value)}
+                      placeholder="Armor Class"
+                      min="1"
+                      className="input-field"
+                    />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
             <button
               type="submit"
               disabled={!qaName.trim() && qaType !== 'lair'}
-              className="btn-action w-full !text-sm !py-2 disabled:opacity-30"
+              className="neu-btn-raised w-full text-sm py-2 rounded-xl transition-all disabled:opacity-30"
             >
               Add to Tracker
             </button>
           </form>
-          <p className="mt-6 text-[#6a6864] text-xs leading-relaxed border-t border-black/[0.15] pt-4">
-            Quick add creates a combatant with no statblock - useful for improvised NPCs and summoned creatures.
-          </p>
+          {qaType === 'quick' && (
+            <p className="mt-6 text-[#6a6864] text-xs leading-relaxed border-t border-white/[0.04] pt-4">
+              Quick add creates a combatant with no statblock - useful for improvised NPCs and summoned creatures.
+            </p>
+          )}
         </div>
       )}
 
@@ -441,7 +453,6 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         >
           <div
             className="glass-toast rounded-2xl w-full max-w-sm p-5"
-            style={{ background: 'rgba(62, 62, 62, 0.65)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-medium text-[#e6e6e6] mb-2">Delete {deleteConfirm.type === 'pc' ? 'PC' : 'Statblock'}</h3>
@@ -483,11 +494,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         >
           <div
             className="glass-toast rounded-2xl w-full max-w-sm overflow-hidden"
-            style={{ background: 'rgba(62, 62, 62, 0.65)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header — centered name/type, ✕ in top-right corner */}
-            <div className="relative px-10 py-3 border-b border-black/[0.15] text-center">
+            <div className="relative px-10 py-3 border-b border-white/[0.04] text-center">
               <p className="text-sm font-medium text-[#e6e6e6]">{mobileLibraryMenu.entry.Name}</p>
               {mobileLibraryMenu.entry.Type && (
                 <p className="text-xs text-[#9a9894] mt-0.5">{mobileLibraryMenu.entry.Type}</p>
@@ -538,7 +548,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             </div>
 
             {/* Cancel — plain text, no outline */}
-            <div className="border-t border-black/[0.15] px-4 py-3">
+            <div className="border-t border-white/[0.04] px-4 py-3">
               <button
                 className="w-full text-center text-sm text-[#9a9894] hover:text-[#e6e6e6] transition-colors"
                 onClick={() => setMobileLibraryMenu(null)}
@@ -554,19 +564,19 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Desktop: statblock hover preview (no modal, no backdrop) ───── */}
       {!isMobile && hoverPreviewEntry && createPortal(
         <div
-          className="fixed z-[2000] glass-toast rounded-2xl flex flex-col overflow-hidden"
+          className="fixed z-[2000] glass-toast rounded-2xl flex flex-col overflow-hidden neumorphic"
           style={{
             left: hoverPreviewEntry.rect.right + 8,
             top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
             width: 320,
             maxHeight: 'calc(100vh - 64px)',
             '--sb-bg': 'transparent',
-            background: 'rgba(62, 62, 62, 0.65)',
+            background: 'var(--panel, #262626)',
           }}
           onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
           onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
         >
-          <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center justify-between" style={{ background: 'rgba(62, 62, 62, 0.75)' }}>
+          <div className="shrink-0 px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
             <p className="text-sm font-semibold text-[#e6e6e6] truncate pr-2">{hoverPreviewEntry.entry.Name}</p>
             <button
               onClick={() => setHoverPreviewEntry(null)}
@@ -588,11 +598,11 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
           onClick={() => setLibraryPreviewEntry(null)}
         >
           <div
-            className="bg-[#323232] w-full h-full flex flex-col overflow-hidden"
-            style={{ '--sb-bg': '#323232' }}
+            className="w-full h-full flex flex-col overflow-hidden"
+            style={{ '--sb-bg': 'var(--panel, #262626)', background: 'var(--panel, #262626)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center justify-between">
+            <div className="shrink-0 px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
               <p className="text-sm font-medium text-[#e6e6e6] truncate pr-2">{libraryPreviewEntry.Name}</p>
               <button
                 onClick={() => setLibraryPreviewEntry(null)}

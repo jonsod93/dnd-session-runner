@@ -60,7 +60,7 @@ function UsageBoxes({ trackKey, count, usage, onUsageChange }) {
 }
 
 function Rule() {
-  return <hr className="border-black/[0.15] my-3" />
+  return <hr className="border-white/[0.04] my-3" />
 }
 
 function PropLine({ label, value, colorDamageTypes }) {
@@ -476,9 +476,9 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, onRoll
   return (
     <div className="mb-1">
       <div className={`${compact ? '' : 'sticky -top-3 z-10'} bg-[var(--sb-bg)] -mx-4 px-4 pb-2`}>
-        <hr className="border-black/[0.15] my-3 -mt-[3px]" />
+        <hr className="border-white/[0.04] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] leading-none text-[#e87830] section-title-glow">{title}</p>
+          <p className="text-[10px] font-semibold uppercase leading-none text-[var(--accent,#FF7A45)]" style={{ letterSpacing: '0.1em' }}>{title}</p>
           {legendaryPerRound != null && (
             <UsageBoxes
               trackKey={`__${title}`}
@@ -636,9 +636,9 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#2e2e2e]" style={{ '--sb-bg': '#323232' }}>
+      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#262626]" style={{ '--sb-bg': 'var(--panel, #262626)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.15] shrink-0 min-h-[48px]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
             {combatant?.name}
           </h3>
@@ -676,14 +676,14 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   }
 
   return (
-    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[#323232]" style={{ width, '--sb-bg': '#323232' }}>
+    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[var(--panel,#1e1e1e)]" style={{ width, '--sb-bg': 'var(--panel, #262626)' }}>
       {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}
         className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-[#e87830]/30 active:bg-[#e87830]/50 transition-colors"
       />
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.15] shrink-0 min-h-[48px]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04] shrink-0 min-h-[48px]">
         {combatant ? (
           <>
             <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
@@ -753,7 +753,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
   }
 
   const statsHeader = (
-    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[#323232] border-b border-black/[0.15]'}>
+    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[var(--sb-bg)] border-b border-white/[0.04]'}>
       {/* Type & CR */}
       <div className="flex items-baseline justify-between gap-2 mb-0.5">
         <p className="text-sm text-[#9a9894] italic">{sb.Type}</p>
@@ -792,14 +792,14 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
       {/* Ability scores */}
       {sb.Abilities && (
         <>
-          <hr className="border-black/[0.15] my-3" />
+          <hr className="border-white/[0.04] my-3" />
           <div className="grid grid-cols-6 gap-2.5 text-center">
             {ABILITIES.map((a) => {
               const mod = abilityMod(sb.Abilities[a])
               return (
                 <button
                   key={a}
-                  className="flex flex-col items-center cursor-pointer rounded-lg px-1 py-1.5 transition-all stat-card hover:bg-[var(--neu-bg-elevated)]"
+                  className="flex flex-col items-center cursor-pointer rounded-lg px-1 py-1.5 transition-all stat-card hover:bg-[#262626]"
                   onClick={() => handleAbilityRoll(`${ABILITY_LABELS[a]} Check`, mod)}
                   title={`Roll ${ABILITY_LABELS[a]} Check ${formatMod(mod)}`}
                 >
