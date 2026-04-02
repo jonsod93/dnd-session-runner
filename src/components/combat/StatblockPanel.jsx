@@ -843,6 +843,17 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
           <hr className="border-white/[0.04] my-3" />
         </>
       )}
+    </div>
+  )
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* In compact mode (preview), everything scrolls together */}
+      {!compact && statsHeader}
+
+      {/* ── Scrollable content: properties, traits, actions, etc. ─── */}
+      <div className="flex-1 overflow-y-auto px-4 pt-3 pb-12">
+      {compact && <div className="-mx-4 -mt-3">{statsHeader}</div>}
 
       {/* Properties */}
       <div className="space-y-1 mb-2">

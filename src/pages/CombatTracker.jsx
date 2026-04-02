@@ -327,7 +327,7 @@ export default function CombatTracker() {
         )}
 
         {/* Combatant list */}
-        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-44 flex flex-col p-3">
+        <div ref={listRef} className="flex-1 overflow-y-auto max-lg:pb-44 flex flex-col p-3 pb-6">
           {combat.combatants.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="text-[#b8b5b0] text-sm mb-1">No combatants</p>
@@ -481,39 +481,34 @@ export default function CombatTracker() {
               if (target) {
                 const concCond = target.conditions.find((c) => c.name === 'Concentration')
                 if (concCond) {
-                  const tempHp = target.tempHp ?? 0
-                  const damageToHp = Math.max(0, amount - tempHp)
-                  if (damageToHp > 0) {
-                    const dc = Math.max(10, Math.floor(damageToHp / 2))
-                    const conMod = abilityMod(target.statblock?.Abilities?.Con ?? 10)
-                    const roll = d20()
-                    const total = roll + conMod
-                    const success = total >= dc
-                    const modStr = conMod >= 0 ? `+${conMod}` : String(conMod)
-                    if (success) {
-                      // Show as a toast like dice rolls - non-blocking
-                      setRolls((prev) => [...prev, {
-                        id: uid(),
-                        context: 'Concentration maintained',
-                        combatantName: target.name,
-                        label: `DC ${dc}`,
-                        detail: `d20(${roll})${modStr}`,
-                        total,
-                        rollType: 'save',
-                      }])
-                    } else {
-                      setConcCheck({
-                        combatantId: damageTargetId,
-                        combatantName: target.name,
-                        condId: concCond.id,
-                        dc,
-                        roll,
-                        conMod,
-                        total,
-                        success: false,
-                        spellName: concCond.spellName,
-                      })
-                    }
+                  const dc = Math.max(10, Math.floor(amount / 2))
+                  const conMod = abilityMod(target.statblock?.Abilities?.Con ?? 10)
+                  const roll = d20()
+                  const total = roll + conMod
+                  const success = total >= dc
+                  const modStr = conMod >= 0 ? `+${conMod}` : String(conMod)
+                  if (success) {
+                    setRolls((prev) => [...prev, {
+                      id: uid(),
+                      context: 'Concentration maintained',
+                      combatantName: target.name,
+                      label: `DC ${dc}`,
+                      detail: `d20(${roll})${modStr}`,
+                      total,
+                      rollType: 'save',
+                    }])
+                  } else {
+                    setConcCheck({
+                      combatantId: damageTargetId,
+                      combatantName: target.name,
+                      condId: concCond.id,
+                      dc,
+                      roll,
+                      conMod,
+                      total,
+                      success: false,
+                      spellName: concCond.spellName,
+                    })
                   }
                 }
               }

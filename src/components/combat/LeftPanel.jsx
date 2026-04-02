@@ -7,6 +7,7 @@ import { useIsMobile } from '../../hooks/useIsMobile'
 const LEFT_MIN_WIDTH = 200
 const LEFT_MAX_WIDTH = 400
 const LEFT_DEFAULT_WIDTH = 256
+const NPC_RENDER_LIMIT = 50
 
 export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock, onNewStatblock, onDeleteStatblock, onSavePC, onDeletePC, monsters, pcs }) {
   const isMobile = useIsMobile()
@@ -73,6 +74,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       return name.includes(q) || type.includes(q) || source.includes(q)
     })
   }, [monsters, query])
+
+  const hasNpcQuery = query.trim().length > 0
+  const visibleNPCs = hasNpcQuery ? filteredNPCs : filteredNPCs.slice(0, NPC_RENDER_LIMIT)
+  const npcsTruncated = !hasNpcQuery && filteredNPCs.length > NPC_RENDER_LIMIT
 
   const filteredPCs = useMemo(() => {
     const q = pcQuery.toLowerCase().trim()
@@ -197,10 +202,10 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             </button>
           </div>
           <div className="flex-1 overflow-y-auto px-2 py-2 flex flex-col">
-            {filteredNPCs.length === 0 && (
+            {visibleNPCs.length === 0 && (
               <p className="text-[#8a8884] text-sm text-center py-6">No results</p>
             )}
-            {filteredNPCs.map((entry, idx) => (
+            {visibleNPCs.map((entry, idx) => (
               <Fragment key={entry._key ?? entry.Id ?? entry.Name}>
               {idx > 0 && <div className="row-divider" />}
               <div
@@ -247,6 +252,11 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
               </Fragment>
             ))}
           </div>
+          {npcsTruncated && (
+            <p className="text-[#8a8884] text-xs text-center py-2 border-t border-white/[0.04] shrink-0">
+              Showing {NPC_RENDER_LIMIT} of {monsters.length} creatures - type to search
+            </p>
+          )}
         </>
       )}
 
