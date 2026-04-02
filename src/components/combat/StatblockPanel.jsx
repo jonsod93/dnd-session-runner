@@ -768,7 +768,7 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
   }
 
   const statsHeader = (
-    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[var(--sb-bg)]'}>
+    <div className={compact ? 'px-4 py-3' : 'shrink-0 px-4 py-3 bg-[var(--sb-bg)] border-b border-white/[0.04]'}>
       {/* Type & CR */}
       <div className="flex items-baseline justify-between gap-2 mb-0.5">
         <p className="text-sm text-[#9a9894] italic">{sb.Type}</p>
@@ -803,22 +803,11 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
           </span>
         )}
       </div>
-    </div>
-  )
 
-  return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* In compact mode (preview), everything scrolls together */}
-      {!compact && statsHeader}
-
-      {/* ── Scrollable content: properties, traits, actions, etc. ─── */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
-      {compact && <div className="-mx-4 -mt-3">{statsHeader}</div>}
-
-      {/* Ability scores - scrolls with content */}
+      {/* Ability scores */}
       {sb.Abilities && (
         <>
-          <hr className="border-white/[0.04] -mx-4 mb-3 -mt-[3px]" />
+          <hr className="border-white/[0.04] my-3" />
           <div className="grid grid-cols-6 gap-2.5 text-center">
             {ABILITIES.map((a) => {
               const mod = abilityMod(sb.Abilities[a])
@@ -840,7 +829,6 @@ export function StatblockBody({ sb, usage, onUsageChange, onRoll, onSpellClick, 
               )
             })}
           </div>
-          <hr className="border-white/[0.04] my-3" />
         </>
       )}
     </div>
