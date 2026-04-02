@@ -393,23 +393,24 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
       >
         <div
           className="glass-toast rounded-t-xl w-full overflow-hidden flex flex-col"
-          style={{ maxHeight: '80vh' }}
+          style={{ maxHeight: '75vh', marginBottom: 'calc(56px + env(safe-area-inset-bottom, 0px))' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="relative shrink-0 px-4 py-3 border-b border-black/[0.15] flex items-center">
-            <label
+            <button
               className="flex items-center gap-1.5 cursor-pointer select-none"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); setWithDuration(!withDuration) }}
             >
-              <input
-                type="checkbox"
-                checked={withDuration}
-                onChange={(e) => setWithDuration(e.target.checked)}
-                className="accent-[#d4a843] w-3.5 h-3.5"
+              <span
+                className={`w-3.5 h-3.5 rounded-sm transition-colors ${withDuration ? '' : 'border border-white/20'}`}
+                style={withDuration ? {
+                  background: 'linear-gradient(145deg, var(--accent, #FF7A45), var(--accent-deep, #BF2E00))',
+                  boxShadow: '0 0 4px rgba(220, 80, 10, 0.28)',
+                } : undefined}
               />
               <span className={`text-xs transition-colors ${withDuration ? 'text-gold-400' : 'text-[#9a9894]'}`}>Duration</span>
-            </label>
+            </button>
             <p className="text-sm font-medium text-[#e6e6e6] flex-1 text-center">Add Condition</p>
             <button
               className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors text-sm leading-none"
@@ -440,7 +441,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
                 {availableConditions.map((c) => (
                   <button
                     key={c.name}
-                    className="text-center px-3 py-2.5 text-sm text-[#e6e6e6] library-card hover:!bg-[#202226]"
+                    className="text-center px-3 py-2.5 text-sm text-[#e6e6e6] library-card hover:!bg-[#3a3a3a]"
                     onClick={() => handleConditionClick(c)}
                     title={c.info || ''}
                   >
@@ -493,7 +494,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
   return (
     <div
       ref={menuRef}
-      className="fixed z-[70] glass-toast rounded-xl overflow-y-auto neumorphic"
+      className="fixed z-[70] glass-toast rounded-xl overflow-hidden neumorphic flex flex-col"
       style={{ width: MENU_W, ...posStyle }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -512,14 +513,14 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
         </div>
       ) : (
         <>
-          <div className="py-1">
+          <div className="py-1 overflow-y-auto min-h-0 shrink">
             {availableConditions.length === 0 ? (
               <p className="px-3 py-2 text-sm text-[#9a9894] italic">All conditions applied</p>
             ) : (
               availableConditions.map((c) => (
                 <button
                   key={c.name}
-                  className="group w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-[#202226] rounded-lg transition-all flex items-center"
+                  className="group w-full text-left px-3 py-1.5 text-sm text-[#e6e6e6] hover:bg-[#3a3a3a] rounded-lg transition-all flex items-center"
                   onClick={() => handleConditionClick(c)}
                   title={c.info || ''}
                 >
@@ -537,7 +538,7 @@ function ConditionMenu({ anchor, onAdd, onClose, currentConditions = [], combata
               ))
             )}
           </div>
-          <div className="border-t border-white/[0.04] px-3 py-2">
+          <div className="border-t border-white/[0.04] px-3 py-2 shrink-0">
             <form onSubmit={handleCustomSubmit} className="flex gap-1.5 items-center">
               <input
                 type="text"

@@ -454,7 +454,7 @@ export default function CombatTracker() {
               className={[
                 'flex-1 text-sm font-medium border-t-2 transition-colors',
                 mobileTab === key
-                  ? 'border-[#e87830] text-[#e6e6e6]'
+                  ? 'tab-gradient-t text-[#e6e6e6]'
                   : 'border-transparent text-[#9a9894] hover:text-[#e6e6e6]',
               ].join(' ')}
               onClick={() => setMobileTab(key)}

@@ -29,7 +29,7 @@ function ToastItem({ roll, onExpire }) {
 
   return (
     <div
-      className={`pointer-events-auto glass-toast ${roll.hasDamage ? 'pl-4 pr-8 py-3 min-w-[280px]' : 'px-4 py-2.5 min-w-[240px]'} max-w-[420px] relative`}
+      className={`pointer-events-auto glass-toast toast-item ${roll.hasDamage ? 'pl-4 pr-8 py-3 min-w-[280px]' : 'px-4 py-2.5 min-w-[240px]'} max-w-[420px] relative`}
       style={isCrit
         ? { background: '#1e2520', boxShadow: '0 28px 60px rgba(0,0,0,0.78), 0 10px 24px rgba(0,0,0,0.50), 0 0 20px rgba(74,222,128,0.25), inset 0 1px 0 rgba(255,255,255,0.065)', borderColor: 'rgba(74, 222, 128, 0.35)' }
         : isCritMiss

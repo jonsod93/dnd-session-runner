@@ -252,11 +252,15 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
                       type="button"
                       onClick={() => handleOptionChange(opt.key, choice)}
                       className={[
-                        'text-xs rounded-lg px-2.5 py-1 transition-colors',
+                        'text-xs rounded-lg px-2.5 py-1 transition-all',
                         selectedOptions[opt.key] === choice
-                          ? 'btn-action !border-gold-400/60 !bg-gold-400/10 text-gold-400'
+                          ? 'text-white font-semibold border-none'
                           : 'btn-action',
                       ].join(' ')}
+                      style={selectedOptions[opt.key] === choice ? {
+                        background: 'linear-gradient(145deg, #FF7A45, #BF2E00)',
+                        boxShadow: '0 0 8px rgba(220, 80, 10, 0.3)',
+                      } : undefined}
                     >
                       {choice}
                     </button>

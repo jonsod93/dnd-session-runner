@@ -47,8 +47,7 @@ export function DamageModal({ combatant, onConfirm, onClose, onSetTempHp }) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 w-5 h-5 rounded-[5px] bg-[#1c1c20] flex items-center justify-center text-[#505060] hover:text-[#9090A8] cursor-pointer text-xs leading-none transition-colors"
-          style={{ boxShadow: 'var(--neum-btn)' }}
+          className="absolute top-3 right-3 w-5 h-5 rounded-[5px] flex items-center justify-center text-[#808080] hover:text-[#a0a0a0] cursor-pointer text-xs leading-none transition-colors neu-btn-raised"
         >
           ✕
         </button>

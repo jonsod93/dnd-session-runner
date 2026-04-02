@@ -31,7 +31,7 @@ export default function Navigation() {
   }, [menuOpen])
 
   return (
-    <nav className="h-12 bg-surface-1 border-b border-white/[0.05] flex items-stretch px-5 shrink-0 relative z-[1001]" style={{ background: 'linear-gradient(180deg, #141418 0%, #111114 100%)' }}>
+    <nav className="h-12 bg-surface-1 border-b border-white/[0.05] flex items-stretch px-5 shrink-0 relative z-[1001] overflow-hidden grain-overlay" style={{ background: 'linear-gradient(180deg, #141418 0%, #111114 100%)' }}>
       {/* App title */}
       <div className="flex items-center mr-7">
         <span className="font-display text-sm font-semibold tracking-[0.22em] text-gold-400 uppercase select-none">

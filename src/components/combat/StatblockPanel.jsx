@@ -648,7 +648,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-[2000] flex flex-col bg-[#262626]" style={{ '--sb-bg': 'var(--panel, #262626)' }}>
+      <div className="fixed inset-0 z-[2000] flex flex-col bg-[var(--panel,#222222)] grain-overlay" style={{ '--sb-bg': 'var(--panel, #222222)' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
@@ -688,7 +688,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   }
 
   return (
-    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[var(--panel,#1e1e1e)]" style={{ width, '--sb-bg': 'var(--panel, #262626)' }}>
+    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[var(--panel,#222222)]" style={{ width, '--sb-bg': 'var(--panel, #222222)' }}>
       {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}

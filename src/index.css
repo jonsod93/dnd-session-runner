@@ -71,11 +71,14 @@
     background-color: #323232 !important;
   }
 
-  /* ── Glass panels ────────────────────────────────── */
+  /* ── Panels ──────────────────────────────────────── */
   .glass-panel {
-    background: rgba(255,255,255,0.02);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: #222222;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 14px;
+    border: none;
+    box-shadow: 7px 7px 18px #101010, -4px -4px 12px #333333;
   }
 
   .glass-modal {
@@ -238,11 +241,11 @@
      ══════════════════════════════════════════════════ */
 
   .neumorphic {
-    --bg-top: #2c2c2c;
-    --bg-bottom: #232323;
-    --panel: #262626;
-    --shadow-dark: #141414;
-    --shadow-light: #383838;
+    --bg-top: #272727;
+    --bg-bottom: #1e1e1e;
+    --panel: #222222;
+    --shadow-dark: #101010;
+    --shadow-light: #333333;
     --text-primary: #d4d4d4;
     --text-secondary: #b8b8b8;
     --text-muted: #909090;
@@ -255,34 +258,54 @@
     --hp-half: #c07830;
     --hp-low: #d85555;
     --hp-dead: #944040;
-    --neum-panel: 7px 7px 18px #141414, -4px -4px 12px #383838;
-    --neum-raised: 7px 7px 18px #141414, -4px -4px 12px #3e3e3e;
-    --neum-inset: inset 3px 3px 8px #141414, inset -2px -2px 6px #383838;
-    --neum-btn: 2px 2px 5px #181818, -1px -1px 4px #444444;
-    --neum-btn-inset: inset 1px 1px 3px #181818, inset -1px -1px 2px #3a3a3a;
-    --neum-hp-hover: 3px 3px 8px #181818, -2px -2px 6px #444444;
-    --neum-hp-press: inset 2px 2px 5px #141414, inset -1px -1px 4px #323232;
+    --neum-panel: 7px 7px 18px #101010, -4px -4px 12px #333333;
+    --neum-raised: 7px 7px 18px #101010, -4px -4px 12px #393939;
+    --neum-inset: inset 3px 3px 8px #101010, inset -2px -2px 6px #333333;
+    --neum-btn: 2px 2px 5px #141414, -1px -1px 4px #3f3f3f;
+    --neum-btn-inset: inset 1px 1px 3px #141414, inset -1px -1px 2px #353535;
+    --neum-hp-hover: 3px 3px 8px #141414, -2px -2px 6px #3f3f3f;
+    --neum-hp-press: inset 2px 2px 5px #101010, inset -1px -1px 4px #2d2d2d;
+    --grain-opacity: 0.05;
     background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
     min-height: 100vh;
   }
 
+  /* Portalled popups use .neumorphic for grain but must not inherit page min-height */
+  .neumorphic.fixed {
+    min-height: auto;
+  }
+
+  /* ── Noise/grain texture overlay (page-level only) ── */
+  main .neumorphic::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
+  /* ── Reusable grain overlay for positioned containers ── */
+  .grain-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
   /* When combat tracker is active, match the nav bar and root bg */
   :has(> main .neumorphic) > nav {
-    background: #2a2a2a !important;
+    background: #252525 !important;
     border-bottom-color: rgba(255,255,255,0.04) !important;
   }
   :has(> main .neumorphic) {
-    background: linear-gradient(180deg, #2c2c2c 0%, #232323 100%) !important;
-  }
-
-  /* ── Panels ──────────────────────────────────────── */
-  .neumorphic .glass-panel {
-    background: var(--panel);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-radius: 14px;
-    border: none;
-    box-shadow: var(--neum-panel);
+    background: linear-gradient(180deg, #272727 0%, #1e1e1e 100%) !important;
   }
 
   .neumorphic .glass-modal,
@@ -307,17 +330,17 @@
   }
   @media (min-width: 1024px) {
     .neumorphic .combat-card:hover {
-      background: #2e2e2e;
+      background: #333333;
     }
   }
   .neumorphic .combat-card.is-selected {
-    background: #232323;
+    background: #212121;
     border: none;
     box-shadow: var(--neum-inset);
   }
   @media (min-width: 1024px) {
     .neumorphic .combat-card.is-selected:hover {
-      background: #2e2e2e;
+      background: #333333;
     }
   }
 
@@ -330,12 +353,12 @@
     transition: background 150ms ease;
   }
   .neumorphic .library-card:hover {
-    background: #2e2e2e;
+    background: #333333;
     box-shadow: none;
     border-color: transparent;
   }
   .neumorphic .library-card:active {
-    background: #2e2e2e;
+    background: #292929;
     box-shadow: var(--neum-inset);
     z-index: 1;
   }
@@ -351,11 +374,11 @@
     transition: box-shadow 140ms ease, background 140ms ease;
   }
   .neumorphic .stat-card:hover {
-    background: #2a2a2a;
+    background: #252525;
     box-shadow: var(--neum-btn);
   }
   .neumorphic .stat-card:active {
-    background: #202020;
+    background: #1c1c1c;
     box-shadow: var(--neum-inset);
   }
 
@@ -401,17 +424,17 @@
   }
   @media (min-width: 1024px) {
     .neumorphic .active-border:hover {
-      background: #2e2e2e;
+      background: #333333;
     }
   }
   .neumorphic .active-border.is-selected {
-    background: #232323;
+    background: #212121;
     border: none;
     box-shadow: var(--neum-raised), var(--neum-inset);
   }
   @media (min-width: 1024px) {
     .neumorphic .active-border.is-selected:hover {
-      background: #2e2e2e;
+      background: #333333;
     }
   }
 
@@ -439,17 +462,17 @@
   }
   @media (min-width: 1024px) {
     .neumorphic .lair-border:hover {
-      background: #2e2e2e !important;
+      background: #333333 !important;
     }
   }
   .neumorphic .lair-border.is-selected {
-    background: #232323;
+    background: #212121;
     border: none;
     box-shadow: var(--neum-inset);
   }
   @media (min-width: 1024px) {
     .neumorphic .lair-border.is-selected:hover {
-      background: #2e2e2e;
+      background: #333333;
     }
   }
 
@@ -462,20 +485,20 @@
     transition: box-shadow 140ms ease, background 140ms ease;
   }
   .neumorphic .neu-btn-raised:hover {
-    background: #303030;
+    background: #2b2b2b;
   }
   .neumorphic .neu-btn-raised:active {
     box-shadow: var(--neum-btn-inset);
   }
   .glass-toast .neu-btn-raised {
-    background: #323232;
+    background: #2d2d2d;
     color: var(--text-primary);
     border: none;
     box-shadow: var(--neum-btn);
     transition: box-shadow 140ms ease, background 140ms ease;
   }
   .glass-toast .neu-btn-raised:hover {
-    background: #3a3a3a;
+    background: #353535;
   }
   .glass-toast .neu-btn-raised:active {
     box-shadow: var(--neum-btn-inset);
@@ -492,7 +515,7 @@
     transition: box-shadow 140ms ease, background 140ms ease;
   }
   .neumorphic .btn-neon-gold:hover {
-    background: #2e2e2e;
+    background: #292929;
     box-shadow: var(--neum-btn);
   }
   .neumorphic .btn-neon-gold:active {
@@ -508,7 +531,7 @@
   }
   .neumorphic .btn-outline:hover {
     color: var(--text-primary);
-    background: #2e2e2e;
+    background: #292929;
   }
   .neumorphic .btn-outline:active {
     box-shadow: var(--neum-btn-inset);
@@ -525,7 +548,7 @@
   }
   .neumorphic .btn-action:hover {
     color: #a0a0a0;
-    background: #2e2e2e;
+    background: #333333;
     box-shadow: var(--neum-btn);
   }
   .neumorphic .btn-action:active {
@@ -570,7 +593,7 @@
   }
   .neumorphic .hp-btn:hover {
     box-shadow: var(--neum-hp-hover);
-    background: #303030;
+    background: #333333;
   }
   .neumorphic .hp-btn:active {
     box-shadow: var(--neum-hp-press);
@@ -602,7 +625,7 @@
 
   /* ── Inputs (pressed-in well) ────────────────────── */
   .neumorphic .input-field {
-    background: #1e1e1e;
+    background: #1a1a1a;
     border: none;
     border-radius: 8px;
     box-shadow: var(--neum-inset);
@@ -616,7 +639,7 @@
 
   /* Elements inside glass overlays */
   .glass-toast .input-field {
-    background: #1e1e1e !important;
+    background: #1a1a1a !important;
     border: none !important;
     box-shadow: var(--neum-inset) !important;
   }
@@ -630,7 +653,8 @@
     box-shadow: var(--neum-btn) !important;
   }
   .glass-toast .btn-action:hover {
-    color: #9090A8 !important;
+    background: #353535 !important;
+    color: #e6e6e6 !important;
   }
   .glass-toast .btn-action:active {
     box-shadow: var(--neum-btn-inset) !important;
@@ -702,6 +726,21 @@
     background: linear-gradient(90deg, #FF7A45, #BF2E00);
     border-radius: 1px;
   }
+  .tab-gradient-t {
+    position: relative;
+    border-color: transparent !important;
+  }
+  .tab-gradient-t::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #FF7A45, #BF2E00);
+    border-radius: 1px;
+  }
+
   .tab-gradient-l {
     position: relative;
     border-color: transparent !important;
@@ -717,6 +756,13 @@
     border-radius: 1px;
   }
 
+  /* ── Dice roll toast items — lighter shadow to avoid stacking artifacts ── */
+  .glass-toast.toast-item {
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  }
+
   /* ── Scrollbar ───────────────────────────────────── */
   .neumorphic {
     scrollbar-width: thin;
@@ -726,17 +772,31 @@
   .neumorphic ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
   .neumorphic ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
   .neumorphic ::-webkit-scrollbar-track { background: transparent; }
-}
 
-/* ── Glass toast (popups and dialogs) ────────────────── */
-.glass-toast {
-  background: #2c2c2c;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 1px solid rgba(255, 255, 255, 0.065);
-  border-radius: 12px;
-  box-shadow:
-    0 28px 60px rgba(0, 0, 0, 0.78),
-    0 10px 24px rgba(0, 0, 0, 0.50),
-    inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  /* ── Glass toast (popups and dialogs) ────────────────── */
+  .glass-toast {
+    background: #272727;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    border-radius: 12px;
+    box-shadow:
+      0 28px 60px rgba(0, 0, 0, 0.78),
+      0 10px 24px rgba(0, 0, 0, 0.50),
+      inset 0 1px 0 rgba(255, 255, 255, 0.065);
+    position: relative;
+  }
+
+  /* Grain on glass-toast popups and dialogs */
+  .glass-toast::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
 }
