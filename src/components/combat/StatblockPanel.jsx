@@ -479,7 +479,10 @@ function Section({ title, items, usage, onUsageChange, legendaryPerRound, reacti
   if (!items?.length) return null
   return (
     <div className="mb-1">
-      <div className={`${compact ? '' : 'sticky -top-3 z-10'} bg-[var(--sb-bg)] -mx-4 px-4 pb-2`}>
+      <div
+        className={`${compact ? '' : 'sticky -top-3 z-10'} -mx-4 px-4 pb-2`}
+        style={compact ? undefined : { background: 'linear-gradient(180deg, var(--bg-top, #272727) 0%, var(--bg-bottom, #1e1e1e) 100%)', backgroundAttachment: 'fixed' }}
+      >
         <hr className="border-white/[0.04] my-3 -mt-[3px]" />
         <div className="flex items-center gap-2">
           <p className="text-[11px] font-bold uppercase leading-none text-[var(--accent,#FF7A45)]" style={{ letterSpacing: '0.1em' }}>{title}</p>
@@ -648,7 +651,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
 
   if (mobileOverlay) {
     return (
-      <div className="fixed inset-0 z-[2000] flex flex-col bg-[var(--panel,#222222)] grain-overlay" style={{ '--sb-bg': 'var(--panel, #222222)' }}>
+      <div className="fixed inset-0 z-[2000] flex flex-col grain-overlay" style={{ background: 'linear-gradient(180deg, var(--bg-top, #272727) 0%, var(--bg-bottom, #1e1e1e) 100%)', '--sb-bg': 'transparent' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04] shrink-0 min-h-[48px]">
           <h3 className="text-sm font-medium text-[#e6e6e6] truncate pr-2">
@@ -688,7 +691,7 @@ export function StatblockPanel({ combatant, combatants, onClear, onUsageChange, 
   }
 
   return (
-    <div className="shrink-0 neu-panel-right flex flex-col relative bg-[var(--panel,#222222)]" style={{ width, '--sb-bg': 'var(--panel, #222222)' }}>
+    <div className="shrink-0 neu-panel-right flex flex-col relative" style={{ width, '--sb-bg': 'transparent' }}>
       {/* Resize handle */}
       <div
         onMouseDown={onMouseDown}

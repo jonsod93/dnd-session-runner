@@ -118,7 +118,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
 
   if (collapsed) {
     return (
-      <div className="w-10 shrink-0 bg-[#323232] neu-panel-left flex flex-col items-center pt-3">
+      <div className="w-10 shrink-0 neu-panel-left flex flex-col items-center pt-3">
         <button
           onClick={onToggleCollapse}
           className="text-[#9a9894] hover:text-[#e6e6e6] transition-colors p-1.5 rounded hover:bg-[#202226]"
@@ -133,7 +133,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   }
 
   return (
-    <div className={`${isMobile ? 'w-full flex-1' : 'shrink-0'} bg-[#323232] neu-panel-left flex flex-col relative`} style={isMobile ? undefined : { width: panelWidth }}>
+    <div className={`${isMobile ? 'w-full flex-1' : 'shrink-0'} neu-panel-left flex flex-col relative`} style={isMobile ? undefined : { width: panelWidth }}>
       {/* Resize handle */}
       {!isMobile && (
         <div
@@ -571,7 +571,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             width: 320,
             maxHeight: 'calc(100vh - 64px)',
             '--sb-bg': 'transparent',
-            background: 'var(--panel, #262626)',
+            background: 'linear-gradient(180deg, var(--bg-top, #272727) 0%, var(--bg-bottom, #1e1e1e) 100%)',
           }}
           onMouseEnter={() => { if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current) }}
           onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setHoverPreviewEntry(null), 200) }}
@@ -599,7 +599,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
         >
           <div
             className="w-full h-full flex flex-col overflow-hidden"
-            style={{ '--sb-bg': 'var(--panel, #262626)', background: 'var(--panel, #262626)' }}
+            style={{ '--sb-bg': 'transparent', background: 'linear-gradient(180deg, var(--bg-top, #272727) 0%, var(--bg-bottom, #1e1e1e) 100%)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="shrink-0 px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
