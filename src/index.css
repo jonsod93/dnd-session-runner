@@ -283,7 +283,7 @@
     z-index: 50;
     pointer-events: none;
     opacity: var(--grain-opacity);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
     background-repeat: repeat;
   }
 
@@ -295,7 +295,7 @@
     z-index: 50;
     pointer-events: none;
     opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
     background-repeat: repeat;
   }
 
@@ -303,6 +303,7 @@
   :has(> main .neumorphic) > nav {
     background: #252525 !important;
     border-bottom-color: rgba(255,255,255,0.04) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
   :has(> main .neumorphic) {
     background: linear-gradient(180deg, #272727 0%, #1e1e1e 100%) !important;
@@ -316,6 +317,7 @@
     border-radius: 14px;
     border: none;
     box-shadow: var(--neum-panel);
+    position: relative;
   }
 
   /* ── Combat rows ─────────────────────────────────── */
@@ -429,7 +431,7 @@
   }
   .neumorphic .active-border.is-selected {
     background: #212121;
-    border: none;
+    border: none !important;
     box-shadow: var(--neum-raised), var(--neum-inset);
   }
   @media (min-width: 1024px) {
@@ -490,6 +492,15 @@
   .neumorphic .neu-btn-raised:active {
     box-shadow: var(--neum-btn-inset);
   }
+  .neumorphic .neu-btn-raised:disabled {
+    box-shadow: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.15);
+    cursor: default;
+  }
+  .neumorphic .neu-btn-raised:disabled:hover {
+    background: transparent;
+  }
   .glass-toast .neu-btn-raised {
     background: #2d2d2d;
     color: var(--text-primary);
@@ -549,7 +560,7 @@
   .neumorphic .btn-action:hover {
     color: #a0a0a0;
     background: #333333;
-    box-shadow: var(--neum-btn);
+    box-shadow: 2px 2px 5px #141414, -1px -1px 4px #4a4a4a;
   }
   .neumorphic .btn-action:active {
     box-shadow: var(--neum-btn-inset);
@@ -592,7 +603,7 @@
     transition: box-shadow 140ms ease, background 140ms ease;
   }
   .neumorphic .hp-btn:hover {
-    box-shadow: var(--neum-hp-hover);
+    box-shadow: 3px 3px 8px #141414, -2px -2px 6px #4a4a4a;
     background: #333333;
   }
   .neumorphic .hp-btn:active {
@@ -787,8 +798,10 @@
     position: relative;
   }
 
-  /* Grain on glass-toast popups and dialogs */
-  .glass-toast::after {
+  /* Grain on glass-toast popups, dialogs, and modals */
+  .glass-toast::after,
+  .neumorphic .glass-modal::after,
+  .neumorphic.glass-modal::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -796,7 +809,7 @@
     pointer-events: none;
     border-radius: inherit;
     opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0' result='gray'/%3E%3CfeComponentTransfer in='gray' result='bright'%3E%3CfeFuncR type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='3' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='3' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
     background-repeat: repeat;
   }
 }

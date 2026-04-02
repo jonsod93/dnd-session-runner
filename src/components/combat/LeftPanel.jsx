@@ -190,7 +190,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             </div>
             <button
               onClick={() => onNewStatblock?.()}
-              className="shrink-0 btn-action !px-2.5"
+              className="shrink-0 btn-action !px-2.5 hover:!bg-transparent"
               title="Add new statblock from JSON"
             >
               + New
@@ -268,7 +268,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             </div>
             <button
               onClick={() => setPcEditName({ original: null, value: '', ac: '' })}
-              className="shrink-0 btn-action !px-2.5"
+              className="shrink-0 btn-action !px-2.5 hover:!bg-transparent"
               title="Add new PC"
             >
               + New
@@ -431,7 +431,7 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
             <button
               type="submit"
               disabled={!qaName.trim() && qaType !== 'lair'}
-              className="neu-btn-raised w-full text-sm py-2 rounded-xl transition-all disabled:opacity-30"
+              className="neu-btn-raised w-full text-sm py-2 rounded-xl transition-all"
             >
               Add to Tracker
             </button>

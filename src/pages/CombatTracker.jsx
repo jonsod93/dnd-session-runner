@@ -3,14 +3,12 @@ import {
   DndContext,
   MouseSensor,
   TouchSensor,
-  KeyboardSensor,
   closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
 import {
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
@@ -137,7 +135,6 @@ export default function CombatTracker() {
     useSensor(MouseSensor,    { activationConstraint: { distance: 5 } }),
     // Touch: activate after 250ms hold — avoids competing with page scroll
     useSensor(TouchSensor,    { activationConstraint: { delay: 250, tolerance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
   const handleDragEnd = ({ active, over }) => {

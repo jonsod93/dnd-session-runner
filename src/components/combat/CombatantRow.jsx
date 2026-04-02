@@ -218,16 +218,16 @@ export function CombatantRow({
                       title="Apply damage/healing"
                     >
                       <span className="inline-flex items-center gap-0.5">
-                        <span className={`font-mono ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 400, color: hpColorVar }}>{displayHp}/{combatant.hp.max}</span>
+                        <span className={`font-mono ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 500, color: hpColorVar }}>{displayHp}/{combatant.hp.max}</span>
                         {tempHp > 0 && (
-                          <span className="text-blue-400 font-mono text-[11px]" style={{ fontWeight: 400 }}>+{tempHp}</span>
+                          <span className="text-blue-400 font-mono text-[11px]" style={{ fontWeight: 500 }}>+{tempHp}</span>
                         )}
                       </span>
                     </button>
                   )}
                 </span>
 
-                <span className="shrink-0 w-7 flex justify-center text-[11px] font-mono font-normal" style={{ color: 'var(--text-muted)' }}>
+                <span className="shrink-0 w-7 flex justify-center text-[11px] font-mono font-medium" style={{ color: 'var(--text-muted)' }}>
                   {combatant.ac != null && combatant.ac}
                 </span>
               </div>
@@ -264,15 +264,15 @@ export function CombatantRow({
               onClick={(e) => { e.stopPropagation(); onDamage(combatant.id) }}
               title="Apply damage/healing (T)"
             >
-              <span className={`font-mono text-[13px] ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 400, color: hpColorVar }}>{displayHp}/{combatant.hp.max}</span>
+              <span className={`font-mono text-[13px] ${isDead ? 'opacity-40' : ''}`} style={{ fontWeight: 500, color: hpColorVar }}>{displayHp}/{combatant.hp.max}</span>
               {tempHp > 0 && (
-                <span className="text-blue-400 font-mono text-[13px] ml-0.5" style={{ fontWeight: 400 }} title="Temporary HP">+{tempHp}</span>
+                <span className="text-blue-400 font-mono text-[13px] ml-0.5" style={{ fontWeight: 500 }} title="Temporary HP">+{tempHp}</span>
               )}
             </button>
           ) : (
             <div className="flex-1" />
           )}
-          <div className="text-center font-mono text-[13px] font-normal w-[30px]" style={{ color: 'var(--text-muted)' }}>
+          <div className="text-center font-mono text-[13px] font-medium w-[30px]" style={{ color: 'var(--text-muted)' }}>
             {combatant.ac != null && combatant.ac}
           </div>
         </div>
@@ -602,7 +602,7 @@ function ConditionSubPanel({ condition, spellName, setSpellName, onConcentration
           placeholder="Spell name (optional)"
           className="input-field !border-blue-400/20 focus:!border-blue-400/50"
           autoFocus={!mobile}
-          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onConcentrationAdd() } }}
+          onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); onConcentrationAdd() } }}
         />
         <button
           onClick={onConcentrationAdd}
