@@ -87,7 +87,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+        <div className="flex items-center justify-between px-[26px] py-4 border-b border-white/[0.04]">
           <div>
             <h2 className="text-sm font-medium text-[#e6e6e6]">Roll Initiative</h2>
             <p className="text-xs text-[#8a8884] mt-0.5">Edit any value before confirming</p>
@@ -100,8 +100,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
               Reroll All
             </button>
             <button
-              className="w-5 h-5 rounded-[5px] bg-[#1c1c20] flex items-center justify-center text-[#505060] hover:text-[#9090A8] cursor-pointer text-xs leading-none transition-colors"
-              style={{ boxShadow: 'var(--neum-btn)' }}
+              className="btn-icon w-7 h-7 flex items-center justify-center text-xs leading-none"
               onClick={onClose}
             >
               ✕
@@ -148,7 +147,8 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
                 value={values[c.id] ?? ''}
                 onChange={(e) => setValues((prev) => ({ ...prev, [c.id]: e.target.value }))}
                 placeholder="--"
-                className="w-14 bg-[#2e2e2e] border-none rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none shadow-[inset_1.5px_1.5px_3px_#0e0e0e,inset_-1.5px_-1.5px_3px_rgba(95,94,94,0.4)] focus:shadow-[inset_2px_2px_3px_#0e0e0e,inset_-2px_-2px_3px_rgba(95,94,94,0.4)] placeholder:text-[#5a5854] transition-all"
+                className="w-14 border-none rounded-lg py-1.5 text-center font-mono text-sm text-[#e6e6e6] focus:outline-none placeholder:text-[#5a5854] transition-all"
+                style={{ background: '#1a1a1a', boxShadow: 'var(--neum-inset)' }}
               />
             </div>
           ))}
@@ -161,7 +161,7 @@ export function InitiativeModal({ combatants, onConfirm, onClose }) {
         <div className="px-5 py-4 border-t border-black/[0.15]">
           <button
             onClick={handleConfirm}
-            className="btn-neon-gold w-full py-2.5"
+            className="btn-accent-gradient w-full py-2.5"
           >
             Confirm & Sort
           </button>

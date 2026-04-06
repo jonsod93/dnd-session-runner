@@ -186,6 +186,20 @@
     transform: translateY(0);
   }
 
+  .btn-accent-gradient {
+    @apply rounded-xl font-semibold text-sm transition-all px-4 py-2 text-white;
+    background: linear-gradient(180deg, var(--accent), var(--accent-deep));
+    box-shadow: 0 0 8px var(--accent-glow-strong), 0 0 20px var(--accent-glow-soft);
+    border: none;
+  }
+  .btn-accent-gradient:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 0 14px var(--accent-glow-strong), 0 0 28px var(--accent-glow-soft);
+  }
+  .btn-accent-gradient:active {
+    filter: brightness(0.96);
+  }
+
   .btn-outline {
     @apply rounded-xl text-sm transition-all px-4 py-2;
     border: 1px solid rgba(255,255,255,0.08);
@@ -658,17 +672,27 @@
     box-shadow: var(--neum-inset) !important;
     border: none !important;
   }
-  .glass-toast .btn-action {
-    background: var(--panel) !important;
+  .glass-toast .btn-action,
+  .glass-toast .btn-icon {
+    background: transparent !important;
     border: none !important;
-    box-shadow: var(--neum-btn) !important;
+    box-shadow: none !important;
+    color: #9a9894;
+    cursor: pointer;
+    transition: background 140ms ease, box-shadow 140ms ease, color 140ms ease;
   }
-  .glass-toast .btn-action:hover {
-    background: #353535 !important;
+  .glass-toast .btn-action:hover,
+  .glass-toast .btn-icon:hover {
+    background: #2a2a2a !important;
+    box-shadow: var(--neum-btn) !important;
     color: #e6e6e6 !important;
   }
-  .glass-toast .btn-action:active {
+  .glass-toast .btn-action:active,
+  .glass-toast .btn-icon:active {
     box-shadow: var(--neum-btn-inset) !important;
+  }
+  .glass-toast .btn-icon {
+    border-radius: 8px;
   }
 
   /* Number input spinners */

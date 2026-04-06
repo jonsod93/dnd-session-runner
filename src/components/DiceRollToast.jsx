@@ -48,7 +48,7 @@ function ToastItem({ roll, onExpire }) {
       )}
 
       {hasContext && (
-        <div className="flex items-baseline gap-2 mb-1.5">
+        <div className="flex flex-col mb-2 pb-2 border-b border-white/[0.08]">
           {roll.context && (
             <span className="text-sm font-semibold text-[#e6e6e6] capitalize">{roll.context}</span>
           )}
@@ -56,6 +56,10 @@ function ToastItem({ roll, onExpire }) {
             <span className="text-xs text-[#b0aeaa] font-medium truncate">{roll.combatantName}</span>
           )}
         </div>
+      )}
+
+      {isAttack && roll.hasDamage && (
+        <div className="text-xs font-semibold mb-1.5 text-[#e6e6e6]">To hit</div>
       )}
 
       {/* Roll info */}

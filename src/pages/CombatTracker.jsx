@@ -315,7 +315,7 @@ export default function CombatTracker() {
         {combat.combatants.length > 0 && (
           <div className="max-lg:hidden shrink-0 grid grid-cols-[36px_1fr_2fr_auto] items-center pl-[22px] pr-[6px] py-2 mx-3 border-b border-white/[0.04] mb-[3px]" style={{ color: 'var(--text-subtle)', fontSize: '13px', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 500 }}>
             <div className="text-center">#</div>
-            <div>Name</div>
+            <div className="pl-[14px]">Name</div>
             <div className="flex items-center gap-[6px]">
               <div className="flex items-center justify-center gap-[6px] w-[120px]">
                 <div className="flex-1 text-center">HP</div>

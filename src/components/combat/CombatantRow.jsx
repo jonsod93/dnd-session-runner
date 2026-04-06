@@ -148,7 +148,7 @@ export function CombatantRow({
       </button>
 
       {/* ── Name + conditions column — grid col 2 on desktop ─────────── */}
-      <div className={`max-lg:flex-1 max-lg:min-w-0 ${isLair ? 'self-center' : ''}`}>
+      <div className={`max-lg:flex-1 max-lg:min-w-0 lg:pl-[14px] ${isLair ? 'self-center' : ''}`}>
 
         {/* ── Desktop layout (hidden on mobile) ─────────────────────────── */}
         <div className="max-lg:hidden">
