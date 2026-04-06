@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback, useEffect, Fragment } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect, Fragment } from 'react'
 import { createPortal } from 'react-dom'
 import { StatblockBody } from './StatblockPanel'
 import { SpellDrawer } from '../SpellDrawer'
@@ -62,7 +62,38 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   const [libraryPreviewEntry, setLibraryPreviewEntry] = useState(null) // mobile modal
   const [hoverPreviewEntry,   setHoverPreviewEntry]   = useState(null) // { entry, rect } desktop hover
   const [previewSpell,        setPreviewSpell]        = useState(null) // spell name for library preview
+  const [hoverPreviewStyle,   setHoverPreviewStyle]   = useState(null) // { top, maxHeight } resolved
   const hoverTimerRef = useRef(null)
+  const hoverPreviewRef = useRef(null)
+
+  // Measure the preview after mount and clamp it to the viewport. Runs synchronously
+  // before paint so the user never sees the un-positioned (visibility:hidden) frame.
+  useLayoutEffect(() => {
+    if (!hoverPreviewEntry) {
+      setHoverPreviewStyle(null)
+      return
+    }
+    const el = hoverPreviewRef.current
+    if (!el) return
+    const TOP_MARGIN = 16
+    const BOTTOM_MARGIN = 16
+    const vh = window.innerHeight
+    const availableHeight = Math.max(0, vh - TOP_MARGIN - BOTTOM_MARGIN)
+    // Temporarily lift the maxHeight cap so the inner flex child expands to its
+    // natural height; otherwise scrollHeight would just reflect the prior cap.
+    const prevMaxHeight = el.style.maxHeight
+    el.style.maxHeight = 'none'
+    const naturalHeight = el.scrollHeight
+    el.style.maxHeight = prevMaxHeight
+    const effectiveHeight = Math.min(naturalHeight, availableHeight)
+    const rect = hoverPreviewEntry.rect
+    let top = rect.top - 20
+    if (top + effectiveHeight > vh - BOTTOM_MARGIN) {
+      top = vh - BOTTOM_MARGIN - effectiveHeight
+    }
+    if (top < TOP_MARGIN) top = TOP_MARGIN
+    setHoverPreviewStyle({ top, maxHeight: effectiveHeight })
+  }, [hoverPreviewEntry])
 
   const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -574,12 +605,14 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
       {/* ── Desktop: statblock hover preview (no modal, no backdrop) ───── */}
       {!isMobile && hoverPreviewEntry && createPortal(
         <div
+          ref={hoverPreviewRef}
           className="fixed z-[2000] glass-toast rounded-2xl flex flex-col overflow-hidden neumorphic"
           style={{
             left: hoverPreviewEntry.rect.right + 8,
-            top: Math.max(48, Math.min(hoverPreviewEntry.rect.top - 20, window.innerHeight - 420)),
+            top: hoverPreviewStyle ? hoverPreviewStyle.top : hoverPreviewEntry.rect.top - 20,
             width: 320,
-            maxHeight: 'calc(100vh - 64px)',
+            maxHeight: hoverPreviewStyle ? hoverPreviewStyle.maxHeight : `calc(100vh - ${16 + 16}px)`,
+            visibility: hoverPreviewStyle ? 'visible' : 'hidden',
             '--sb-bg': 'transparent',
             background: 'linear-gradient(180deg, var(--bg-top, #272727) 0%, var(--bg-bottom, #1e1e1e) 100%)',
           }}
