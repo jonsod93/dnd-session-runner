@@ -9,6 +9,9 @@ Thumbs.db
 .vercel
 .claude/
 
+# Dev-only library overlays written by vite-library-api.js
+src/data/*.dev.json
+
 # Map images tracked via Git LFS (.gitattributes)
 
 .vercel

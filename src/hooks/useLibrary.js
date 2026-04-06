@@ -24,6 +24,7 @@ const LS_EDITS_KEY = 'mythranos:creature-edits'
 const LS_DELETES_KEY = 'mythranos:creature-deletes'
 const LS_PCS_CACHE_KEY = 'mythranos:pcs-cache'
 const LS_PCS_DIRTY_KEY = 'mythranos:pcs-dirty'
+const LS_PCS_MIGRATED_KEY = 'mythranos:pcs-migrated-v1'
 
 // Auth token for write operations (JWT from login)
 import { getToken } from './useAuth'
@@ -256,16 +257,27 @@ export function useLibrary() {
     if (IS_DEV || hasFetchedPCs.current) return
     hasFetchedPCs.current = true
 
-    // Migrate old localStorage PCs to server if present
+    // Migrate old localStorage PCs to server if present.
+    // Guarded by a persistent marker so a restored localStorage snapshot
+    // (browser sync, profile copy, backup) can never re-trigger the merge
+    // and silently overwrite current server state with stale data.
     async function migrateLegacyPCs() {
+      if (localStorage.getItem(LS_PCS_MIGRATED_KEY) === '1') return
       try {
         const oldCustom = localStorage.getItem('mythranos:custom-pcs')
         const oldHidden = localStorage.getItem('mythranos:hidden-pcs')
-        if (!oldCustom && !oldHidden) return
+        if (!oldCustom && !oldHidden) {
+          // Nothing to migrate; mark as done so we never check again.
+          try { localStorage.setItem(LS_PCS_MIGRATED_KEY, '1') } catch {}
+          return
+        }
 
         const custom = oldCustom ? JSON.parse(oldCustom) : []
         const hidden = new Set(oldHidden ? JSON.parse(oldHidden) : [])
-        if (custom.length === 0 && hidden.size === 0) return
+        if (custom.length === 0 && hidden.size === 0) {
+          try { localStorage.setItem(LS_PCS_MIGRATED_KEY, '1') } catch {}
+          return
+        }
 
         console.log('[useLibrary] Migrating legacy PC data to server...')
         // Fetch current server PCs, apply hidden + custom changes
@@ -286,6 +298,7 @@ export function useLibrary() {
         })
         localStorage.removeItem('mythranos:custom-pcs')
         localStorage.removeItem('mythranos:hidden-pcs')
+        try { localStorage.setItem(LS_PCS_MIGRATED_KEY, '1') } catch {}
         console.log('[useLibrary] Legacy PC migration complete')
         return merged
       } catch (err) {
@@ -333,40 +346,65 @@ export function useLibrary() {
       .sort((a, b) => a.Name.localeCompare(b.Name))
   }, [pcList])
 
-  const persistPCs = useCallback(async (newList) => {
-    // Cache locally
-    try { localStorage.setItem(LS_PCS_CACHE_KEY, JSON.stringify(newList)) } catch {}
+  // Cache the current PC list to localStorage. Always called after a state
+  // mutation so the cached snapshot stays in sync with what the user sees.
+  const cachePCList = (list) => {
+    try { localStorage.setItem(LS_PCS_CACHE_KEY, JSON.stringify(list)) } catch {}
+  }
 
-    // Persist to server
-    const clean = newList.map(({ _libType, _custom, ...rest }) => rest)
+  // Incremental upsert: send a single PC to the server. This avoids the
+  // last-write-wins clobber that the previous full-list replacement caused
+  // when two devices edited different PCs at the same time.
+  const persistPCUpsert = useCallback(async (pc, originalName) => {
+    const { _libType, _custom, ...clean } = pc
     try {
-      if (IS_DEV) {
-        await fetch('/api/library/pcs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pcs: clean }),
-        })
-      } else {
-        await fetch('/api/pcs', {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify({ pcs: clean }),
-        })
+      const url = IS_DEV ? '/api/library/pcs' : '/api/pcs'
+      const headers = IS_DEV ? { 'Content-Type': 'application/json' } : authHeaders()
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ pc: clean, originalName: originalName || undefined }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || `HTTP ${res.status}`)
       }
       try { localStorage.removeItem(LS_PCS_DIRTY_KEY) } catch {}
     } catch (err) {
       try { localStorage.setItem(LS_PCS_DIRTY_KEY, '1') } catch {}
-      console.warn('[useLibrary] Failed to sync PCs to server:', err.message)
+      console.warn('[useLibrary] Failed to upsert PC to server:', err.message)
+    }
+  }, [])
+
+  // Incremental delete: remove a single PC by name on the server.
+  const persistPCDelete = useCallback(async (name) => {
+    try {
+      const url = IS_DEV ? '/api/library/pcs' : '/api/pcs'
+      const headers = IS_DEV ? { 'Content-Type': 'application/json' } : authHeaders()
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ name }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || `HTTP ${res.status}`)
+      }
+      try { localStorage.removeItem(LS_PCS_DIRTY_KEY) } catch {}
+    } catch (err) {
+      try { localStorage.setItem(LS_PCS_DIRTY_KEY, '1') } catch {}
+      console.warn('[useLibrary] Failed to delete PC on server:', err.message)
     }
   }, [])
 
   const savePC = useCallback((name, originalName, ac) => {
     const acVal = ac != null && ac !== '' ? Number(ac) : undefined
+    const entry = { Name: name }
+    if (acVal != null) entry.AC = acVal
+
     setPcList((prev) => {
       let next
       if (originalName) {
-        const entry = { Name: name }
-        if (acVal != null) entry.AC = acVal
         const idx = prev.findIndex((pc) => pc.Name === originalName)
         if (idx >= 0) {
           next = [...prev]
@@ -375,22 +413,22 @@ export function useLibrary() {
           next = [...prev, entry]
         }
       } else {
-        const entry = { Name: name }
-        if (acVal != null) entry.AC = acVal
         next = [...prev, entry]
       }
-      persistPCs(next)
+      cachePCList(next)
       return next
     })
-  }, [persistPCs])
+    persistPCUpsert(entry, originalName)
+  }, [persistPCUpsert])
 
   const deletePC = useCallback((name) => {
     setPcList((prev) => {
       const next = prev.filter((pc) => pc.Name !== name)
-      persistPCs(next)
+      cachePCList(next)
       return next
     })
-  }, [persistPCs])
+    persistPCDelete(name)
+  }, [persistPCDelete])
 
   // ── Add or update a creature ──────────────────────────────────────────────
 

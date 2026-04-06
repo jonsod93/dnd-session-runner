@@ -96,12 +96,23 @@ export default async function handler(req, res) {
 
       let data = await readBlob()
 
-      // Lazy migration: first request seeds the blob from the bundled JSON
+      // Blob missing: only initialize when explicitly requested with auth.
+      // This prevents a transient empty-list response from silently restoring
+      // the bundled baseline over a previously populated library.
       if (!data) {
-        console.log('[api/creatures] No blob found, seeding from bundled JSON...')
-        data = readBundledJson()
-        await writeBlob(data)
-        console.log('[api/creatures] Blob seeded successfully')
+        if (req.query.bootstrap === 'true') {
+          if (!(await checkAuth(req))) {
+            return res.status(401).json({ error: 'Unauthorized' })
+          }
+          console.log('[api/creatures] Bootstrap requested, seeding blob from bundled JSON...')
+          data = readBundledJson()
+          await writeBlob(data)
+          console.log('[api/creatures] Blob seeded successfully')
+        } else {
+          return res.status(503).json({
+            error: 'Library blob is missing. Call GET /api/creatures?bootstrap=true (authenticated) to initialize.',
+          })
+        }
       }
 
       return res.status(200).json(data)
@@ -119,7 +130,16 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'statblock.Name is required' })
       }
 
-      const data = (await readBlob()) || readBundledJson()
+      // Refuse to write if the blob is missing. Falling back to the bundled
+      // JSON here would silently overwrite a (possibly transiently) empty blob
+      // with the factory baseline plus this single edit, destroying every
+      // custom creature in the library.
+      const data = await readBlob()
+      if (!data) {
+        return res.status(503).json({
+          error: 'Library blob is missing. Refusing to write to avoid clobbering. Restore the blob (or call GET /api/creatures?bootstrap=true to initialize a fresh environment) before retrying.',
+        })
+      }
       const newKey = `Creatures.${statblock.Name}`
 
       // Remove old key if renaming
@@ -140,7 +160,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'name or key is required' })
       }
 
-      const data = (await readBlob()) || readBundledJson()
+      // Same guard as POST: never let a missing blob cause a silent reseed.
+      const data = await readBlob()
+      if (!data) {
+        return res.status(503).json({
+          error: 'Library blob is missing. Refusing to write to avoid clobbering. Restore the blob (or call GET /api/creatures?bootstrap=true to initialize a fresh environment) before retrying.',
+        })
+      }
 
       // Use the provided key if available, otherwise fall back to name-based key
       let key = providedKey

@@ -2,6 +2,11 @@
  * Vite dev-server plugin: exposes REST endpoints to read/write
  * the creature library JSON file on disk.
  *
+ * Writes go to gitignored *.dev.json overlays so dev edits never mutate the
+ * production-bundled baseline (which is the seed/fallback used by
+ * api/creatures.js). Reads fall through to the bundled file the first time
+ * a dev overlay does not exist yet.
+ *
  * Endpoints:
  *   POST   /api/library/creature   { key?, statblock }   → add or update
  *   DELETE  /api/library/creature   { key }               → remove
@@ -9,15 +14,30 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-const JSON_PATH = path.resolve('src/data/improved-initiative.json')
-const PCS_PATH = path.resolve('src/data/pcs.json')
+const BUNDLED_JSON_PATH = path.resolve('src/data/improved-initiative.json')
+const BUNDLED_PCS_PATH = path.resolve('src/data/pcs.json')
+const JSON_PATH = path.resolve('src/data/improved-initiative.dev.json')
+const PCS_PATH = path.resolve('src/data/pcs.dev.json')
 
 function readLibrary() {
-  return JSON.parse(fs.readFileSync(JSON_PATH, 'utf-8'))
+  // Prefer the dev overlay if it exists; otherwise fall through to the
+  // bundled baseline so the dev session starts from real data.
+  const sourcePath = fs.existsSync(JSON_PATH) ? JSON_PATH : BUNDLED_JSON_PATH
+  return JSON.parse(fs.readFileSync(sourcePath, 'utf-8'))
 }
 
 function writeLibrary(data) {
   fs.writeFileSync(JSON_PATH, JSON.stringify(data, null, 2), 'utf-8')
+}
+
+function readPCs() {
+  if (fs.existsSync(PCS_PATH)) {
+    return JSON.parse(fs.readFileSync(PCS_PATH, 'utf-8'))
+  }
+  if (fs.existsSync(BUNDLED_PCS_PATH)) {
+    return JSON.parse(fs.readFileSync(BUNDLED_PCS_PATH, 'utf-8'))
+  }
+  return []
 }
 
 function creatureKey(name) {
@@ -43,16 +63,41 @@ export default function libraryApiPlugin() {
         res.setHeader('Content-Type', 'application/json')
         try {
           if (req.method === 'GET') {
-            const data = fs.existsSync(PCS_PATH) ? JSON.parse(fs.readFileSync(PCS_PATH, 'utf-8')) : []
-            return res.end(JSON.stringify(data))
+            return res.end(JSON.stringify(readPCs()))
           }
           if (req.method === 'POST') {
-            const { pcs } = await bodyOf(req)
-            if (!Array.isArray(pcs)) {
-              res.statusCode = 400
-              return res.end(JSON.stringify({ error: 'pcs array is required' }))
+            const body = await bodyOf(req)
+            // Incremental upsert: { pc: { Name, AC? } }
+            if (body.pc && typeof body.pc === 'object') {
+              const pc = body.pc
+              if (!pc.Name?.trim()) {
+                res.statusCode = 400
+                return res.end(JSON.stringify({ error: 'pc.Name is required' }))
+              }
+              const list = readPCs()
+              const idx = list.findIndex((p) => p.Name === pc.Name)
+              if (idx >= 0) list[idx] = pc
+              else list.push(pc)
+              fs.writeFileSync(PCS_PATH, JSON.stringify(list, null, 2), 'utf-8')
+              return res.end(JSON.stringify({ ok: true }))
             }
-            fs.writeFileSync(PCS_PATH, JSON.stringify(pcs, null, 2), 'utf-8')
+            // Legacy full-list replace: { pcs: [...] }
+            if (Array.isArray(body.pcs)) {
+              fs.writeFileSync(PCS_PATH, JSON.stringify(body.pcs, null, 2), 'utf-8')
+              return res.end(JSON.stringify({ ok: true }))
+            }
+            res.statusCode = 400
+            return res.end(JSON.stringify({ error: 'pc object or pcs array is required' }))
+          }
+          if (req.method === 'DELETE') {
+            const { name } = await bodyOf(req)
+            if (!name?.trim()) {
+              res.statusCode = 400
+              return res.end(JSON.stringify({ error: 'name is required' }))
+            }
+            const list = readPCs()
+            const next = list.filter((p) => p.Name !== name)
+            fs.writeFileSync(PCS_PATH, JSON.stringify(next, null, 2), 'utf-8')
             return res.end(JSON.stringify({ ok: true }))
           }
           res.statusCode = 405

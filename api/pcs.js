@@ -37,13 +37,51 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    // POST: save full PC list (replace all)
+    // POST: incremental upsert ({ pc }) or legacy full-list replace ({ pcs }).
+    // Incremental is preferred so concurrent edits on different PCs from
+    // different devices do not clobber each other.
     if (req.method === 'POST') {
-      const { pcs } = req.body || {}
-      if (!Array.isArray(pcs)) {
-        return res.status(400).json({ error: 'pcs array is required' })
+      const { pc, pcs, originalName } = req.body || {}
+
+      if (pc && typeof pc === 'object') {
+        if (!pc.Name || typeof pc.Name !== 'string') {
+          return res.status(400).json({ error: 'pc.Name is required' })
+        }
+        const current = (await readBlob()) || []
+        if (!Array.isArray(current)) {
+          return res.status(500).json({ error: 'PC blob is corrupted (not an array)' })
+        }
+        // Drop the original entry first if this is a rename, so the new Name
+        // does not collide and the old one disappears in one write.
+        const renaming = originalName && originalName !== pc.Name
+        const next = renaming ? current.filter((p) => p.Name !== originalName) : current.slice()
+        const idx = next.findIndex((p) => p.Name === pc.Name)
+        if (idx >= 0) next[idx] = pc
+        else next.push(pc)
+        await writeBlob(next)
+        return res.status(200).json({ ok: true })
       }
-      await writeBlob(pcs)
+
+      if (Array.isArray(pcs)) {
+        await writeBlob(pcs)
+        return res.status(200).json({ ok: true })
+      }
+
+      return res.status(400).json({ error: 'pc object or pcs array is required' })
+    }
+
+    // DELETE: remove a single PC by Name.
+    if (req.method === 'DELETE') {
+      const { name } = req.body || {}
+      if (!name || typeof name !== 'string') {
+        return res.status(400).json({ error: 'name is required' })
+      }
+      const current = (await readBlob()) || []
+      if (!Array.isArray(current)) {
+        return res.status(500).json({ error: 'PC blob is corrupted (not an array)' })
+      }
+      const next = current.filter((p) => p.Name !== name)
+      await writeBlob(next)
       return res.status(200).json({ ok: true })
     }
 
