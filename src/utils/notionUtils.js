@@ -6,6 +6,7 @@ export const ORGANIZATIONS_DB_ID = '1372674d-44b5-812d-9a5e-da895d041d0c'
 export const WORLD_MASTER_ID = '1382674d44b580d788daf4515b74772f'
 export const INGREDIENTS_DB_ID = '1b82674d-44b5-8029-adc7-ee083f2dc165'
 export const TRADE_ITEMS_DB_ID = '3312674d-44b5-80bf-bb57-cea20b6fc2f5'
+export const ECONOMY_DB_ID = '1372674d-44b5-8162-8a92-cb056b34e6ae'
 
 // Extract plain text from Notion rich_text array
 export function richTextToPlain(richText) {
@@ -337,6 +338,61 @@ async function fetchTradeItemsFromNotion() {
       price: props['Price (gp)']?.number ?? 0,
       attunement: props.Attunement?.checkbox ?? false,
       description: richTextToPlain(props.Description?.rich_text) || '',
+    }
+  })
+}
+
+// ── Magic items (Economy DB) ──
+
+export async function fetchMagicItems() {
+  const CACHE_KEY = 'knowledge-magic-items-v1'
+  const cached = getCached(CACHE_KEY)
+
+  if (cached && !cached.fresh) {
+    fetchMagicItemsFromNotion().then(items => setCache(CACHE_KEY, items)).catch(() => {})
+    return cached.data
+  }
+  if (cached?.fresh) return cached.data
+
+  const items = await fetchMagicItemsFromNotion()
+  setCache(CACHE_KEY, items)
+  return items
+}
+
+async function fetchMagicItemsFromNotion() {
+  let allResults = []
+  let startCursor = undefined
+  let hasMore = true
+
+  while (hasMore) {
+    const body = {
+      page_size: 100,
+      filter: { property: 'World', relation: { contains: WORLD_MASTER_ID } },
+      sorts: [{ property: 'Name', direction: 'ascending' }],
+    }
+    if (startCursor) body.start_cursor = startCursor
+
+    const res = await notionFetch(`v1/databases/${ECONOMY_DB_ID}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error(`Notion API error: ${res.status}`)
+    const data = await res.json()
+    allResults = allResults.concat(data.results ?? [])
+    hasMore = data.has_more
+    startCursor = data.next_cursor
+  }
+
+  return allResults.map((page) => {
+    const props = page.properties ?? {}
+    return {
+      name: richTextToPlain(props.Name?.title) || 'Unknown',
+      type: richTextToPlain(props.Type?.rich_text) || '',
+      value: props.Value?.number ?? null,
+      rarity: props.Rarity?.select?.name || 'Common',
+      page: props.Page?.number ?? null,
+      notes: richTextToPlain(props.Notes?.rich_text) || '',
     }
   })
 }
