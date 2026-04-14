@@ -517,9 +517,6 @@ export function generateShopInventory(options = {}) {
         text: `  ${item.name}  (${item.rarity}, ${nativeLabel})  -  ${price} gp`,
         color,
       })
-      if (item.description) {
-        lines.push({ text: `    ${item.description}`, color: null })
-      }
     })
 
     return lines
