@@ -493,6 +493,15 @@ export function generateShopInventory(options = {}) {
     const selected = pickN(sourceItems, itemCount)
     const usingNotion = notionItems && notionItems.length > 0
 
+    // Sort: common native, common foreign, uncommon native, uncommon foreign
+    selected.sort((a, b) => {
+      const rarityA = a.rarity === 'Uncommon' ? 1 : 0
+      const rarityB = b.rarity === 'Uncommon' ? 1 : 0
+      const nativeA = isNativeToRegion(a.location, region) ? 0 : 1
+      const nativeB = isNativeToRegion(b.location, region) ? 0 : 1
+      return (rarityA * 2 + nativeA) - (rarityB * 2 + nativeB)
+    })
+
     // Return structured output with color info for the modal
     const lines = [
       { text: usingNotion ? `Ingredients (${region}):` : `Ingredients (${region}, random):`, color: null },
