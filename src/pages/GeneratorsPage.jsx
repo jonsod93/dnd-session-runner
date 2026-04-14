@@ -3,6 +3,7 @@ import useSessionLink from '../hooks/useSessionLink'
 import SessionLinker from '../components/generators/SessionLinker'
 import GeneratorModal from '../components/generators/GeneratorModal'
 import { GENERATORS } from '../utils/nameGenerators'
+import ItemSearch from '../components/toolbox/ItemSearch'
 
 let notifId = 0
 
@@ -21,10 +22,10 @@ export default function GeneratorsPage() {
 
   return (
     <div className="h-full overflow-y-auto neumorphic" style={{ background: 'var(--neu-bg)' }}>
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Header */}
         <h1 className="font-display text-lg font-semibold text-[#e6e6e6] mb-6">
-          Generators
+          Toolbox
         </h1>
 
         {/* Page-level session linker */}
@@ -57,6 +58,12 @@ export default function GeneratorsPage() {
             </button>
           ))}
         </div>
+
+        {/* Divider */}
+        <div className="border-t border-white/[0.06] my-8" />
+
+        {/* Item search */}
+        <ItemSearch />
       </div>
 
       {/* Generator modal */}
