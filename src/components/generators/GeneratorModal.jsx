@@ -218,7 +218,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
         onClick={onClose}
       >
         <div
-          className="glass-modal rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]"
+          className="glass-modal rounded-2xl w-full max-w-lg flex flex-col max-h-[85vh]"
           style={{ boxShadow: 'none' }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -337,7 +337,7 @@ export default function GeneratorModal({ generator, initialSession, onClose, onS
       onClick={() => !saving && onClose()}
     >
       <div
-        className="glass-modal rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]"
+        className="glass-modal rounded-2xl w-full max-w-lg flex flex-col max-h-[85vh]"
         style={{ boxShadow: 'none' }}
         onClick={(e) => e.stopPropagation()}
       >
