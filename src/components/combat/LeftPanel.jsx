@@ -113,6 +113,19 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
     })
   }, [monsters, query])
 
+  const duplicateNames = useMemo(() => {
+    const counts = {}
+    for (const c of monsters) {
+      const n = c.Name ?? ''
+      counts[n] = (counts[n] || 0) + 1
+    }
+    const dupes = new Set()
+    for (const [n, count] of Object.entries(counts)) {
+      if (count > 1) dupes.add(n)
+    }
+    return dupes
+  }, [monsters])
+
   const hasNpcQuery = query.trim().length > 0
   const visibleNPCs = hasNpcQuery ? filteredNPCs : filteredNPCs.slice(0, NPC_RENDER_LIMIT)
   const npcsTruncated = !hasNpcQuery && filteredNPCs.length > NPC_RENDER_LIMIT
@@ -260,7 +273,12 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
                 }}
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm text-[#e6e6e6] truncate">{entry.Name}</div>
+                  <div className="text-sm text-[#e6e6e6] truncate">
+                    {entry.Name}
+                    {duplicateNames.has(entry.Name) && entry.Source && (
+                      <span className="text-xs text-gold-400/70 ml-1.5">({entry.Source})</span>
+                    )}
+                  </div>
                   {entry.Type && (
                     <div className="text-xs text-[#8a8884] truncate mt-0.5">{entry.Type}</div>
                   )}

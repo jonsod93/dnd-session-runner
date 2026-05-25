@@ -67,19 +67,23 @@ export default async function handler(req, res) {
         // Merge: bundled entries fill in missing keys, existing entries are kept
         const merged = { ...bundled, ...existing }
 
-        // Deduplicate: collapse entries with the same Name to canonical Creatures.${Name} key
-        const nameToKeys = {}
+        // Deduplicate: collapse entries with the same Name+Source to canonical key
+        const identityToKeys = {}
         for (const key of Object.keys(merged)) {
           if (!key.startsWith('Creatures.')) continue
-          const name = merged[key]?.Name
+          const entry = merged[key]
+          const name = entry?.Name
           if (!name) continue
-          if (!nameToKeys[name]) nameToKeys[name] = []
-          nameToKeys[name].push(key)
+          const identity = entry.Source ? `${name}::${entry.Source}` : name
+          if (!identityToKeys[identity]) identityToKeys[identity] = []
+          identityToKeys[identity].push(key)
         }
-        for (const [name, keys] of Object.entries(nameToKeys)) {
+        for (const [identity, keys] of Object.entries(identityToKeys)) {
           if (keys.length <= 1) continue
-          const canonicalKey = `Creatures.${name}`
-          // Prefer the canonical key's data, fall back to last key's data
+          const [name, source] = identity.split('::')
+          const canonicalKey = source
+            ? `Creatures.${name}::${source}`
+            : `Creatures.${name}`
           const keepKey = keys.includes(canonicalKey) ? canonicalKey : keys[keys.length - 1]
           const keepData = merged[keepKey]
           for (const k of keys) delete merged[k]
@@ -140,9 +144,11 @@ export default async function handler(req, res) {
           error: 'Library blob is missing. Refusing to write to avoid clobbering. Restore the blob (or call GET /api/creatures?bootstrap=true to initialize a fresh environment) before retrying.',
         })
       }
-      const newKey = `Creatures.${statblock.Name}`
+      const newKey = statblock.Source
+        ? `Creatures.${statblock.Name}::${statblock.Source}`
+        : `Creatures.${statblock.Name}`
 
-      // Remove old key if renaming
+      // Remove old key if renaming or source changed
       if (oldKey && oldKey !== newKey) {
         delete data[oldKey]
       }

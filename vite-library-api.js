@@ -40,7 +40,8 @@ function readPCs() {
   return []
 }
 
-function creatureKey(name) {
+function creatureKey(name, source) {
+  if (source) return `Creatures.${name}::${source}`
   return `Creatures.${name}`
 }
 
@@ -122,17 +123,17 @@ export default function libraryApiPlugin() {
             }
 
             const data = readLibrary()
-            const targetKey = key || creatureKey(statblock.Name)
+            const newKey = creatureKey(statblock.Name, statblock.Source)
 
-            // If renaming (key provided but name changed), remove old key
-            if (key && key !== creatureKey(statblock.Name)) {
+            // If renaming/re-sourcing (key provided but changed), remove old key
+            if (key && key !== newKey) {
               delete data[key]
             }
 
-            data[creatureKey(statblock.Name)] = statblock
+            data[newKey] = statblock
             writeLibrary(data)
 
-            return res.end(JSON.stringify({ ok: true, key: creatureKey(statblock.Name) }))
+            return res.end(JSON.stringify({ ok: true, key: newKey }))
           }
 
           if (req.method === 'DELETE') {

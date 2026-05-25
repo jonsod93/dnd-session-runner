@@ -12,7 +12,8 @@ function safeParse(val) {
   }
 }
 
-function creatureKey(name) {
+function creatureKey(name, source) {
+  if (source) return `Creatures.${name}::${source}`
   return `Creatures.${name}`
 }
 
@@ -156,27 +157,30 @@ async function migrateLocalEdits() {
 
 // ── Build a monster Map from raw server/bundled data ────────────────────────
 
+function creatureIdentity(name, source) {
+  return source ? `${name}::${source}` : name
+}
+
 function buildMonsterMap(sourceData) {
   const map = new Map()
-  const seenNames = new Map() // Name -> key, for deduplication
+  const seenIdentities = new Map() // "Name::Source" -> key, for deduplication
   Object.entries(sourceData)
     .filter(([k]) => k.startsWith('Creatures.'))
     .forEach(([k, v]) => {
       const name = v.Name ?? k
-      const existingKey = seenNames.get(name)
+      const source = v.Source || ''
+      const identity = creatureIdentity(name, source)
+      const canonicalKey = creatureKey(name, source)
+      const existingKey = seenIdentities.get(identity)
       if (existingKey) {
-        // Duplicate Name - prefer name-based keys (what saveCreature produces)
-        // over ID-based keys (legacy format)
-        const nameBasedKey = `Creatures.${name}`
-        if (k === nameBasedKey) {
+        // Duplicate name+source - prefer canonical keys over legacy ID-based keys
+        if (k === canonicalKey) {
           map.delete(existingKey)
-        } else if (existingKey === nameBasedKey) {
-          return // keep the existing name-based key
-        }
-        // If neither is name-based, keep the first one seen
-        else return
+        } else if (existingKey === canonicalKey) {
+          return
+        } else return
       }
-      seenNames.set(name, k)
+      seenIdentities.set(identity, k)
       map.set(k, {
         ...v,
         _libType: 'monster',
@@ -434,7 +438,7 @@ export function useLibrary() {
 
   const saveCreature = useCallback(async (statblock, originalKey) => {
     // originalKey is the actual map key (e.g. "Creatures.00dpnnui"), not name-derived
-    const newKey = creatureKey(statblock.Name)
+    const newKey = creatureKey(statblock.Name, statblock.Source)
 
     // Optimistic local update
     setMonsterMap((prev) => {
@@ -499,7 +503,9 @@ export function useLibrary() {
   // ── Lookup helper ─────────────────────────────────────────────────────────
 
   const hasCreature = useCallback(
-    (name) => [...monsterMap.values()].some((m) => m.Name === name),
+    (name, source) => [...monsterMap.values()].some(
+      (m) => m.Name === name && (m.Source || '') === (source || '')
+    ),
     [monsterMap]
   )
 
