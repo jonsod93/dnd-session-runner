@@ -98,11 +98,18 @@ export function LeftPanel({ onAdd, collapsed, onToggleCollapse, onEditStatblock,
   const filteredNPCs = useMemo(() => {
     const q = query.toLowerCase().trim()
     if (!q) return monsters
-    return monsters.filter((c) => {
+    const filtered = monsters.filter((c) => {
       const name   = (c.Name ?? '').toLowerCase()
       const type   = (c.Type ?? '').toLowerCase()
       const source = (c.Source ?? '').toLowerCase()
       return name.includes(q) || type.includes(q) || source.includes(q)
+    })
+    return filtered.sort((a, b) => {
+      const aExact = (a.Name ?? '').toLowerCase() === q
+      const bExact = (b.Name ?? '').toLowerCase() === q
+      if (aExact && !bExact) return -1
+      if (!aExact && bExact) return 1
+      return 0
     })
   }, [monsters, query])
 
