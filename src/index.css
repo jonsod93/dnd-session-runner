@@ -289,6 +289,11 @@
     min-height: auto;
   }
 
+  /* Inside main, the flex layout already constrains height — don't force 100vh */
+  main .neumorphic {
+    min-height: auto;
+  }
+
   /* ── Noise/grain texture overlay (page-level only) ── */
   main .neumorphic::after {
     content: '';

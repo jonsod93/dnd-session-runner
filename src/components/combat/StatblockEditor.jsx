@@ -56,7 +56,7 @@ export function StatblockEditor({ initial, onSave, onCancel, title }) {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0 min-h-0">
       {/* Header */}
       <div className="shrink-0 px-5 py-2.5 border-b border-black/[0.15] flex items-center gap-3 min-h-[48px]">
         <h2 className="text-sm font-medium text-[#e6e6e6]">{title ?? 'Edit Statblock'}</h2>
@@ -83,7 +83,7 @@ export function StatblockEditor({ initial, onSave, onCancel, title }) {
       )}
 
       {/* Editor */}
-      <div className="flex-1 p-4 overflow-hidden">
+      <div className="flex-1 p-4 overflow-hidden min-h-0">
         <textarea
           value={json}
           onChange={(e) => setJson(e.target.value)}
